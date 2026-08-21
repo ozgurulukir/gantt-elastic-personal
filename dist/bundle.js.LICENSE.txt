@@ -1,0 +1,13 @@
+/**
+ * @fileoverview Bundle main entry file
+ * @license MIT
+ * @author Rafal Pospiech <neuronet.io@gmail.com>
+ * @package GanttElasticStandalone
+ */
+
+/**
+ * @fileoverview Styles for gantt-elastic
+ * @license MIT
+ * @author Rafal Pospiech <neuronet.io@gmail.com>
+ * @package GanttElastic
+ */

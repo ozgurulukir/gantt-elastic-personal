@@ -118,7 +118,7 @@ export default {
         this.resizer.moving = column;
         this.resizer.x = event.clientX;
         this.resizer.initialWidth = column.width;
-        this.root.$emit('taskList-column-width-change-start', this.resizer.moving);
+        this.root.$emitBus.emit('taskList-column-width-change-start', this.resizer.moving);
       }
     },
 
@@ -133,7 +133,7 @@ export default {
           this.resizer.moving.width = this.root.state.options.taskList.minWidth;
         }
         if (lastWidth !== this.resizer.moving.width) {
-          this.root.$emit('taskList-column-width-change', this.resizer.moving);
+          this.root.$emitBus.emit('taskList-column-width-change', this.resizer.moving);
         }
       }
     },
@@ -143,7 +143,7 @@ export default {
      */
     resizerMouseUp(event) {
       if (this.resizer.moving) {
-        this.root.$emit('taskList-column-width-change-stop', this.resizer.moving);
+        this.root.$emitBus.emit('taskList-column-width-change-stop', this.resizer.moving);
         this.resizer.moving = false;
       }
     }
@@ -153,16 +153,19 @@ export default {
    * Created
    */
   created() {
+    this.$set = function(obj, key, val) { obj[key] = val; };
+    this.$delete = function(obj, key) { delete obj[key]; };
+
     this.mouseUpListener = document.addEventListener('mouseup', this.resizerMouseUp.bind(this));
     this.mouseMoveListener = document.addEventListener('mousemove', this.resizerMouseMove.bind(this));
-    this.root.$on('main-view-mousemove', this.resizerMouseMove);
-    this.root.$on('main-view-mouseup', this.resizerMouseUp);
+    this.root.$emitBus.on('main-view-mousemove', this.resizerMouseMove);
+    this.root.$emitBus.on('main-view-mouseup', this.resizerMouseUp);
   },
 
   /**
    * Before destroy event - clear all event listeners
    */
-  beforeDestroy() {
+  beforeUnmount() {
     document.removeEventListener('mouseup', this.resizerMouseUp);
     document.removeEventListener('mousemove', this.resizerMouseMove);
   }

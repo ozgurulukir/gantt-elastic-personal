@@ -7,7 +7,7 @@
 		exports["GanttElastic"] = factory(require("Vue"));
 	else
 		root["GanttElastic"] = factory(root["Vue"]);
-})(window, function(__WEBPACK_EXTERNAL_MODULE__2__) {
+})(window, function(__WEBPACK_EXTERNAL_MODULE__0__) {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -91,40 +91,58 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 8);
+/******/ 	return __webpack_require__(__webpack_require__.s = 9);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-!function(t,n){ true?module.exports=n():undefined}(this,function(){"use strict";var t="millisecond",n="second",e="minute",r="hour",i="day",s="week",u="month",a="quarter",o="year",h=/^(\d{4})-?(\d{1,2})-?(\d{0,2})[^0-9]*(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?.?(\d{1,3})?$/,f=/\[([^\]]+)]|Y{2,4}|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS/g,c=function(t,n,e){var r=String(t);return!r||r.length>=n?t:""+Array(n+1-r.length).join(e)+t},d={s:c,z:function(t){var n=-t.utcOffset(),e=Math.abs(n),r=Math.floor(e/60),i=e%60;return(n<=0?"+":"-")+c(r,2,"0")+":"+c(i,2,"0")},m:function(t,n){var e=12*(n.year()-t.year())+(n.month()-t.month()),r=t.clone().add(e,u),i=n-r<0,s=t.clone().add(e+(i?-1:1),u);return Number(-(e+(n-r)/(i?r-s:s-r))||0)},a:function(t){return t<0?Math.ceil(t)||0:Math.floor(t)},p:function(h){return{M:u,y:o,w:s,d:i,h:r,m:e,s:n,ms:t,Q:a}[h]||String(h||"").toLowerCase().replace(/s$/,"")},u:function(t){return void 0===t}},$={name:"en",weekdays:"Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday".split("_"),months:"January_February_March_April_May_June_July_August_September_October_November_December".split("_")},l="en",m={};m[l]=$;var y=function(t){return t instanceof v},M=function(t,n,e){var r;if(!t)return l;if("string"==typeof t)m[t]&&(r=t),n&&(m[t]=n,r=t);else{var i=t.name;m[i]=t,r=i}return e||(l=r),r},g=function(t,n,e){if(y(t))return t.clone();var r=n?"string"==typeof n?{format:n,pl:e}:n:{};return r.date=t,new v(r)},D=d;D.l=M,D.i=y,D.w=function(t,n){return g(t,{locale:n.$L,utc:n.$u})};var v=function(){function c(t){this.$L=this.$L||M(t.locale,null,!0),this.parse(t)}var d=c.prototype;return d.parse=function(t){this.$d=function(t){var n=t.date,e=t.utc;if(null===n)return new Date(NaN);if(D.u(n))return new Date;if(n instanceof Date)return new Date(n);if("string"==typeof n&&!/Z$/i.test(n)){var r=n.match(h);if(r)return e?new Date(Date.UTC(r[1],r[2]-1,r[3]||1,r[4]||0,r[5]||0,r[6]||0,r[7]||0)):new Date(r[1],r[2]-1,r[3]||1,r[4]||0,r[5]||0,r[6]||0,r[7]||0)}return new Date(n)}(t),this.init()},d.init=function(){var t=this.$d;this.$y=t.getFullYear(),this.$M=t.getMonth(),this.$D=t.getDate(),this.$W=t.getDay(),this.$H=t.getHours(),this.$m=t.getMinutes(),this.$s=t.getSeconds(),this.$ms=t.getMilliseconds()},d.$utils=function(){return D},d.isValid=function(){return!("Invalid Date"===this.$d.toString())},d.isSame=function(t,n){var e=g(t);return this.startOf(n)<=e&&e<=this.endOf(n)},d.isAfter=function(t,n){return g(t)<this.startOf(n)},d.isBefore=function(t,n){return this.endOf(n)<g(t)},d.$g=function(t,n,e){return D.u(t)?this[n]:this.set(e,t)},d.year=function(t){return this.$g(t,"$y",o)},d.month=function(t){return this.$g(t,"$M",u)},d.day=function(t){return this.$g(t,"$W",i)},d.date=function(t){return this.$g(t,"$D","date")},d.hour=function(t){return this.$g(t,"$H",r)},d.minute=function(t){return this.$g(t,"$m",e)},d.second=function(t){return this.$g(t,"$s",n)},d.millisecond=function(n){return this.$g(n,"$ms",t)},d.unix=function(){return Math.floor(this.valueOf()/1e3)},d.valueOf=function(){return this.$d.getTime()},d.startOf=function(t,a){var h=this,f=!!D.u(a)||a,c=D.p(t),d=function(t,n){var e=D.w(h.$u?Date.UTC(h.$y,n,t):new Date(h.$y,n,t),h);return f?e:e.endOf(i)},$=function(t,n){return D.w(h.toDate()[t].apply(h.toDate(),(f?[0,0,0,0]:[23,59,59,999]).slice(n)),h)},l=this.$W,m=this.$M,y=this.$D,M="set"+(this.$u?"UTC":"");switch(c){case o:return f?d(1,0):d(31,11);case u:return f?d(1,m):d(0,m+1);case s:var g=this.$locale().weekStart||0,v=(l<g?l+7:l)-g;return d(f?y-v:y+(6-v),m);case i:case"date":return $(M+"Hours",0);case r:return $(M+"Minutes",1);case e:return $(M+"Seconds",2);case n:return $(M+"Milliseconds",3);default:return this.clone()}},d.endOf=function(t){return this.startOf(t,!1)},d.$set=function(s,a){var h,f=D.p(s),c="set"+(this.$u?"UTC":""),d=(h={},h[i]=c+"Date",h.date=c+"Date",h[u]=c+"Month",h[o]=c+"FullYear",h[r]=c+"Hours",h[e]=c+"Minutes",h[n]=c+"Seconds",h[t]=c+"Milliseconds",h)[f],$=f===i?this.$D+(a-this.$W):a;if(f===u||f===o){var l=this.clone().set("date",1);l.$d[d]($),l.init(),this.$d=l.set("date",Math.min(this.$D,l.daysInMonth())).toDate()}else d&&this.$d[d]($);return this.init(),this},d.set=function(t,n){return this.clone().$set(t,n)},d.get=function(t){return this[D.p(t)]()},d.add=function(t,a){var h,f=this;t=Number(t);var c=D.p(a),d=function(n){var e=g(f);return D.w(e.date(e.date()+Math.round(n*t)),f)};if(c===u)return this.set(u,this.$M+t);if(c===o)return this.set(o,this.$y+t);if(c===i)return d(1);if(c===s)return d(7);var $=(h={},h[e]=6e4,h[r]=36e5,h[n]=1e3,h)[c]||1,l=this.valueOf()+t*$;return D.w(l,this)},d.subtract=function(t,n){return this.add(-1*t,n)},d.format=function(t){var n=this;if(!this.isValid())return"Invalid Date";var e=t||"YYYY-MM-DDTHH:mm:ssZ",r=D.z(this),i=this.$locale(),s=this.$H,u=this.$m,a=this.$M,o=i.weekdays,h=i.months,c=function(t,r,i,s){return t&&(t[r]||t(n,e))||i[r].substr(0,s)},d=function(t){return D.s(s%12||12,t,"0")},$=i.meridiem||function(t,n,e){var r=t<12?"AM":"PM";return e?r.toLowerCase():r},l={YY:String(this.$y).slice(-2),YYYY:this.$y,M:a+1,MM:D.s(a+1,2,"0"),MMM:c(i.monthsShort,a,h,3),MMMM:h[a]||h(this,e),D:this.$D,DD:D.s(this.$D,2,"0"),d:String(this.$W),dd:c(i.weekdaysMin,this.$W,o,2),ddd:c(i.weekdaysShort,this.$W,o,3),dddd:o[this.$W],H:String(s),HH:D.s(s,2,"0"),h:d(1),hh:d(2),a:$(s,u,!0),A:$(s,u,!1),m:String(u),mm:D.s(u,2,"0"),s:String(this.$s),ss:D.s(this.$s,2,"0"),SSS:D.s(this.$ms,3,"0"),Z:r};return e.replace(f,function(t,n){return n||l[t]||r.replace(":","")})},d.utcOffset=function(){return 15*-Math.round(this.$d.getTimezoneOffset()/15)},d.diff=function(t,h,f){var c,d=D.p(h),$=g(t),l=6e4*($.utcOffset()-this.utcOffset()),m=this-$,y=D.m(this,$);return y=(c={},c[o]=y/12,c[u]=y,c[a]=y/3,c[s]=(m-l)/6048e5,c[i]=(m-l)/864e5,c[r]=m/36e5,c[e]=m/6e4,c[n]=m/1e3,c)[d]||m,f?y:D.a(y)},d.daysInMonth=function(){return this.endOf(u).$D},d.$locale=function(){return m[this.$L]},d.locale=function(t,n){if(!t)return this.$L;var e=this.clone();return e.$L=M(t,n,!0),e},d.clone=function(){return D.w(this.toDate(),this)},d.toDate=function(){return new Date(this.$d)},d.toJSON=function(){return this.isValid()?this.toISOString():null},d.toISOString=function(){return this.$d.toISOString()},d.toString=function(){return this.$d.toUTCString()},c}();return g.prototype=v.prototype,g.extend=function(t,n){return t(n,v,g),g},g.locale=M,g.isDayjs=y,g.unix=function(t){return g(1e3*t)},g.en=m[l],g.Ls=m,g});
-
+module.exports = __WEBPACK_EXTERNAL_MODULE__0__;
 
 /***/ }),
 /* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+// runtime helper for setting properties on components
+// in a tree-shakable way
+exports.default = (sfc, props) => {
+    const target = sfc.__vccOpts || sfc;
+    for (const [key, val] of props) {
+        target[key] = val;
+    }
+    return target;
+};
+
+
+/***/ }),
+/* 2 */
+/***/ (function(module, exports, __webpack_require__) {
+
+!function(t,e){ true?module.exports=e():undefined}(this,(function(){"use strict";var t=1e3,e=6e4,n=36e5,r="millisecond",i="second",s="minute",u="hour",a="day",o="week",c="month",f="quarter",h="year",d="date",l="Invalid Date",$=/^(\d{4})[-/]?(\d{1,2})?[-/]?(\d{0,2})[Tt\s]*(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?[.:]?(\d+)?$/,y=/\[([^\]]+)]|YYYY|YY|M{1,4}|D{1,2}|d{1,4}|H{1,2}|h{1,2}|a|A|m{1,2}|s{1,2}|Z{1,2}|SSS/g,M={name:"en",weekdays:"Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday".split("_"),months:"January_February_March_April_May_June_July_August_September_October_November_December".split("_"),ordinal:function(t){var e=["th","st","nd","rd"],n=t%100;return"["+t+(e[(n-20)%10]||e[n]||e[0])+"]"}},m=function(t,e,n){var r=String(t);return!r||r.length>=e?t:""+Array(e+1-r.length).join(n)+t},v={s:m,z:function(t){var e=-t.utcOffset(),n=Math.abs(e),r=Math.floor(n/60),i=n%60;return(e<=0?"+":"-")+m(r,2,"0")+":"+m(i,2,"0")},m:function t(e,n){if(e.date()<n.date())return-t(n,e);var r=12*(n.year()-e.year())+(n.month()-e.month()),i=e.clone().add(r,c),s=n-i<0,u=e.clone().add(r+(s?-1:1),c);return+(-(r+(n-i)/(s?i-u:u-i))||0)},a:function(t){return t<0?Math.ceil(t)||0:Math.floor(t)},p:function(t){return{M:c,y:h,w:o,d:a,D:d,h:u,m:s,s:i,ms:r,Q:f}[t]||String(t||"").toLowerCase().replace(/s$/,"")},u:function(t){return void 0===t}},g="en",D={};D[g]=M;var p="$isDayjsObject",S=function(t){return t instanceof _||!(!t||!t[p])},w=function t(e,n,r){var i;if(!e)return g;if("string"==typeof e){var s=e.toLowerCase();D[s]&&(i=s),n&&(D[s]=n,i=s);var u=e.split("-");if(!i&&u.length>1)return t(u[0])}else{var a=e.name;D[a]=e,i=a}return!r&&i&&(g=i),i||!r&&g},O=function(t,e){if(S(t))return t.clone();var n="object"==typeof e?e:{};return n.date=t,n.args=arguments,new _(n)},b=v;b.l=w,b.i=S,b.w=function(t,e){return O(t,{locale:e.$L,utc:e.$u,x:e.$x,$offset:e.$offset})};var _=function(){function M(t){this.$L=w(t.locale,null,!0),this.parse(t),this.$x=this.$x||t.x||{},this[p]=!0}var m=M.prototype;return m.parse=function(t){this.$d=function(t){var e=t.date,n=t.utc;if(null===e)return new Date(NaN);if(b.u(e))return new Date;if(e instanceof Date)return new Date(e);if("string"==typeof e&&!/Z$/i.test(e)){var r=e.match($);if(r){var i=r[2]-1||0,s=(r[7]||"0").substring(0,3);return n?new Date(Date.UTC(r[1],i,r[3]||1,r[4]||0,r[5]||0,r[6]||0,s)):new Date(r[1],i,r[3]||1,r[4]||0,r[5]||0,r[6]||0,s)}}return new Date(e)}(t),this.init()},m.init=function(){var t=this.$d;this.$y=t.getFullYear(),this.$M=t.getMonth(),this.$D=t.getDate(),this.$W=t.getDay(),this.$H=t.getHours(),this.$m=t.getMinutes(),this.$s=t.getSeconds(),this.$ms=t.getMilliseconds()},m.$utils=function(){return b},m.isValid=function(){return!(this.$d.toString()===l)},m.isSame=function(t,e){var n=O(t);return this.startOf(e)<=n&&n<=this.endOf(e)},m.isAfter=function(t,e){return O(t)<this.startOf(e)},m.isBefore=function(t,e){return this.endOf(e)<O(t)},m.$g=function(t,e,n){return b.u(t)?this[e]:this.set(n,t)},m.unix=function(){return Math.floor(this.valueOf()/1e3)},m.valueOf=function(){return this.$d.getTime()},m.startOf=function(t,e){var n=this,r=!!b.u(e)||e,f=b.p(t),l=function(t,e){var i=b.w(n.$u?Date.UTC(n.$y,e,t):new Date(n.$y,e,t),n);return r?i:i.endOf(a)},$=function(t,e){return b.w(n.toDate()[t].apply(n.toDate("s"),(r?[0,0,0,0]:[23,59,59,999]).slice(e)),n)},y=this.$W,M=this.$M,m=this.$D,v="set"+(this.$u?"UTC":"");switch(f){case h:return r?l(1,0):l(31,11);case c:return r?l(1,M):l(0,M+1);case o:var g=this.$locale().weekStart||0,D=(y<g?y+7:y)-g;return l(r?m-D:m+(6-D),M);case a:case d:return $(v+"Hours",0);case u:return $(v+"Minutes",1);case s:return $(v+"Seconds",2);case i:return $(v+"Milliseconds",3);default:return this.clone()}},m.endOf=function(t){return this.startOf(t,!1)},m.$set=function(t,e){var n,o=b.p(t),f="set"+(this.$u?"UTC":""),l=(n={},n[a]=f+"Date",n[d]=f+"Date",n[c]=f+"Month",n[h]=f+"FullYear",n[u]=f+"Hours",n[s]=f+"Minutes",n[i]=f+"Seconds",n[r]=f+"Milliseconds",n)[o],$=o===a?this.$D+(e-this.$W):e;if(o===c||o===h){var y=this.clone().set(d,1);y.$d[l]($),y.init(),this.$d=y.set(d,Math.min(this.$D,y.daysInMonth())).$d}else l&&this.$d[l]($);return this.init(),this},m.set=function(t,e){return this.clone().$set(t,e)},m.get=function(t){return this[b.p(t)]()},m.add=function(r,f){var d,l=this;r=Number(r);var $=b.p(f),y=function(t){var e=O(l);return b.w(e.date(e.date()+Math.round(t*r)),l)};if($===c)return this.set(c,this.$M+r);if($===h)return this.set(h,this.$y+r);if($===a)return y(1);if($===o)return y(7);var M=(d={},d[s]=e,d[u]=n,d[i]=t,d)[$]||1,m=this.$d.getTime()+r*M;return b.w(m,this)},m.subtract=function(t,e){return this.add(-1*t,e)},m.format=function(t){var e=this,n=this.$locale();if(!this.isValid())return n.invalidDate||l;var r=t||"YYYY-MM-DDTHH:mm:ssZ",i=b.z(this),s=this.$H,u=this.$m,a=this.$M,o=n.weekdays,c=n.months,f=n.meridiem,h=function(t,n,i,s){return t&&(t[n]||t(e,r))||i[n].slice(0,s)},d=function(t){return b.s(s%12||12,t,"0")},$=f||function(t,e,n){var r=t<12?"AM":"PM";return n?r.toLowerCase():r};return r.replace(y,(function(t,r){return r||function(t){switch(t){case"YY":return String(e.$y).slice(-2);case"YYYY":return b.s(e.$y,4,"0");case"M":return a+1;case"MM":return b.s(a+1,2,"0");case"MMM":return h(n.monthsShort,a,c,3);case"MMMM":return h(c,a);case"D":return e.$D;case"DD":return b.s(e.$D,2,"0");case"d":return String(e.$W);case"dd":return h(n.weekdaysMin,e.$W,o,2);case"ddd":return h(n.weekdaysShort,e.$W,o,3);case"dddd":return o[e.$W];case"H":return String(s);case"HH":return b.s(s,2,"0");case"h":return d(1);case"hh":return d(2);case"a":return $(s,u,!0);case"A":return $(s,u,!1);case"m":return String(u);case"mm":return b.s(u,2,"0");case"s":return String(e.$s);case"ss":return b.s(e.$s,2,"0");case"SSS":return b.s(e.$ms,3,"0");case"Z":return i}return null}(t)||i.replace(":","")}))},m.utcOffset=function(){return 15*-Math.round(this.$d.getTimezoneOffset()/15)},m.diff=function(r,d,l){var $,y=this,M=b.p(d),m=O(r),v=(m.utcOffset()-this.utcOffset())*e,g=this-m,D=function(){return b.m(y,m)};switch(M){case h:$=D()/12;break;case c:$=D();break;case f:$=D()/3;break;case o:$=(g-v)/6048e5;break;case a:$=(g-v)/864e5;break;case u:$=g/n;break;case s:$=g/e;break;case i:$=g/t;break;default:$=g}return l?$:b.a($)},m.daysInMonth=function(){return this.endOf(c).$D},m.$locale=function(){return D[this.$L]},m.locale=function(t,e){if(!t)return this.$L;var n=this.clone(),r=w(t,e,!0);return r&&(n.$L=r),n},m.clone=function(){return b.w(this.$d,this)},m.toDate=function(){return new Date(this.valueOf())},m.toJSON=function(){return this.isValid()?this.toISOString():null},m.toISOString=function(){return this.$d.toISOString()},m.toString=function(){return this.$d.toUTCString()},M}(),Y=_.prototype;return O.prototype=Y,[["$ms",r],["$s",i],["$m",s],["$H",u],["$W",a],["$M",c],["$y",h],["$D",d]].forEach((function(t){Y[t[1]]=function(e){return this.$g(e,t[0],t[1])}})),O.extend=function(t,e){return t.$i||(t(e,_,O),t.$i=!0),O},O.locale=w,O.isDayjs=S,O.unix=function(t){return O(1e3*t)},O.en=D[g],O.Ls=D,O.p={},O}));
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(6);
+var content = __webpack_require__(7);
+if(content.__esModule) content = content.default;
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var add = __webpack_require__(9).default
-var update = add("c3e5085c", content, false, {});
+var add = __webpack_require__(10).default
+var update = add("465e6f72", content, false, {});
 // Hot Module Replacement
 if(false) {}
 
 /***/ }),
-/* 2 */
-/***/ (function(module, exports) {
-
-module.exports = __WEBPACK_EXTERNAL_MODULE__2__;
-
-/***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -1057,10 +1075,10 @@ var index = (function () {
 
 /* harmony default export */ __webpack_exports__["a"] = (index);
 
-/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(4)))
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(5)))
 
 /***/ }),
-/* 4 */
+/* 5 */
 /***/ (function(module, exports) {
 
 var g;
@@ -1086,20 +1104,20 @@ module.exports = g;
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_GanttElastic_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(1);
-/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_GanttElastic_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_vue_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_GanttElastic_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_vue_loader_dist_index_js_ref_7_0_GanttElastic_vue_vue_type_style_index_0_id_fcce3488_lang_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(3);
+/* harmony import */ var _node_modules_vue_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_vue_loader_dist_index_js_ref_7_0_GanttElastic_vue_vue_type_style_index_0_id_fcce3488_lang_css__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_vue_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_dist_stylePostLoader_js_node_modules_vue_loader_dist_index_js_ref_7_0_GanttElastic_vue_vue_type_style_index_0_id_fcce3488_lang_css__WEBPACK_IMPORTED_MODULE_0__);
 /* unused harmony reexport * */
- /* unused harmony default export */ var _unused_webpack_default_export = (_node_modules_vue_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_GanttElastic_vue_vue_type_style_index_0_lang_css___WEBPACK_IMPORTED_MODULE_0___default.a); 
+
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(7)(false);
+exports = module.exports = __webpack_require__(8)(false);
 // imports
 
 
@@ -1110,7 +1128,7 @@ exports.push([module.i, "\n[class^='gantt-elastic'],\n[class*=' gantt-elastic'] 
 
 
 /***/ }),
-/* 7 */
+/* 8 */
 /***/ (function(module, exports) {
 
 /*
@@ -1192,532 +1210,316 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 8 */
+/* 9 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+// ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/GanttElastic.vue?vue&type=template&id=02c6304c&
-var render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    { staticClass: "gantt-elastic", staticStyle: { width: "100%" } },
-    [
-      _vm._t("header"),
-      _vm._v(" "),
-      _c("main-view", { ref: "mainView" }),
-      _vm._v(" "),
-      _vm._t("footer")
-    ],
-    2
-  )
-}
-var staticRenderFns = []
-render._withStripped = true
-
-
-// CONCATENATED MODULE: ./src/GanttElastic.vue?vue&type=template&id=02c6304c&
+// EXPORTS
+__webpack_require__.d(__webpack_exports__, "mergeDeep", function() { return /* reexport */ mergeDeep; });
+__webpack_require__.d(__webpack_exports__, "mergeDeepReactive", function() { return /* reexport */ mergeDeepReactive; });
+__webpack_require__.d(__webpack_exports__, "notEqualDeep", function() { return /* reexport */ notEqualDeep; });
 
 // EXTERNAL MODULE: external "Vue"
-var external_Vue_ = __webpack_require__(2);
+var external_Vue_ = __webpack_require__(0);
 var external_Vue_default = /*#__PURE__*/__webpack_require__.n(external_Vue_);
 
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ref--5!./node_modules/vue-loader/dist??ref--7-0!./src/GanttElastic.vue?vue&type=template&id=fcce3488
+
+
+const _hoisted_1 = {
+  class: "gantt-elastic",
+  style: {"width":"100%"}
+}
+
+function render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_main_view = Object(external_Vue_["resolveComponent"])("main-view")
+
+  return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("div", _hoisted_1, [
+    Object(external_Vue_["renderSlot"])(_ctx.$slots, "header"),
+    Object(external_Vue_["createVNode"])(_component_main_view, { ref: "mainView" }, null, 512 /* NEED_PATCH */),
+    Object(external_Vue_["renderSlot"])(_ctx.$slots, "footer")
+  ]))
+}
+// CONCATENATED MODULE: ./src/GanttElastic.vue?vue&type=template&id=fcce3488
+
 // EXTERNAL MODULE: ./node_modules/dayjs/dayjs.min.js
-var dayjs_min = __webpack_require__(0);
+var dayjs_min = __webpack_require__(2);
 var dayjs_min_default = /*#__PURE__*/__webpack_require__.n(dayjs_min);
 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/components/MainView.vue?vue&type=template&id=0bc4212e&
-var MainViewvue_type_template_id_0bc4212e_render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    {
-      staticClass: "gantt-elastic__main-view",
-      style: Object.assign({}, _vm.root.style["main-view"])
-    },
-    [
-      _c(
-        "div",
-        {
-          staticClass: "gantt-elastic__main-container-wrapper",
-          style: Object.assign({}, _vm.root.style["main-container-wrapper"], {
-            height: _vm.root.state.options.height + "px"
-          })
-        },
-        [
-          _c(
-            "div",
-            {
-              ref: "mainView",
-              staticClass: "gantt-elastic__main-container",
-              style: Object.assign({}, _vm.root.style["main-container"], {
-                width: _vm.root.state.options.clientWidth + "px",
-                height: _vm.root.state.options.height + "px"
-              })
-            },
-            [
-              _c(
-                "div",
-                {
-                  staticClass: "gantt-elastic__container",
-                  style: Object.assign({}, _vm.root.style["container"]),
-                  on: { mousemove: _vm.mouseMove, mouseup: _vm.mouseUp }
-                },
-                [
-                  _c(
-                    "div",
-                    {
-                      directives: [
-                        {
-                          name: "show",
-                          rawName: "v-show",
-                          value: _vm.root.state.options.taskList.display,
-                          expression: "root.state.options.taskList.display"
-                        }
-                      ],
-                      ref: "taskList",
-                      staticClass: "gantt-elastic__task-list-container",
-                      style: Object.assign(
-                        {},
-                        _vm.root.style["task-list-container"],
-                        {
-                          width:
-                            _vm.root.state.options.taskList.finalWidth + "px",
-                          height: _vm.root.state.options.height + "px"
-                        }
-                      )
-                    },
-                    [_c("task-list")],
-                    1
-                  ),
-                  _vm._v(" "),
-                  _c(
-                    "div",
-                    {
-                      ref: "chartContainer",
-                      staticClass: "gantt-elastic__main-view-container",
-                      style: Object.assign(
-                        {},
-                        _vm.root.style["main-view-container"]
-                      ),
-                      on: {
-                        mousedown: _vm.chartMouseDown,
-                        touchstart: _vm.chartMouseDown,
-                        mouseup: _vm.chartMouseUp,
-                        touchend: _vm.chartMouseUp,
-                        mousemove: function($event) {
-                          $event.preventDefault()
-                          return _vm.chartMouseMove($event)
-                        },
-                        touchmove: function($event) {
-                          $event.preventDefault()
-                          return _vm.chartMouseMove($event)
-                        },
-                        wheel: function($event) {
-                          $event.preventDefault()
-                          return _vm.chartWheel($event)
-                        }
-                      }
-                    },
-                    [_c("chart")],
-                    1
-                  )
-                ]
-              )
-            ]
-          ),
-          _vm._v(" "),
-          _c(
-            "div",
-            {
-              ref: "chartScrollContainerVertical",
-              staticClass:
-                "gantt-elastic__chart-scroll-container gantt-elastic__chart-scroll-container--vertical",
-              style: Object.assign(
-                {},
-                _vm.root.style["chart-scroll-container"],
-                _vm.root.style["chart-scroll-container--vertical"],
-                _vm.verticalStyle
-              ),
-              on: { scroll: _vm.onVerticalScroll }
-            },
-            [
-              _c("div", {
-                staticClass: "gantt-elastic__chart-scroll--vertical",
-                style: {
-                  width: "1px",
-                  height: _vm.root.state.options.allVisibleTasksHeight + "px"
-                }
-              })
-            ]
-          )
-        ]
-      ),
-      _vm._v(" "),
-      _c(
-        "div",
-        {
-          ref: "chartScrollContainerHorizontal",
-          staticClass:
-            "gantt-elastic__chart-scroll-container gantt-elastic__chart-scroll-container--horizontal",
-          style: Object.assign(
-            {},
-            _vm.root.style["chart-scroll-container"],
-            _vm.root.style["chart-scroll-container--horizontal"],
-            { marginLeft: _vm.getMarginLeft }
-          ),
-          on: { scroll: _vm.onHorizontalScroll }
-        },
-        [
-          _c("div", {
-            staticClass: "gantt-elastic__chart-scroll--horizontal",
-            style: { height: "1px", width: _vm.root.state.options.width + "px" }
-          })
-        ]
-      )
-    ]
-  )
+// CONCATENATED MODULE: ./node_modules/mitt/dist/mitt.mjs
+/* harmony default export */ var mitt = (function(n){return{all:n=n||new Map,on:function(t,e){var i=n.get(t);i?i.push(e):n.set(t,[e])},off:function(t,e){var i=n.get(t);i&&(e?i.splice(i.indexOf(e)>>>0,1):n.set(t,[]))},emit:function(t,e){var i=n.get(t);i&&i.slice().map(function(n){n(e)}),(i=n.get("*"))&&i.slice().map(function(n){n(t,e)})}}});
+//# sourceMappingURL=mitt.mjs.map
+
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ref--5!./node_modules/vue-loader/dist??ref--7-0!./src/components/MainView.vue?vue&type=template&id=7ac81826
+
+
+function MainViewvue_type_template_id_7ac81826_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_task_list = Object(external_Vue_["resolveComponent"])("task-list")
+  const _component_chart = Object(external_Vue_["resolveComponent"])("chart")
+
+  return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("div", {
+    class: "gantt-elastic__main-view",
+    style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['main-view'] })
+  }, [
+    Object(external_Vue_["createElementVNode"])("div", {
+      class: "gantt-elastic__main-container-wrapper",
+      style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['main-container-wrapper'], height: $options.root.state.options.height + 'px' })
+    }, [
+      Object(external_Vue_["createElementVNode"])("div", {
+        class: "gantt-elastic__main-container",
+        style: Object(external_Vue_["normalizeStyle"])({
+          ...$options.root.style['main-container'],
+          width: $options.root.state.options.clientWidth + 'px',
+          height: $options.root.state.options.height + 'px'
+        }),
+        ref: "mainView"
+      }, [
+        Object(external_Vue_["createElementVNode"])("div", {
+          class: "gantt-elastic__container",
+          style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['container'] }),
+          onMousemove: _cache[7] || (_cache[7] = (...args) => ($options.mouseMove && $options.mouseMove(...args))),
+          onMouseup: _cache[8] || (_cache[8] = (...args) => ($options.mouseUp && $options.mouseUp(...args)))
+        }, [
+          Object(external_Vue_["withDirectives"])(Object(external_Vue_["createElementVNode"])("div", {
+            ref: "taskList",
+            class: "gantt-elastic__task-list-container",
+            style: Object(external_Vue_["normalizeStyle"])({
+              ...$options.root.style['task-list-container'],
+              width: $options.root.state.options.taskList.finalWidth + 'px',
+              height: $options.root.state.options.height + 'px'
+            })
+          }, [
+            Object(external_Vue_["createVNode"])(_component_task_list)
+          ], 4 /* STYLE */), [
+            [external_Vue_["vShow"], $options.root.state.options.taskList.display]
+          ]),
+          Object(external_Vue_["createElementVNode"])("div", {
+            class: "gantt-elastic__main-view-container",
+            style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['main-view-container'] }),
+            ref: "chartContainer",
+            onMousedown: _cache[0] || (_cache[0] = (...args) => ($options.chartMouseDown && $options.chartMouseDown(...args))),
+            onTouchstart: _cache[1] || (_cache[1] = (...args) => ($options.chartMouseDown && $options.chartMouseDown(...args))),
+            onMouseup: _cache[2] || (_cache[2] = (...args) => ($options.chartMouseUp && $options.chartMouseUp(...args))),
+            onTouchend: _cache[3] || (_cache[3] = (...args) => ($options.chartMouseUp && $options.chartMouseUp(...args))),
+            onMousemove: _cache[4] || (_cache[4] = Object(external_Vue_["withModifiers"])((...args) => ($options.chartMouseMove && $options.chartMouseMove(...args)), ["prevent"])),
+            onTouchmove: _cache[5] || (_cache[5] = Object(external_Vue_["withModifiers"])((...args) => ($options.chartMouseMove && $options.chartMouseMove(...args)), ["prevent"])),
+            onWheel: _cache[6] || (_cache[6] = Object(external_Vue_["withModifiers"])((...args) => ($options.chartWheel && $options.chartWheel(...args)), ["prevent"]))
+          }, [
+            Object(external_Vue_["createVNode"])(_component_chart)
+          ], 36 /* STYLE, NEED_HYDRATION */)
+        ], 36 /* STYLE, NEED_HYDRATION */)
+      ], 4 /* STYLE */),
+      Object(external_Vue_["createElementVNode"])("div", {
+        class: "gantt-elastic__chart-scroll-container gantt-elastic__chart-scroll-container--vertical",
+        style: Object(external_Vue_["normalizeStyle"])({
+          ...$options.root.style['chart-scroll-container'],
+          ...$options.root.style['chart-scroll-container--vertical'],
+          ...$options.verticalStyle
+        }),
+        ref: "chartScrollContainerVertical",
+        onScroll: _cache[9] || (_cache[9] = (...args) => ($options.onVerticalScroll && $options.onVerticalScroll(...args)))
+      }, [
+        Object(external_Vue_["createElementVNode"])("div", {
+          class: "gantt-elastic__chart-scroll--vertical",
+          style: Object(external_Vue_["normalizeStyle"])({ width: '1px', height: $options.root.state.options.allVisibleTasksHeight + 'px' })
+        }, null, 4 /* STYLE */)
+      ], 36 /* STYLE, NEED_HYDRATION */)
+    ], 4 /* STYLE */),
+    Object(external_Vue_["createElementVNode"])("div", {
+      class: "gantt-elastic__chart-scroll-container gantt-elastic__chart-scroll-container--horizontal",
+      style: Object(external_Vue_["normalizeStyle"])({
+        ...$options.root.style['chart-scroll-container'],
+        ...$options.root.style['chart-scroll-container--horizontal'],
+        marginLeft: $options.getMarginLeft
+      }),
+      onScroll: _cache[10] || (_cache[10] = (...args) => ($options.onHorizontalScroll && $options.onHorizontalScroll(...args))),
+      ref: "chartScrollContainerHorizontal"
+    }, [
+      Object(external_Vue_["createElementVNode"])("div", {
+        class: "gantt-elastic__chart-scroll--horizontal",
+        style: Object(external_Vue_["normalizeStyle"])({ height: '1px', width: $options.root.state.options.width + 'px' })
+      }, null, 4 /* STYLE */)
+    ], 36 /* STYLE, NEED_HYDRATION */)
+  ], 4 /* STYLE */))
 }
-var MainViewvue_type_template_id_0bc4212e_staticRenderFns = []
-MainViewvue_type_template_id_0bc4212e_render._withStripped = true
+// CONCATENATED MODULE: ./src/components/MainView.vue?vue&type=template&id=7ac81826
+
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ref--5!./node_modules/vue-loader/dist??ref--7-0!./src/components/TaskList/TaskList.vue?vue&type=template&id=0ddd1532
 
 
-// CONCATENATED MODULE: ./src/components/MainView.vue?vue&type=template&id=0bc4212e&
+function TaskListvue_type_template_id_0ddd1532_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_task_list_header = Object(external_Vue_["resolveComponent"])("task-list-header")
+  const _component_task_list_item = Object(external_Vue_["resolveComponent"])("task-list-item")
 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/components/TaskList/TaskList.vue?vue&type=template&id=6e11f12f&
-var TaskListvue_type_template_id_6e11f12f_render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    {
-      directives: [
-        {
-          name: "show",
-          rawName: "v-show",
-          value: _vm.root.state.options.taskList.display,
-          expression: "root.state.options.taskList.display"
-        }
-      ],
-      ref: "taskListWrapper",
-      staticClass: "gantt-elastic__task-list-wrapper",
-      style: Object.assign({}, _vm.root.style["task-list-wrapper"], {
-        width: "100%",
-        height: "100%"
-      })
-    },
-    [
-      _c(
-        "div",
-        {
-          ref: "taskList",
-          staticClass: "gantt-elastic__task-list",
-          style: Object.assign({}, _vm.root.style["task-list"])
-        },
-        [
-          _c("task-list-header"),
-          _vm._v(" "),
-          _c(
-            "div",
-            {
-              ref: "taskListItems",
-              staticClass: "gantt-elastic__task-list-items",
-              style: Object.assign({}, _vm.root.style["task-list-items"], {
-                height: _vm.root.state.options.rowsHeight + "px"
-              })
-            },
-            _vm._l(_vm.root.visibleTasks, function(task) {
-              return _c("task-list-item", {
-                key: task.id,
-                attrs: { task: task }
-              })
-            }),
-            1
-          )
-        ],
-        1
-      )
-    ]
-  )
+  return Object(external_Vue_["withDirectives"])((Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("div", {
+    class: "gantt-elastic__task-list-wrapper",
+    ref: "taskListWrapper",
+    style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['task-list-wrapper'], width: '100%', height: '100%' })
+  }, [
+    Object(external_Vue_["createElementVNode"])("div", {
+      class: "gantt-elastic__task-list",
+      style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['task-list'] }),
+      ref: "taskList"
+    }, [
+      Object(external_Vue_["createVNode"])(_component_task_list_header),
+      Object(external_Vue_["createElementVNode"])("div", {
+        class: "gantt-elastic__task-list-items",
+        ref: "taskListItems",
+        style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['task-list-items'], height: $options.root.state.options.rowsHeight + 'px' })
+      }, [
+        (Object(external_Vue_["openBlock"])(true), Object(external_Vue_["createElementBlock"])(external_Vue_["Fragment"], null, Object(external_Vue_["renderList"])($options.root.visibleTasks, (task) => {
+          return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createBlock"])(_component_task_list_item, {
+            key: task.id,
+            task: task
+          }, null, 8 /* PROPS */, ["task"]))
+        }), 128 /* KEYED_FRAGMENT */))
+      ], 4 /* STYLE */)
+    ], 4 /* STYLE */)
+  ], 4 /* STYLE */)), [
+    [external_Vue_["vShow"], $options.root.state.options.taskList.display]
+  ])
 }
-var TaskListvue_type_template_id_6e11f12f_staticRenderFns = []
-TaskListvue_type_template_id_6e11f12f_render._withStripped = true
+// CONCATENATED MODULE: ./src/components/TaskList/TaskList.vue?vue&type=template&id=0ddd1532
+
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ref--5!./node_modules/vue-loader/dist??ref--7-0!./src/components/TaskList/TaskListHeader.vue?vue&type=template&id=14f6a512
 
 
-// CONCATENATED MODULE: ./src/components/TaskList/TaskList.vue?vue&type=template&id=6e11f12f&
+const TaskListHeadervue_type_template_id_14f6a512_hoisted_1 = ["column"]
+const _hoisted_2 = ["column", "onMousedown"]
 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/components/TaskList/TaskListHeader.vue?vue&type=template&id=aefdd7c8&
-var TaskListHeadervue_type_template_id_aefdd7c8_render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    {
-      staticClass: "gantt-elastic__task-list-header",
-      style: Object.assign({}, _vm.root.style["task-list-header"], {
-        height: _vm.root.state.options.calendar.height + "px",
-        "margin-bottom": _vm.root.state.options.calendar.gap + "px"
-      })
-    },
-    _vm._l(_vm.root.getTaskListColumns, function(column) {
-      return _c(
-        "div",
-        {
-          key: column._id,
-          staticClass: "gantt-elastic__task-list-header-column",
-          style: Object.assign(
-            {},
-            _vm.root.style["task-list-header-column"],
-            column.style["task-list-header-column"],
-            _vm.getStyle(column)
-          )
-        },
-        [
-          column.expander
-            ? _c("task-list-expander", {
-                attrs: {
-                  tasks: _vm.collapsible,
-                  options: _vm.root.state.options.taskList.expander
-                }
-              })
-            : _vm._e(),
-          _vm._v(" "),
-          _c(
-            "div",
-            {
-              staticClass: "gantt-elastic__task-list-header-label",
-              style: Object.assign(
-                {},
-                _vm.root.style["task-list-header-label"],
-                column.style["task-list-header-label"]
-              ),
-              attrs: { column: column },
-              on: { mouseup: _vm.resizerMouseUp }
-            },
-            [_vm._v("\n      " + _vm._s(column.label) + "\n    ")]
-          ),
-          _vm._v(" "),
-          _c(
-            "div",
-            {
-              staticClass: "gantt-elastic__task-list-header-resizer-wrapper",
-              style: Object.assign(
-                {},
-                _vm.root.style["task-list-header-resizer-wrapper"],
-                column.style["task-list-header-resizer-wrapper"]
-              ),
-              attrs: { column: column },
-              on: {
-                mousedown: function($event) {
-                  return _vm.resizerMouseDown($event, column)
-                }
-              }
-            },
-            [
-              _c(
-                "div",
-                {
-                  staticClass: "gantt-elastic__task-list-header-resizer",
-                  style: Object.assign(
-                    {},
-                    _vm.root.style["task-list-header-resizer"],
-                    column.style["task-list-header-resizer"]
-                  )
-                },
-                [
-                  _c("div", {
-                    staticClass: "gantt-elastic__task-list-header-resizer-dot",
-                    style: Object.assign(
-                      {},
-                      _vm.root.style["task-list-header-resizer-dot"],
-                      column.style["task-list-header-resizer-dot"]
-                    )
-                  }),
-                  _vm._v(" "),
-                  _c("div", {
-                    staticClass: "gantt-elastic__task-list-header-resizer-dot",
-                    style: Object.assign(
-                      {},
-                      _vm.root.style["task-list-header-resizer-dot"],
-                      column.style["task-list-header-resizer-dot"]
-                    )
-                  }),
-                  _vm._v(" "),
-                  _c("div", {
-                    staticClass: "gantt-elastic__task-list-header-resizer-dot",
-                    style: Object.assign(
-                      {},
-                      _vm.root.style["task-list-header-resizer-dot"],
-                      column.style["task-list-header-resizer-dot"]
-                    )
-                  })
-                ]
-              )
-            ]
-          )
-        ],
-        1
-      )
-    }),
-    0
-  )
+function TaskListHeadervue_type_template_id_14f6a512_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_task_list_expander = Object(external_Vue_["resolveComponent"])("task-list-expander")
+
+  return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("div", {
+    class: "gantt-elastic__task-list-header",
+    style: Object(external_Vue_["normalizeStyle"])({
+      ...$options.root.style['task-list-header'],
+      height: `${$options.root.state.options.calendar.height}px`,
+      'margin-bottom': `${$options.root.state.options.calendar.gap}px`
+    })
+  }, [
+    (Object(external_Vue_["openBlock"])(true), Object(external_Vue_["createElementBlock"])(external_Vue_["Fragment"], null, Object(external_Vue_["renderList"])($options.root.getTaskListColumns, (column) => {
+      return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("div", {
+        class: "gantt-elastic__task-list-header-column",
+        style: Object(external_Vue_["normalizeStyle"])({
+        ...$options.root.style['task-list-header-column'],
+        ...column.style['task-list-header-column'],
+        ...$options.getStyle(column)
+      }),
+        key: column._id
+      }, [
+        (column.expander)
+          ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createBlock"])(_component_task_list_expander, {
+              key: 0,
+              tasks: $options.collapsible,
+              options: $options.root.state.options.taskList.expander
+            }, null, 8 /* PROPS */, ["tasks", "options"]))
+          : Object(external_Vue_["createCommentVNode"])("v-if", true),
+        Object(external_Vue_["createElementVNode"])("div", {
+          class: "gantt-elastic__task-list-header-label",
+          style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['task-list-header-label'], ...column.style['task-list-header-label'] }),
+          column: column,
+          onMouseup: _cache[0] || (_cache[0] = (...args) => ($options.resizerMouseUp && $options.resizerMouseUp(...args)))
+        }, Object(external_Vue_["toDisplayString"])(column.label), 45 /* TEXT, STYLE, PROPS, NEED_HYDRATION */, TaskListHeadervue_type_template_id_14f6a512_hoisted_1),
+        Object(external_Vue_["createElementVNode"])("div", {
+          class: "gantt-elastic__task-list-header-resizer-wrapper",
+          style: Object(external_Vue_["normalizeStyle"])({
+          ...$options.root.style['task-list-header-resizer-wrapper'],
+          ...column.style['task-list-header-resizer-wrapper']
+        }),
+          column: column,
+          onMousedown: $event => ($options.resizerMouseDown($event, column))
+        }, [
+          Object(external_Vue_["createElementVNode"])("div", {
+            class: "gantt-elastic__task-list-header-resizer",
+            style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['task-list-header-resizer'], ...column.style['task-list-header-resizer'] })
+          }, [
+            Object(external_Vue_["createElementVNode"])("div", {
+              class: "gantt-elastic__task-list-header-resizer-dot",
+              style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['task-list-header-resizer-dot'], ...column.style['task-list-header-resizer-dot'] })
+            }, null, 4 /* STYLE */),
+            Object(external_Vue_["createElementVNode"])("div", {
+              class: "gantt-elastic__task-list-header-resizer-dot",
+              style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['task-list-header-resizer-dot'], ...column.style['task-list-header-resizer-dot'] })
+            }, null, 4 /* STYLE */),
+            Object(external_Vue_["createElementVNode"])("div", {
+              class: "gantt-elastic__task-list-header-resizer-dot",
+              style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['task-list-header-resizer-dot'], ...column.style['task-list-header-resizer-dot'] })
+            }, null, 4 /* STYLE */)
+          ], 4 /* STYLE */)
+        ], 44 /* STYLE, PROPS, NEED_HYDRATION */, _hoisted_2)
+      ], 4 /* STYLE */))
+    }), 128 /* KEYED_FRAGMENT */))
+  ], 4 /* STYLE */))
 }
-var TaskListHeadervue_type_template_id_aefdd7c8_staticRenderFns = []
-TaskListHeadervue_type_template_id_aefdd7c8_render._withStripped = true
+// CONCATENATED MODULE: ./src/components/TaskList/TaskListHeader.vue?vue&type=template&id=14f6a512
+
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ref--5!./node_modules/vue-loader/dist??ref--7-0!./src/components/Expander.vue?vue&type=template&id=09ed5944
 
 
-// CONCATENATED MODULE: ./src/components/TaskList/TaskListHeader.vue?vue&type=template&id=aefdd7c8&
+const Expandervue_type_template_id_09ed5944_hoisted_1 = ["width", "height"]
+const Expandervue_type_template_id_09ed5944_hoisted_2 = ["x", "y", "width", "height"]
+const _hoisted_3 = ["x1", "y1", "x2", "y2"]
+const _hoisted_4 = ["x1", "y1", "x2", "y2"]
 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Expander.vue?vue&type=template&id=09a21177&
-var Expandervue_type_template_id_09a21177_render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    {
-      class: _vm.getClassPrefix() + "-wrapper",
-      style: Object.assign(
-        {},
-        _vm.root.style[_vm.getClassPrefix(false) + "-wrapper"],
-        _vm.style
-      )
-    },
-    [
-      _vm.allChildren.length
-        ? _c(
-            "svg",
-            {
-              class: _vm.getClassPrefix() + "-content",
-              style: Object.assign(
-                {},
-                _vm.root.style[_vm.getClassPrefix(false) + "-content"]
-              ),
-              attrs: { width: _vm.options.size, height: _vm.options.size },
-              on: { click: _vm.toggle }
-            },
-            [
-              _c("rect", {
-                class: _vm.getClassPrefix() + "-border",
-                style: Object.assign(
-                  {},
-                  _vm.root.style[_vm.getClassPrefix(false) + "-border"],
-                  _vm.borderStyle
-                ),
-                attrs: {
-                  x: _vm.border,
-                  y: _vm.border,
-                  width: _vm.options.size - _vm.border * 2,
-                  height: _vm.options.size - _vm.border * 2,
-                  rx: "2",
-                  ry: "2"
-                }
-              }),
-              _vm._v(" "),
-              _vm.allChildren.length
-                ? _c("line", {
-                    class: _vm.getClassPrefix() + "-line",
-                    style: Object.assign(
-                      {},
-                      _vm.root.style[_vm.getClassPrefix(false) + "-line"]
-                    ),
-                    attrs: {
-                      x1: _vm.lineOffset,
-                      y1: _vm.options.size / 2,
-                      x2: _vm.options.size - _vm.lineOffset,
-                      y2: _vm.options.size / 2
-                    }
-                  })
-                : _vm._e(),
-              _vm._v(" "),
-              _vm.collapsed
-                ? _c("line", {
-                    class: _vm.getClassPrefix() + "-line",
-                    style: Object.assign(
-                      {},
-                      _vm.root.style[_vm.getClassPrefix(false) + "-line"]
-                    ),
-                    attrs: {
-                      x1: _vm.options.size / 2,
-                      y1: _vm.lineOffset,
-                      x2: _vm.options.size / 2,
-                      y2: _vm.options.size - _vm.lineOffset
-                    }
-                  })
-                : _vm._e()
-            ]
-          )
-        : _vm._e()
-    ]
-  )
+function Expandervue_type_template_id_09ed5944_render(_ctx, _cache, $props, $setup, $data, $options) {
+  return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("div", {
+    class: Object(external_Vue_["normalizeClass"])($options.getClassPrefix() + '-wrapper'),
+    style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style[$options.getClassPrefix(false) + '-wrapper'], ...$options.style })
+  }, [
+    ($options.allChildren.length)
+      ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("svg", {
+          key: 0,
+          class: Object(external_Vue_["normalizeClass"])($options.getClassPrefix() + '-content'),
+          style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style[$options.getClassPrefix(false) + '-content'] }),
+          width: $props.options.size,
+          height: $props.options.size,
+          onClick: _cache[0] || (_cache[0] = (...args) => ($options.toggle && $options.toggle(...args)))
+        }, [
+          Object(external_Vue_["createElementVNode"])("rect", {
+            class: Object(external_Vue_["normalizeClass"])($options.getClassPrefix() + '-border'),
+            style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style[$options.getClassPrefix(false) + '-border'], ...$data.borderStyle }),
+            x: $data.border,
+            y: $data.border,
+            width: $props.options.size - $data.border * 2,
+            height: $props.options.size - $data.border * 2,
+            rx: "2",
+            ry: "2"
+          }, null, 14 /* CLASS, STYLE, PROPS */, Expandervue_type_template_id_09ed5944_hoisted_2),
+          ($options.allChildren.length)
+            ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("line", {
+                key: 0,
+                class: Object(external_Vue_["normalizeClass"])($options.getClassPrefix() + '-line'),
+                style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style[$options.getClassPrefix(false) + '-line'] }),
+                x1: $data.lineOffset,
+                y1: $props.options.size / 2,
+                x2: $props.options.size - $data.lineOffset,
+                y2: $props.options.size / 2
+              }, null, 14 /* CLASS, STYLE, PROPS */, _hoisted_3))
+            : Object(external_Vue_["createCommentVNode"])("v-if", true),
+          ($options.collapsed)
+            ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("line", {
+                key: 1,
+                class: Object(external_Vue_["normalizeClass"])($options.getClassPrefix() + '-line'),
+                style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style[$options.getClassPrefix(false) + '-line'] }),
+                x1: $props.options.size / 2,
+                y1: $data.lineOffset,
+                x2: $props.options.size / 2,
+                y2: $props.options.size - $data.lineOffset
+              }, null, 14 /* CLASS, STYLE, PROPS */, _hoisted_4))
+            : Object(external_Vue_["createCommentVNode"])("v-if", true)
+        ], 14 /* CLASS, STYLE, PROPS */, Expandervue_type_template_id_09ed5944_hoisted_1))
+      : Object(external_Vue_["createCommentVNode"])("v-if", true)
+  ], 6 /* CLASS, STYLE */))
 }
-var Expandervue_type_template_id_09a21177_staticRenderFns = []
-Expandervue_type_template_id_09a21177_render._withStripped = true
+// CONCATENATED MODULE: ./src/components/Expander.vue?vue&type=template&id=09ed5944
 
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist??ref--7-0!./src/components/Expander.vue?vue&type=script&lang=js
 
-// CONCATENATED MODULE: ./src/components/Expander.vue?vue&type=template&id=09a21177&
-
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/components/Expander.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/* harmony default export */ var Expandervue_type_script_lang_js_ = ({
+/* harmony default export */ var Expandervue_type_script_lang_js = ({
   name: 'Expander',
   inject: ['root'],
   props: ['tasks', 'options', 'type'],
@@ -1799,102 +1601,11 @@ Expandervue_type_template_id_09a21177_render._withStripped = true
   }
 });
 
-// CONCATENATED MODULE: ./src/components/Expander.vue?vue&type=script&lang=js&
- /* harmony default export */ var components_Expandervue_type_script_lang_js_ = (Expandervue_type_script_lang_js_); 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/runtime/componentNormalizer.js
-/* globals __VUE_SSR_CONTEXT__ */
+// CONCATENATED MODULE: ./src/components/Expander.vue?vue&type=script&lang=js
 
-// IMPORTANT: Do NOT use ES2015 features in this file (except for modules).
-// This module is a runtime utility for cleaner component module output and will
-// be included in the final webpack user bundle.
-
-function normalizeComponent (
-  scriptExports,
-  render,
-  staticRenderFns,
-  functionalTemplate,
-  injectStyles,
-  scopeId,
-  moduleIdentifier, /* server only */
-  shadowMode /* vue-cli only */
-) {
-  // Vue.extend constructor export interop
-  var options = typeof scriptExports === 'function'
-    ? scriptExports.options
-    : scriptExports
-
-  // render functions
-  if (render) {
-    options.render = render
-    options.staticRenderFns = staticRenderFns
-    options._compiled = true
-  }
-
-  // functional template
-  if (functionalTemplate) {
-    options.functional = true
-  }
-
-  // scopedId
-  if (scopeId) {
-    options._scopeId = 'data-v-' + scopeId
-  }
-
-  var hook
-  if (moduleIdentifier) { // server build
-    hook = function (context) {
-      // 2.3 injection
-      context =
-        context || // cached call
-        (this.$vnode && this.$vnode.ssrContext) || // stateful
-        (this.parent && this.parent.$vnode && this.parent.$vnode.ssrContext) // functional
-      // 2.2 with runInNewContext: true
-      if (!context && typeof __VUE_SSR_CONTEXT__ !== 'undefined') {
-        context = __VUE_SSR_CONTEXT__
-      }
-      // inject component styles
-      if (injectStyles) {
-        injectStyles.call(this, context)
-      }
-      // register component module identifier for async chunk inferrence
-      if (context && context._registeredComponents) {
-        context._registeredComponents.add(moduleIdentifier)
-      }
-    }
-    // used by ssr in case component is cached and beforeCreate
-    // never gets called
-    options._ssrRegister = hook
-  } else if (injectStyles) {
-    hook = shadowMode
-      ? function () { injectStyles.call(this, this.$root.$options.shadowRoot) }
-      : injectStyles
-  }
-
-  if (hook) {
-    if (options.functional) {
-      // for template-only hot-reload because in that case the render fn doesn't
-      // go through the normalizer
-      options._injectStyles = hook
-      // register for functioal component in vue file
-      var originalRender = options.render
-      options.render = function renderWithStyleInjection (h, context) {
-        hook.call(context)
-        return originalRender(h, context)
-      }
-    } else {
-      // inject component registration as beforeCreate hook
-      var existing = options.beforeCreate
-      options.beforeCreate = existing
-        ? [].concat(existing, hook)
-        : [hook]
-    }
-  }
-
-  return {
-    exports: scriptExports,
-    options: options
-  }
-}
+// EXTERNAL MODULE: ./node_modules/vue-loader/dist/exportHelper.js
+var exportHelper = __webpack_require__(1);
+var exportHelper_default = /*#__PURE__*/__webpack_require__.n(exportHelper);
 
 // CONCATENATED MODULE: ./src/components/Expander.vue
 
@@ -1902,98 +1613,13 @@ function normalizeComponent (
 
 
 
-/* normalize component */
+const __exports__ = /*#__PURE__*/exportHelper_default()(Expandervue_type_script_lang_js, [['render',Expandervue_type_template_id_09ed5944_render]])
 
-var component = normalizeComponent(
-  components_Expandervue_type_script_lang_js_,
-  Expandervue_type_template_id_09a21177_render,
-  Expandervue_type_template_id_09a21177_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* hot reload */
-if (false) { var api; }
-component.options.__file = "src/components/Expander.vue"
-/* harmony default export */ var Expander = (component.exports);
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/components/TaskList/TaskListHeader.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+/* harmony default export */ var Expander = (__exports__);
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist??ref--7-0!./src/components/TaskList/TaskListHeader.vue?vue&type=script&lang=js
 
 
-/* harmony default export */ var TaskListHeadervue_type_script_lang_js_ = ({
+/* harmony default export */ var TaskListHeadervue_type_script_lang_js = ({
   name: 'TaskListHeader',
   components: {
     TaskListExpander: Expander
@@ -2040,7 +1666,7 @@ component.options.__file = "src/components/Expander.vue"
         this.resizer.moving = column;
         this.resizer.x = event.clientX;
         this.resizer.initialWidth = column.width;
-        this.root.$emit('taskList-column-width-change-start', this.resizer.moving);
+        this.root.$emitBus.emit('taskList-column-width-change-start', this.resizer.moving);
       }
     },
 
@@ -2055,7 +1681,7 @@ component.options.__file = "src/components/Expander.vue"
           this.resizer.moving.width = this.root.state.options.taskList.minWidth;
         }
         if (lastWidth !== this.resizer.moving.width) {
-          this.root.$emit('taskList-column-width-change', this.resizer.moving);
+          this.root.$emitBus.emit('taskList-column-width-change', this.resizer.moving);
         }
       }
     },
@@ -2065,7 +1691,7 @@ component.options.__file = "src/components/Expander.vue"
      */
     resizerMouseUp(event) {
       if (this.resizer.moving) {
-        this.root.$emit('taskList-column-width-change-stop', this.resizer.moving);
+        this.root.$emitBus.emit('taskList-column-width-change-stop', this.resizer.moving);
         this.resizer.moving = false;
       }
     }
@@ -2075,266 +1701,131 @@ component.options.__file = "src/components/Expander.vue"
    * Created
    */
   created() {
+    this.$set = function(obj, key, val) { obj[key] = val; };
+    this.$delete = function(obj, key) { delete obj[key]; };
+
     this.mouseUpListener = document.addEventListener('mouseup', this.resizerMouseUp.bind(this));
     this.mouseMoveListener = document.addEventListener('mousemove', this.resizerMouseMove.bind(this));
-    this.root.$on('main-view-mousemove', this.resizerMouseMove);
-    this.root.$on('main-view-mouseup', this.resizerMouseUp);
+    this.root.$emitBus.on('main-view-mousemove', this.resizerMouseMove);
+    this.root.$emitBus.on('main-view-mouseup', this.resizerMouseUp);
   },
 
   /**
    * Before destroy event - clear all event listeners
    */
-  beforeDestroy() {
+  beforeUnmount() {
     document.removeEventListener('mouseup', this.resizerMouseUp);
     document.removeEventListener('mousemove', this.resizerMouseMove);
   }
 });
 
-// CONCATENATED MODULE: ./src/components/TaskList/TaskListHeader.vue?vue&type=script&lang=js&
- /* harmony default export */ var TaskList_TaskListHeadervue_type_script_lang_js_ = (TaskListHeadervue_type_script_lang_js_); 
+// CONCATENATED MODULE: ./src/components/TaskList/TaskListHeader.vue?vue&type=script&lang=js
+
 // CONCATENATED MODULE: ./src/components/TaskList/TaskListHeader.vue
 
 
 
 
 
-/* normalize component */
+const TaskListHeader_exports_ = /*#__PURE__*/exportHelper_default()(TaskListHeadervue_type_script_lang_js, [['render',TaskListHeadervue_type_template_id_14f6a512_render]])
 
-var TaskListHeader_component = normalizeComponent(
-  TaskList_TaskListHeadervue_type_script_lang_js_,
-  TaskListHeadervue_type_template_id_aefdd7c8_render,
-  TaskListHeadervue_type_template_id_aefdd7c8_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
+/* harmony default export */ var TaskListHeader = (TaskListHeader_exports_);
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ref--5!./node_modules/vue-loader/dist??ref--7-0!./src/components/TaskList/TaskListItem.vue?vue&type=template&id=9ddbf498
 
-/* hot reload */
-if (false) { var TaskListHeader_api; }
-TaskListHeader_component.options.__file = "src/components/TaskList/TaskListHeader.vue"
-/* harmony default export */ var TaskListHeader = (TaskListHeader_component.exports);
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/components/TaskList/TaskListItem.vue?vue&type=template&id=9716293c&
-var TaskListItemvue_type_template_id_9716293c_render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    {
-      staticClass: "gantt-elastic__task-list-item",
-      style: Object.assign({}, _vm.root.style["task-list-item"])
-    },
-    _vm._l(_vm.columns, function(column) {
-      return _c(
-        "item-column",
-        { key: column._id, attrs: { column: column, task: _vm.task } },
-        [
-          column.expander
-            ? _c("task-list-expander", {
-                attrs: {
-                  tasks: [_vm.task],
-                  options: _vm.root.state.options.taskList.expander,
-                  type: "taskList"
-                }
-              })
-            : _vm._e()
-        ],
-        1
-      )
-    }),
-    1
-  )
+
+function TaskListItemvue_type_template_id_9ddbf498_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_task_list_expander = Object(external_Vue_["resolveComponent"])("task-list-expander")
+  const _component_item_column = Object(external_Vue_["resolveComponent"])("item-column")
+
+  return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("div", {
+    class: "gantt-elastic__task-list-item",
+    style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['task-list-item'] })
+  }, [
+    (Object(external_Vue_["openBlock"])(true), Object(external_Vue_["createElementBlock"])(external_Vue_["Fragment"], null, Object(external_Vue_["renderList"])($options.columns, (column) => {
+      return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createBlock"])(_component_item_column, {
+        key: column._id,
+        column: column,
+        task: $props.task
+      }, {
+        default: Object(external_Vue_["withCtx"])(() => [
+          (column.expander)
+            ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createBlock"])(_component_task_list_expander, {
+                key: 0,
+                tasks: [$props.task],
+                options: $options.root.state.options.taskList.expander,
+                type: "taskList"
+              }, null, 8 /* PROPS */, ["tasks", "options"]))
+            : Object(external_Vue_["createCommentVNode"])("v-if", true)
+        ]),
+        _: 2 /* DYNAMIC */
+      }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["column", "task"]))
+    }), 128 /* KEYED_FRAGMENT */))
+  ], 4 /* STYLE */))
 }
-var TaskListItemvue_type_template_id_9716293c_staticRenderFns = []
-TaskListItemvue_type_template_id_9716293c_render._withStripped = true
+// CONCATENATED MODULE: ./src/components/TaskList/TaskListItem.vue?vue&type=template&id=9ddbf498
+
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ref--5!./node_modules/vue-loader/dist??ref--7-0!./src/components/TaskList/ItemColumn.vue?vue&type=template&id=0c93a03c
 
 
-// CONCATENATED MODULE: ./src/components/TaskList/TaskListItem.vue?vue&type=template&id=9716293c&
+const ItemColumnvue_type_template_id_0c93a03c_hoisted_1 = ["innerHTML"]
 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/components/TaskList/ItemColumn.vue?vue&type=template&id=cb5a6c96&
-var ItemColumnvue_type_template_id_cb5a6c96_render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    {
-      staticClass: "gantt-elastic__task-list-item-column",
-      style: _vm.itemColumnStyle
-    },
-    [
-      _c(
-        "div",
-        {
-          staticClass: "gantt-elastic__task-list-item-value-wrapper",
-          style: _vm.wrapperStyle
-        },
-        [
-          _vm._t("default"),
-          _vm._v(" "),
-          _c(
-            "div",
-            {
-              staticClass: "gantt-elastic__task-list-item-value-container",
-              style: _vm.containerStyle
-            },
-            [
-              !_vm.html
-                ? _c(
-                    "div",
-                    {
-                      staticClass: "gantt-elastic__task-list-item-value",
-                      style: _vm.valueStyle,
-                      on: {
-                        click: function($event) {
-                          return _vm.emitEvent("click", $event)
-                        },
-                        mouseenter: function($event) {
-                          return _vm.emitEvent("mouseenter", $event)
-                        },
-                        mouseover: function($event) {
-                          return _vm.emitEvent("mouseover", $event)
-                        },
-                        mouseout: function($event) {
-                          return _vm.emitEvent("mouseout", $event)
-                        },
-                        mousemove: function($event) {
-                          return _vm.emitEvent("mousemove", $event)
-                        },
-                        mousedown: function($event) {
-                          return _vm.emitEvent("mousedown", $event)
-                        },
-                        mouseup: function($event) {
-                          return _vm.emitEvent("mouseup", $event)
-                        },
-                        mousewheel: function($event) {
-                          return _vm.emitEvent("mousewheel", $event)
-                        },
-                        touchstart: function($event) {
-                          return _vm.emitEvent("touchstart", $event)
-                        },
-                        touchmove: function($event) {
-                          return _vm.emitEvent("touchmove", $event)
-                        },
-                        touchend: function($event) {
-                          return _vm.emitEvent("touchend", $event)
-                        }
-                      }
-                    },
-                    [_vm._v("\n        " + _vm._s(_vm.value) + "\n      ")]
-                  )
-                : _c("div", {
-                    staticClass: "gantt-elastic__task-list-item-value",
-                    style: _vm.valueStyle,
-                    domProps: { innerHTML: _vm._s(_vm.value) },
-                    on: {
-                      click: function($event) {
-                        return _vm.emitEvent("click", $event)
-                      },
-                      mouseenter: function($event) {
-                        return _vm.emitEvent("mouseenter", $event)
-                      },
-                      mouseover: function($event) {
-                        return _vm.emitEvent("mouseover", $event)
-                      },
-                      mouseout: function($event) {
-                        return _vm.emitEvent("mouseout", $event)
-                      },
-                      mousemove: function($event) {
-                        return _vm.emitEvent("mousemove", $event)
-                      },
-                      mousedown: function($event) {
-                        return _vm.emitEvent("mousedown", $event)
-                      },
-                      mouseup: function($event) {
-                        return _vm.emitEvent("mouseup", $event)
-                      },
-                      mousewheel: function($event) {
-                        return _vm.emitEvent("mousewheel", $event)
-                      },
-                      touchstart: function($event) {
-                        return _vm.emitEvent("touchstart", $event)
-                      },
-                      touchmove: function($event) {
-                        return _vm.emitEvent("touchmove", $event)
-                      },
-                      touchend: function($event) {
-                        return _vm.emitEvent("touchend", $event)
-                      }
-                    }
-                  })
-            ]
-          )
-        ],
-        2
-      )
-    ]
-  )
+function ItemColumnvue_type_template_id_0c93a03c_render(_ctx, _cache, $props, $setup, $data, $options) {
+  return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("div", {
+    class: "gantt-elastic__task-list-item-column",
+    style: Object(external_Vue_["normalizeStyle"])($options.itemColumnStyle)
+  }, [
+    Object(external_Vue_["createElementVNode"])("div", {
+      class: "gantt-elastic__task-list-item-value-wrapper",
+      style: Object(external_Vue_["normalizeStyle"])($options.wrapperStyle)
+    }, [
+      Object(external_Vue_["renderSlot"])(_ctx.$slots, "default"),
+      Object(external_Vue_["createElementVNode"])("div", {
+        class: "gantt-elastic__task-list-item-value-container",
+        style: Object(external_Vue_["normalizeStyle"])($options.containerStyle)
+      }, [
+        (!$options.html)
+          ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("div", {
+              key: 0,
+              class: "gantt-elastic__task-list-item-value",
+              style: Object(external_Vue_["normalizeStyle"])($options.valueStyle),
+              onClick: _cache[0] || (_cache[0] = $event => ($options.emitEvent('click', $event))),
+              onMouseenter: _cache[1] || (_cache[1] = $event => ($options.emitEvent('mouseenter', $event))),
+              onMouseover: _cache[2] || (_cache[2] = $event => ($options.emitEvent('mouseover', $event))),
+              onMouseout: _cache[3] || (_cache[3] = $event => ($options.emitEvent('mouseout', $event))),
+              onMousemove: _cache[4] || (_cache[4] = $event => ($options.emitEvent('mousemove', $event))),
+              onMousedown: _cache[5] || (_cache[5] = $event => ($options.emitEvent('mousedown', $event))),
+              onMouseup: _cache[6] || (_cache[6] = $event => ($options.emitEvent('mouseup', $event))),
+              onMousewheel: _cache[7] || (_cache[7] = $event => ($options.emitEvent('mousewheel', $event))),
+              onTouchstart: _cache[8] || (_cache[8] = $event => ($options.emitEvent('touchstart', $event))),
+              onTouchmove: _cache[9] || (_cache[9] = $event => ($options.emitEvent('touchmove', $event))),
+              onTouchend: _cache[10] || (_cache[10] = $event => ($options.emitEvent('touchend', $event)))
+            }, Object(external_Vue_["toDisplayString"])($options.value), 37 /* TEXT, STYLE, NEED_HYDRATION */))
+          : (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("div", {
+              key: 1,
+              class: "gantt-elastic__task-list-item-value",
+              style: Object(external_Vue_["normalizeStyle"])($options.valueStyle),
+              onClick: _cache[11] || (_cache[11] = $event => ($options.emitEvent('click', $event))),
+              onMouseenter: _cache[12] || (_cache[12] = $event => ($options.emitEvent('mouseenter', $event))),
+              onMouseover: _cache[13] || (_cache[13] = $event => ($options.emitEvent('mouseover', $event))),
+              onMouseout: _cache[14] || (_cache[14] = $event => ($options.emitEvent('mouseout', $event))),
+              onMousemove: _cache[15] || (_cache[15] = $event => ($options.emitEvent('mousemove', $event))),
+              onMousedown: _cache[16] || (_cache[16] = $event => ($options.emitEvent('mousedown', $event))),
+              onMouseup: _cache[17] || (_cache[17] = $event => ($options.emitEvent('mouseup', $event))),
+              onMousewheel: _cache[18] || (_cache[18] = $event => ($options.emitEvent('mousewheel', $event))),
+              onTouchstart: _cache[19] || (_cache[19] = $event => ($options.emitEvent('touchstart', $event))),
+              onTouchmove: _cache[20] || (_cache[20] = $event => ($options.emitEvent('touchmove', $event))),
+              onTouchend: _cache[21] || (_cache[21] = $event => ($options.emitEvent('touchend', $event))),
+              innerHTML: $options.value
+            }, null, 44 /* STYLE, PROPS, NEED_HYDRATION */, ItemColumnvue_type_template_id_0c93a03c_hoisted_1))
+      ], 4 /* STYLE */)
+    ], 4 /* STYLE */)
+  ], 4 /* STYLE */))
 }
-var ItemColumnvue_type_template_id_cb5a6c96_staticRenderFns = []
-ItemColumnvue_type_template_id_cb5a6c96_render._withStripped = true
+// CONCATENATED MODULE: ./src/components/TaskList/ItemColumn.vue?vue&type=template&id=0c93a03c
 
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist??ref--7-0!./src/components/TaskList/ItemColumn.vue?vue&type=script&lang=js
 
-// CONCATENATED MODULE: ./src/components/TaskList/ItemColumn.vue?vue&type=template&id=cb5a6c96&
-
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/components/TaskList/ItemColumn.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/* harmony default export */ var ItemColumnvue_type_script_lang_js_ = ({
+/* harmony default export */ var ItemColumnvue_type_script_lang_js = ({
   name: 'ItemColumn',
   inject: ['root'],
   props: ['column', 'task'],
@@ -2352,7 +1843,7 @@ ItemColumnvue_type_template_id_cb5a6c96_render._withStripped = true
       if (typeof this.column.events !== 'undefined' && typeof this.column.events[eventName] === 'function') {
         this.column.events[eventName]({ event, data: this.task, column: this.column });
       }
-      this.root.$emit(`taskList-${this.task.type}-${eventName}`, { event, data: this.task, column: this.column });
+      this.root.$emitBus.emit(`taskList-${this.task.type}-${eventName}`, { event, data: this.task, column: this.column });
     }
   },
   computed: {
@@ -2409,57 +1900,23 @@ ItemColumnvue_type_template_id_cb5a6c96_render._withStripped = true
   }
 });
 
-// CONCATENATED MODULE: ./src/components/TaskList/ItemColumn.vue?vue&type=script&lang=js&
- /* harmony default export */ var TaskList_ItemColumnvue_type_script_lang_js_ = (ItemColumnvue_type_script_lang_js_); 
+// CONCATENATED MODULE: ./src/components/TaskList/ItemColumn.vue?vue&type=script&lang=js
+
 // CONCATENATED MODULE: ./src/components/TaskList/ItemColumn.vue
 
 
 
 
 
-/* normalize component */
+const ItemColumn_exports_ = /*#__PURE__*/exportHelper_default()(ItemColumnvue_type_script_lang_js, [['render',ItemColumnvue_type_template_id_0c93a03c_render]])
 
-var ItemColumn_component = normalizeComponent(
-  TaskList_ItemColumnvue_type_script_lang_js_,
-  ItemColumnvue_type_template_id_cb5a6c96_render,
-  ItemColumnvue_type_template_id_cb5a6c96_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* hot reload */
-if (false) { var ItemColumn_api; }
-ItemColumn_component.options.__file = "src/components/TaskList/ItemColumn.vue"
-/* harmony default export */ var ItemColumn = (ItemColumn_component.exports);
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/components/TaskList/TaskListItem.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+/* harmony default export */ var ItemColumn = (ItemColumn_exports_);
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist??ref--7-0!./src/components/TaskList/TaskListItem.vue?vue&type=script&lang=js
 
 
 
 
-/* harmony default export */ var TaskListItemvue_type_script_lang_js_ = ({
+/* harmony default export */ var TaskListItemvue_type_script_lang_js = ({
   name: 'TaskListItem',
   components: {
     TaskListExpander: Expander,
@@ -2477,64 +1934,22 @@ ItemColumn_component.options.__file = "src/components/TaskList/ItemColumn.vue"
   }
 });
 
-// CONCATENATED MODULE: ./src/components/TaskList/TaskListItem.vue?vue&type=script&lang=js&
- /* harmony default export */ var TaskList_TaskListItemvue_type_script_lang_js_ = (TaskListItemvue_type_script_lang_js_); 
+// CONCATENATED MODULE: ./src/components/TaskList/TaskListItem.vue?vue&type=script&lang=js
+
 // CONCATENATED MODULE: ./src/components/TaskList/TaskListItem.vue
 
 
 
 
 
-/* normalize component */
+const TaskListItem_exports_ = /*#__PURE__*/exportHelper_default()(TaskListItemvue_type_script_lang_js, [['render',TaskListItemvue_type_template_id_9ddbf498_render]])
 
-var TaskListItem_component = normalizeComponent(
-  TaskList_TaskListItemvue_type_script_lang_js_,
-  TaskListItemvue_type_template_id_9716293c_render,
-  TaskListItemvue_type_template_id_9716293c_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* hot reload */
-if (false) { var TaskListItem_api; }
-TaskListItem_component.options.__file = "src/components/TaskList/TaskListItem.vue"
-/* harmony default export */ var TaskListItem = (TaskListItem_component.exports);
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/components/TaskList/TaskList.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+/* harmony default export */ var TaskListItem = (TaskListItem_exports_);
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist??ref--7-0!./src/components/TaskList/TaskList.vue?vue&type=script&lang=js
 
 
 
-/* harmony default export */ var TaskListvue_type_script_lang_js_ = ({
+/* harmony default export */ var TaskListvue_type_script_lang_js = ({
   name: 'TaskList',
   components: {
     TaskListHeader: TaskListHeader,
@@ -2555,278 +1970,159 @@ TaskListItem_component.options.__file = "src/components/TaskList/TaskListItem.vu
   }
 });
 
-// CONCATENATED MODULE: ./src/components/TaskList/TaskList.vue?vue&type=script&lang=js&
- /* harmony default export */ var TaskList_TaskListvue_type_script_lang_js_ = (TaskListvue_type_script_lang_js_); 
+// CONCATENATED MODULE: ./src/components/TaskList/TaskList.vue?vue&type=script&lang=js
+
 // CONCATENATED MODULE: ./src/components/TaskList/TaskList.vue
 
 
 
 
 
-/* normalize component */
+const TaskList_exports_ = /*#__PURE__*/exportHelper_default()(TaskListvue_type_script_lang_js, [['render',TaskListvue_type_template_id_0ddd1532_render]])
 
-var TaskList_component = normalizeComponent(
-  TaskList_TaskListvue_type_script_lang_js_,
-  TaskListvue_type_template_id_6e11f12f_render,
-  TaskListvue_type_template_id_6e11f12f_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
+/* harmony default export */ var TaskList = (TaskList_exports_);
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ref--5!./node_modules/vue-loader/dist??ref--7-0!./src/components/Chart/Chart.vue?vue&type=template&id=491a2e0a
 
-/* hot reload */
-if (false) { var TaskList_api; }
-TaskList_component.options.__file = "src/components/TaskList/TaskList.vue"
-/* harmony default export */ var TaskList = (TaskList_component.exports);
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Chart/Chart.vue?vue&type=template&id=67c3f5cd&
-var Chartvue_type_template_id_67c3f5cd_render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    {
-      ref: "chart",
-      staticClass: "gantt-elastic__chart",
-      style: Object.assign({}, _vm.root.style["chart"])
-    },
-    [
-      _c(
-        "div",
-        {
-          ref: "chartCalendarContainer",
-          staticClass: "gantt-elastic__chart-calendar-container",
-          style: Object.assign({}, _vm.root.style["chart-calendar-container"], {
-            height: _vm.root.state.options.calendar.height + "px",
-            "margin-bottom": _vm.root.state.options.calendar.gap + "px"
-          })
-        },
-        [_c("calendar")],
-        1
-      ),
-      _vm._v(" "),
-      _c(
-        "div",
-        {
-          ref: "chartGraphContainer",
-          staticClass: "gantt-elastic__chart-graph-container",
-          style: Object.assign({}, _vm.root.style["chart-graph-container"], {
-            height:
-              _vm.root.state.options.height -
-              _vm.root.state.options.calendar.height +
-              "px"
-          })
-        },
-        [
-          _c(
-            "div",
-            {
-              style: Object.assign({}, _vm.root.style["chart-area"], {
-                width: _vm.root.state.options.width + "px",
-                height: _vm.root.state.options.rowsHeight + "px"
-              })
-            },
-            [
-              _c(
-                "div",
-                {
-                  ref: "chartGraph",
-                  staticClass: "gantt-elastic__chart-graph",
-                  style: Object.assign({}, _vm.root.style["chart-graph"], {
-                    height: "100%"
-                  })
-                },
-                [
-                  _c(
-                    "svg",
-                    {
-                      ref: "chartGraphSvg",
-                      staticClass: "gantt-elastic__chart-graph-svg",
-                      style: Object.assign(
-                        {},
-                        _vm.root.style["chart-graph-svg"]
-                      ),
-                      attrs: {
-                        x: "0",
-                        y: "0",
-                        width: _vm.root.state.options.width + "px",
-                        height:
-                          _vm.root.state.options.allVisibleTasksHeight + "px",
-                        xmlns: "http://www.w3.org/2000/svg"
-                      }
-                    },
-                    [
-                      _c("days-highlight"),
-                      _vm._v(" "),
-                      _c("grid"),
-                      _vm._v(" "),
-                      _c("dependency-lines", {
-                        attrs: { tasks: _vm.root.visibleTasks }
-                      }),
-                      _vm._v(" "),
-                      _vm._l(_vm.root.visibleTasks, function(task) {
-                        return _c(
-                          "g",
-                          {
-                            key: task.id,
-                            staticClass: "gantt-elastic__chart-row-wrapper",
-                            style: Object.assign(
-                              {},
-                              _vm.root.style["chart-row-wrapper"]
-                            ),
-                            attrs: { task: task }
-                          },
-                          [
-                            _c(task.type, {
-                              tag: "component",
-                              attrs: { task: task }
-                            })
-                          ],
-                          1
-                        )
-                      })
-                    ],
-                    2
-                  )
-                ]
-              )
-            ]
-          )
-        ]
-      )
-    ]
-  )
+
+const Chartvue_type_template_id_491a2e0a_hoisted_1 = ["width", "height"]
+const Chartvue_type_template_id_491a2e0a_hoisted_2 = ["task"]
+
+function Chartvue_type_template_id_491a2e0a_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_calendar = Object(external_Vue_["resolveComponent"])("calendar")
+  const _component_days_highlight = Object(external_Vue_["resolveComponent"])("days-highlight")
+  const _component_grid = Object(external_Vue_["resolveComponent"])("grid")
+  const _component_dependency_lines = Object(external_Vue_["resolveComponent"])("dependency-lines")
+
+  return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("div", {
+    class: "gantt-elastic__chart",
+    style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['chart'] }),
+    ref: "chart"
+  }, [
+    Object(external_Vue_["createElementVNode"])("div", {
+      class: "gantt-elastic__chart-calendar-container",
+      ref: "chartCalendarContainer",
+      style: Object(external_Vue_["normalizeStyle"])({
+        ...$options.root.style['chart-calendar-container'],
+        height: $options.root.state.options.calendar.height + 'px',
+        'margin-bottom': $options.root.state.options.calendar.gap + 'px'
+      })
+    }, [
+      Object(external_Vue_["createVNode"])(_component_calendar)
+    ], 4 /* STYLE */),
+    Object(external_Vue_["createElementVNode"])("div", {
+      class: "gantt-elastic__chart-graph-container",
+      ref: "chartGraphContainer",
+      style: Object(external_Vue_["normalizeStyle"])({
+        ...$options.root.style['chart-graph-container'],
+        height: $options.root.state.options.height - $options.root.state.options.calendar.height + 'px'
+      })
+    }, [
+      Object(external_Vue_["createElementVNode"])("div", {
+        style: Object(external_Vue_["normalizeStyle"])({
+          ...$options.root.style['chart-area'],
+          width: $options.root.state.options.width + 'px',
+          height: $options.root.state.options.rowsHeight + 'px'
+        })
+      }, [
+        Object(external_Vue_["createElementVNode"])("div", {
+          class: "gantt-elastic__chart-graph",
+          ref: "chartGraph",
+          style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['chart-graph'], height: '100%' })
+        }, [
+          (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("svg", {
+            class: "gantt-elastic__chart-graph-svg",
+            style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['chart-graph-svg'] }),
+            ref: "chartGraphSvg",
+            x: "0",
+            y: "0",
+            width: $options.root.state.options.width + 'px',
+            height: $options.root.state.options.allVisibleTasksHeight + 'px',
+            xmlns: "http://www.w3.org/2000/svg"
+          }, [
+            Object(external_Vue_["createVNode"])(_component_days_highlight),
+            Object(external_Vue_["createVNode"])(_component_grid),
+            Object(external_Vue_["createVNode"])(_component_dependency_lines, {
+              tasks: $options.root.visibleTasks
+            }, null, 8 /* PROPS */, ["tasks"]),
+            (Object(external_Vue_["openBlock"])(true), Object(external_Vue_["createElementBlock"])(external_Vue_["Fragment"], null, Object(external_Vue_["renderList"])($options.root.visibleTasks, (task) => {
+              return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("g", {
+                class: "gantt-elastic__chart-row-wrapper",
+                style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['chart-row-wrapper'] }),
+                task: task,
+                key: task.id
+              }, [
+                (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createBlock"])(Object(external_Vue_["resolveDynamicComponent"])(task.type), { task: task }, null, 8 /* PROPS */, ["task"]))
+              ], 12 /* STYLE, PROPS */, Chartvue_type_template_id_491a2e0a_hoisted_2))
+            }), 128 /* KEYED_FRAGMENT */))
+          ], 12 /* STYLE, PROPS */, Chartvue_type_template_id_491a2e0a_hoisted_1))
+        ], 4 /* STYLE */)
+      ], 4 /* STYLE */)
+    ], 4 /* STYLE */)
+  ], 4 /* STYLE */))
 }
-var Chartvue_type_template_id_67c3f5cd_staticRenderFns = []
-Chartvue_type_template_id_67c3f5cd_render._withStripped = true
+// CONCATENATED MODULE: ./src/components/Chart/Chart.vue?vue&type=template&id=491a2e0a
+
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ref--5!./node_modules/vue-loader/dist??ref--7-0!./src/components/Chart/Grid.vue?vue&type=template&id=53c02ad9
 
 
-// CONCATENATED MODULE: ./src/components/Chart/Chart.vue?vue&type=template&id=67c3f5cd&
+const Gridvue_type_template_id_53c02ad9_hoisted_1 = ["width", "height"]
+const Gridvue_type_template_id_53c02ad9_hoisted_2 = ["x1", "y1", "x2", "y2"]
+const Gridvue_type_template_id_53c02ad9_hoisted_3 = ["x1", "y1", "x2", "y2"]
+const Gridvue_type_template_id_53c02ad9_hoisted_4 = ["x1", "y1", "x2", "y2"]
 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Chart/Grid.vue?vue&type=template&id=2bf979a7&
-var Gridvue_type_template_id_2bf979a7_render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "svg",
-    {
-      ref: "chart",
-      staticClass: "gantt-elastic__grid-lines-wrapper",
-      style: Object.assign({}, _vm.root.style["grid-lines-wrapper"]),
-      attrs: {
-        x: "0",
-        y: "0",
-        width: _vm.root.state.options.width,
-        height: _vm.root.state.options.allVisibleTasksHeight,
-        xmlns: "http://www.w3.org/2000/svg"
-      }
-    },
-    [
-      _c(
-        "g",
-        {
-          staticClass: "gantt-elastic__grid-lines",
-          style: Object.assign({}, _vm.root.style["grid-lines"])
-        },
-        [
-          _vm._l(_vm.horizontalLines, function(line) {
-            return _c("line", {
-              key: line.key,
-              staticClass: "gantt-elastic__grid-line-horizontal",
-              style: Object.assign({}, _vm.root.style["grid-line-horizontal"]),
-              attrs: { x1: line.x1, y1: line.y1, x2: line.x2, y2: line.y2 }
-            })
-          }),
-          _vm._v(" "),
-          _vm._l(_vm.verticalLines, function(line) {
-            return _c("line", {
-              key: line.key,
-              staticClass: "gantt-elastic__grid-line-vertical",
-              style: Object.assign({}, _vm.root.style["grid-line-vertical"]),
-              attrs: { x1: line.x1, y1: line.y1, x2: line.x2, y2: line.y2 }
-            })
-          }),
-          _vm._v(" "),
-          _c("line", {
-            staticClass: "gantt-elastic__grid-line-time",
-            style: Object.assign({}, _vm.root.style["grid-line-time"]),
-            attrs: {
-              x1: _vm.timeLinePosition.x,
-              y1: _vm.timeLinePosition.y1,
-              x2: _vm.timeLinePosition.x,
-              y2: _vm.timeLinePosition.y2
-            }
-          })
-        ],
-        2
-      )
-    ]
-  )
+function Gridvue_type_template_id_53c02ad9_render(_ctx, _cache, $props, $setup, $data, $options) {
+  return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("svg", {
+    class: "gantt-elastic__grid-lines-wrapper",
+    style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['grid-lines-wrapper'] }),
+    ref: "chart",
+    x: "0",
+    y: "0",
+    width: $options.root.state.options.width,
+    height: $options.root.state.options.allVisibleTasksHeight,
+    xmlns: "http://www.w3.org/2000/svg"
+  }, [
+    Object(external_Vue_["createElementVNode"])("g", {
+      class: "gantt-elastic__grid-lines",
+      style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['grid-lines'] })
+    }, [
+      (Object(external_Vue_["openBlock"])(true), Object(external_Vue_["createElementBlock"])(external_Vue_["Fragment"], null, Object(external_Vue_["renderList"])($options.horizontalLines, (line) => {
+        return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("line", {
+          class: "gantt-elastic__grid-line-horizontal",
+          style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['grid-line-horizontal'] }),
+          key: line.key,
+          x1: line.x1,
+          y1: line.y1,
+          x2: line.x2,
+          y2: line.y2
+        }, null, 12 /* STYLE, PROPS */, Gridvue_type_template_id_53c02ad9_hoisted_2))
+      }), 128 /* KEYED_FRAGMENT */)),
+      (Object(external_Vue_["openBlock"])(true), Object(external_Vue_["createElementBlock"])(external_Vue_["Fragment"], null, Object(external_Vue_["renderList"])($options.verticalLines, (line) => {
+        return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("line", {
+          class: "gantt-elastic__grid-line-vertical",
+          style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['grid-line-vertical'] }),
+          key: line.key,
+          x1: line.x1,
+          y1: line.y1,
+          x2: line.x2,
+          y2: line.y2
+        }, null, 12 /* STYLE, PROPS */, Gridvue_type_template_id_53c02ad9_hoisted_3))
+      }), 128 /* KEYED_FRAGMENT */)),
+      Object(external_Vue_["createElementVNode"])("line", {
+        class: "gantt-elastic__grid-line-time",
+        style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['grid-line-time'] }),
+        x1: $options.timeLinePosition.x,
+        y1: $options.timeLinePosition.y1,
+        x2: $options.timeLinePosition.x,
+        y2: $options.timeLinePosition.y2
+      }, null, 12 /* STYLE, PROPS */, Gridvue_type_template_id_53c02ad9_hoisted_4)
+    ], 4 /* STYLE */)
+  ], 12 /* STYLE, PROPS */, Gridvue_type_template_id_53c02ad9_hoisted_1))
 }
-var Gridvue_type_template_id_2bf979a7_staticRenderFns = []
-Gridvue_type_template_id_2bf979a7_render._withStripped = true
+// CONCATENATED MODULE: ./src/components/Chart/Grid.vue?vue&type=template&id=53c02ad9
 
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist??ref--7-0!./src/components/Chart/Grid.vue?vue&type=script&lang=js
 
-// CONCATENATED MODULE: ./src/components/Chart/Grid.vue?vue&type=template&id=2bf979a7&
-
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/components/Chart/Grid.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/* harmony default export */ var Gridvue_type_script_lang_js_ = ({
+/* harmony default export */ var Gridvue_type_script_lang_js = ({
   name: 'Grid',
   inject: ['root'],
   data() {
@@ -2836,7 +2132,10 @@ Gridvue_type_template_id_2bf979a7_render._withStripped = true
    * Created
    */
   created() {
-    this.root.$on('recenterPosition', this.recenterPosition);
+    this.$set = function(obj, key, val) { obj[key] = val; };
+    this.$delete = function(obj, key) { delete obj[key]; };
+
+    this.root.$emitBus.on('recenterPosition', this.recenterPosition);
   },
 
   /**
@@ -2944,104 +2243,49 @@ Gridvue_type_template_id_2bf979a7_render._withStripped = true
   }
 });
 
-// CONCATENATED MODULE: ./src/components/Chart/Grid.vue?vue&type=script&lang=js&
- /* harmony default export */ var Chart_Gridvue_type_script_lang_js_ = (Gridvue_type_script_lang_js_); 
+// CONCATENATED MODULE: ./src/components/Chart/Grid.vue?vue&type=script&lang=js
+
 // CONCATENATED MODULE: ./src/components/Chart/Grid.vue
 
 
 
 
 
-/* normalize component */
+const Grid_exports_ = /*#__PURE__*/exportHelper_default()(Gridvue_type_script_lang_js, [['render',Gridvue_type_template_id_53c02ad9_render]])
 
-var Grid_component = normalizeComponent(
-  Chart_Gridvue_type_script_lang_js_,
-  Gridvue_type_template_id_2bf979a7_render,
-  Gridvue_type_template_id_2bf979a7_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
+/* harmony default export */ var Grid = (Grid_exports_);
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ref--5!./node_modules/vue-loader/dist??ref--7-0!./src/components/Chart/DaysHighlight.vue?vue&type=template&id=61bd1087
 
-/* hot reload */
-if (false) { var Grid_api; }
-Grid_component.options.__file = "src/components/Chart/Grid.vue"
-/* harmony default export */ var Grid = (Grid_component.exports);
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Chart/DaysHighlight.vue?vue&type=template&id=1bfe64e8&
-var DaysHighlightvue_type_template_id_1bfe64e8_render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _vm.showWorkingDays
-    ? _c(
-        "g",
-        {
-          staticClass: "gantt-elastic__chart-days-highlight-container",
-          style: Object.assign(
-            {},
-            _vm.root.style["chart-days-highlight-container"]
-          )
-        },
-        _vm._l(_vm.workingDays, function(day) {
-          return _c("rect", {
-            key: _vm.getKey(day),
-            staticClass: "gantt-elastic__chart-days-highlight-rect",
-            style: Object.assign(
-              {},
-              _vm.root.style["chart-days-highlight-rect"]
-            ),
-            attrs: {
-              x: day.offset.px,
-              y: "0",
-              width: day.width.px,
-              height: "100%"
-            }
-          })
-        }),
-        0
-      )
-    : _vm._e()
+
+const DaysHighlightvue_type_template_id_61bd1087_hoisted_1 = ["x", "width"]
+
+function DaysHighlightvue_type_template_id_61bd1087_render(_ctx, _cache, $props, $setup, $data, $options) {
+  return ($options.showWorkingDays)
+    ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("g", {
+        key: 0,
+        class: "gantt-elastic__chart-days-highlight-container",
+        style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['chart-days-highlight-container'] })
+      }, [
+        (Object(external_Vue_["openBlock"])(true), Object(external_Vue_["createElementBlock"])(external_Vue_["Fragment"], null, Object(external_Vue_["renderList"])($options.workingDays, (day) => {
+          return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("rect", {
+            class: "gantt-elastic__chart-days-highlight-rect",
+            key: $options.getKey(day),
+            x: day.offset.px,
+            y: "0",
+            width: day.width.px,
+            height: "100%",
+            style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['chart-days-highlight-rect'] })
+          }, null, 12 /* STYLE, PROPS */, DaysHighlightvue_type_template_id_61bd1087_hoisted_1))
+        }), 128 /* KEYED_FRAGMENT */))
+      ], 4 /* STYLE */))
+    : Object(external_Vue_["createCommentVNode"])("v-if", true)
 }
-var DaysHighlightvue_type_template_id_1bfe64e8_staticRenderFns = []
-DaysHighlightvue_type_template_id_1bfe64e8_render._withStripped = true
+// CONCATENATED MODULE: ./src/components/Chart/DaysHighlight.vue?vue&type=template&id=61bd1087
+
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist??ref--7-0!./src/components/Chart/DaysHighlight.vue?vue&type=script&lang=js
 
 
-// CONCATENATED MODULE: ./src/components/Chart/DaysHighlight.vue?vue&type=template&id=1bfe64e8&
-
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/components/Chart/DaysHighlight.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-
-/* harmony default export */ var DaysHighlightvue_type_script_lang_js_ = ({
+/* harmony default export */ var DaysHighlightvue_type_script_lang_js = ({
   name: 'DaysHighlight',
   inject: ['root'],
   data() {
@@ -3089,177 +2333,92 @@ DaysHighlightvue_type_template_id_1bfe64e8_render._withStripped = true
   }
 });
 
-// CONCATENATED MODULE: ./src/components/Chart/DaysHighlight.vue?vue&type=script&lang=js&
- /* harmony default export */ var Chart_DaysHighlightvue_type_script_lang_js_ = (DaysHighlightvue_type_script_lang_js_); 
+// CONCATENATED MODULE: ./src/components/Chart/DaysHighlight.vue?vue&type=script&lang=js
+
 // CONCATENATED MODULE: ./src/components/Chart/DaysHighlight.vue
 
 
 
 
 
-/* normalize component */
+const DaysHighlight_exports_ = /*#__PURE__*/exportHelper_default()(DaysHighlightvue_type_script_lang_js, [['render',DaysHighlightvue_type_template_id_61bd1087_render]])
 
-var DaysHighlight_component = normalizeComponent(
-  Chart_DaysHighlightvue_type_script_lang_js_,
-  DaysHighlightvue_type_template_id_1bfe64e8_render,
-  DaysHighlightvue_type_template_id_1bfe64e8_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
+/* harmony default export */ var DaysHighlight = (DaysHighlight_exports_);
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ref--5!./node_modules/vue-loader/dist??ref--7-0!./src/components/Calendar/Calendar.vue?vue&type=template&id=d6b41f74
 
-/* hot reload */
-if (false) { var DaysHighlight_api; }
-DaysHighlight_component.options.__file = "src/components/Chart/DaysHighlight.vue"
-/* harmony default export */ var DaysHighlight = (DaysHighlight_component.exports);
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Calendar/Calendar.vue?vue&type=template&id=dee108e2&
-var Calendarvue_type_template_id_dee108e2_render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    {
-      staticClass: "gantt-elastic__calendar-wrapper",
-      style: Object.assign({}, _vm.root.style["calendar-wrapper"], {
-        width: _vm.root.state.options.width + "px"
-      })
-    },
-    [
-      _c(
-        "div",
-        {
-          staticClass: "gantt-elastic__calendar",
-          style: Object.assign({}, _vm.root.style["calendar"], {
-            width: _vm.root.state.options.width + "px"
-          })
-        },
-        [
-          _vm.root.state.options.calendar.month.display
-            ? _c("calendar-row", {
-                attrs: { items: _vm.dates.months, which: "month" }
-              })
-            : _vm._e(),
-          _vm._v(" "),
-          _vm.root.state.options.calendar.day.display
-            ? _c("calendar-row", {
-                attrs: { items: _vm.dates.days, which: "day" }
-              })
-            : _vm._e(),
-          _vm._v(" "),
-          _vm.root.state.options.calendar.hour.display
-            ? _c("calendar-row", {
-                attrs: { items: _vm.dates.hours, which: "hour" }
-              })
-            : _vm._e()
-        ],
-        1
-      )
-    ]
-  )
+
+function Calendarvue_type_template_id_d6b41f74_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_calendar_row = Object(external_Vue_["resolveComponent"])("calendar-row")
+
+  return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("div", {
+    class: "gantt-elastic__calendar-wrapper",
+    style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['calendar-wrapper'], width: $options.root.state.options.width + 'px' })
+  }, [
+    Object(external_Vue_["createElementVNode"])("div", {
+      class: "gantt-elastic__calendar",
+      style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['calendar'], width: $options.root.state.options.width + 'px' })
+    }, [
+      ($options.root.state.options.calendar.month.display)
+        ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createBlock"])(_component_calendar_row, {
+            key: 0,
+            items: $options.dates.months,
+            which: "month"
+          }, null, 8 /* PROPS */, ["items"]))
+        : Object(external_Vue_["createCommentVNode"])("v-if", true),
+      ($options.root.state.options.calendar.day.display)
+        ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createBlock"])(_component_calendar_row, {
+            key: 1,
+            items: $options.dates.days,
+            which: "day"
+          }, null, 8 /* PROPS */, ["items"]))
+        : Object(external_Vue_["createCommentVNode"])("v-if", true),
+      ($options.root.state.options.calendar.hour.display)
+        ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createBlock"])(_component_calendar_row, {
+            key: 2,
+            items: $options.dates.hours,
+            which: "hour"
+          }, null, 8 /* PROPS */, ["items"]))
+        : Object(external_Vue_["createCommentVNode"])("v-if", true)
+    ], 4 /* STYLE */)
+  ], 4 /* STYLE */))
 }
-var Calendarvue_type_template_id_dee108e2_staticRenderFns = []
-Calendarvue_type_template_id_dee108e2_render._withStripped = true
+// CONCATENATED MODULE: ./src/components/Calendar/Calendar.vue?vue&type=template&id=d6b41f74
+
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ref--5!./node_modules/vue-loader/dist??ref--7-0!./src/components/Calendar/CalendarRow.vue?vue&type=template&id=14d015ce
 
 
-// CONCATENATED MODULE: ./src/components/Calendar/Calendar.vue?vue&type=template&id=dee108e2&
-
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Calendar/CalendarRow.vue?vue&type=template&id=0daf06fb&
-var CalendarRowvue_type_template_id_0daf06fb_render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    {
-      class:
-        "gantt-elastic__calendar-row gantt-elastic__calendar-row--" + _vm.which,
-      style: _vm.rowStyle
-    },
-    _vm._l(_vm.items, function(item, itemIndex) {
-      return _c(
-        "div",
-        {
-          key: item.key,
-          class:
-            "gantt-elastic__calendar-row-rect gantt-elastic__calendar-row-rect--" +
-            _vm.which,
-          style: _vm.rectStyle
-        },
-        _vm._l(item.children, function(child, childIndex) {
-          return _c(
-            "div",
-            {
-              key: child.key,
-              class:
-                "gantt-elastic__calendar-row-rect-child gantt-elastic__calendar-row-rect-child--" +
-                _vm.which,
-              style: _vm.rectChildStyle[itemIndex][childIndex]
-            },
-            [
-              _c(
-                "div",
-                {
-                  class:
-                    "gantt-elastic__calendar-row-text gantt-elastic__calendar-row-text--" +
-                    _vm.which,
-                  style: _vm.textStyle(child)
-                },
-                [_vm._v("\n        " + _vm._s(child.label) + "\n      ")]
-              )
-            ]
-          )
-        }),
-        0
-      )
-    }),
-    0
-  )
+function CalendarRowvue_type_template_id_14d015ce_render(_ctx, _cache, $props, $setup, $data, $options) {
+  return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("div", {
+    class: Object(external_Vue_["normalizeClass"])('gantt-elastic__calendar-row gantt-elastic__calendar-row--' + $props.which),
+    style: Object(external_Vue_["normalizeStyle"])($options.rowStyle)
+  }, [
+    (Object(external_Vue_["openBlock"])(true), Object(external_Vue_["createElementBlock"])(external_Vue_["Fragment"], null, Object(external_Vue_["renderList"])($props.items, (item, itemIndex) => {
+      return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("div", {
+        key: item.key,
+        class: Object(external_Vue_["normalizeClass"])('gantt-elastic__calendar-row-rect gantt-elastic__calendar-row-rect--' + $props.which),
+        style: Object(external_Vue_["normalizeStyle"])($options.rectStyle)
+      }, [
+        (Object(external_Vue_["openBlock"])(true), Object(external_Vue_["createElementBlock"])(external_Vue_["Fragment"], null, Object(external_Vue_["renderList"])(item.children, (child, childIndex) => {
+          return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("div", {
+            class: Object(external_Vue_["normalizeClass"])('gantt-elastic__calendar-row-rect-child gantt-elastic__calendar-row-rect-child--' + $props.which),
+            key: child.key,
+            style: Object(external_Vue_["normalizeStyle"])($options.rectChildStyle[itemIndex][childIndex])
+          }, [
+            Object(external_Vue_["createElementVNode"])("div", {
+              class: Object(external_Vue_["normalizeClass"])('gantt-elastic__calendar-row-text gantt-elastic__calendar-row-text--' + $props.which),
+              style: Object(external_Vue_["normalizeStyle"])($options.textStyle(child))
+            }, Object(external_Vue_["toDisplayString"])(child.label), 7 /* TEXT, CLASS, STYLE */)
+          ], 6 /* CLASS, STYLE */))
+        }), 128 /* KEYED_FRAGMENT */))
+      ], 6 /* CLASS, STYLE */))
+    }), 128 /* KEYED_FRAGMENT */))
+  ], 6 /* CLASS, STYLE */))
 }
-var CalendarRowvue_type_template_id_0daf06fb_staticRenderFns = []
-CalendarRowvue_type_template_id_0daf06fb_render._withStripped = true
+// CONCATENATED MODULE: ./src/components/Calendar/CalendarRow.vue?vue&type=template&id=14d015ce
 
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist??ref--7-0!./src/components/Calendar/CalendarRow.vue?vue&type=script&lang=js
 
-// CONCATENATED MODULE: ./src/components/Calendar/CalendarRow.vue?vue&type=template&id=0daf06fb&
-
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/components/Calendar/CalendarRow.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/* harmony default export */ var CalendarRowvue_type_script_lang_js_ = ({
+/* harmony default export */ var CalendarRowvue_type_script_lang_js = ({
   name: 'CalendarRow',
   inject: ['root'],
   props: ['items', 'which'],
@@ -3328,58 +2487,23 @@ CalendarRowvue_type_template_id_0daf06fb_render._withStripped = true
   }
 });
 
-// CONCATENATED MODULE: ./src/components/Calendar/CalendarRow.vue?vue&type=script&lang=js&
- /* harmony default export */ var Calendar_CalendarRowvue_type_script_lang_js_ = (CalendarRowvue_type_script_lang_js_); 
+// CONCATENATED MODULE: ./src/components/Calendar/CalendarRow.vue?vue&type=script&lang=js
+
 // CONCATENATED MODULE: ./src/components/Calendar/CalendarRow.vue
 
 
 
 
 
-/* normalize component */
+const CalendarRow_exports_ = /*#__PURE__*/exportHelper_default()(CalendarRowvue_type_script_lang_js, [['render',CalendarRowvue_type_template_id_14d015ce_render]])
 
-var CalendarRow_component = normalizeComponent(
-  Calendar_CalendarRowvue_type_script_lang_js_,
-  CalendarRowvue_type_template_id_0daf06fb_render,
-  CalendarRowvue_type_template_id_0daf06fb_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* hot reload */
-if (false) { var CalendarRow_api; }
-CalendarRow_component.options.__file = "src/components/Calendar/CalendarRow.vue"
-/* harmony default export */ var CalendarRow = (CalendarRow_component.exports);
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/components/Calendar/Calendar.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+/* harmony default export */ var CalendarRow = (CalendarRow_exports_);
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist??ref--7-0!./src/components/Calendar/Calendar.vue?vue&type=script&lang=js
 
 
 
 
-/* harmony default export */ var Calendarvue_type_script_lang_js_ = ({
+/* harmony default export */ var Calendarvue_type_script_lang_js = ({
   name: 'Calendar',
   components: {
     CalendarRow: CalendarRow
@@ -3693,107 +2817,55 @@ CalendarRow_component.options.__file = "src/components/Calendar/CalendarRow.vue"
   }
 });
 
-// CONCATENATED MODULE: ./src/components/Calendar/Calendar.vue?vue&type=script&lang=js&
- /* harmony default export */ var Calendar_Calendarvue_type_script_lang_js_ = (Calendarvue_type_script_lang_js_); 
+// CONCATENATED MODULE: ./src/components/Calendar/Calendar.vue?vue&type=script&lang=js
+
 // CONCATENATED MODULE: ./src/components/Calendar/Calendar.vue
 
 
 
 
 
-/* normalize component */
+const Calendar_exports_ = /*#__PURE__*/exportHelper_default()(Calendarvue_type_script_lang_js, [['render',Calendarvue_type_template_id_d6b41f74_render]])
 
-var Calendar_component = normalizeComponent(
-  Calendar_Calendarvue_type_script_lang_js_,
-  Calendarvue_type_template_id_dee108e2_render,
-  Calendarvue_type_template_id_dee108e2_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
+/* harmony default export */ var Calendar = (Calendar_exports_);
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ref--5!./node_modules/vue-loader/dist??ref--7-0!./src/components/Chart/DependencyLines.vue?vue&type=template&id=5467c6cc
 
-/* hot reload */
-if (false) { var Calendar_api; }
-Calendar_component.options.__file = "src/components/Calendar/Calendar.vue"
-/* harmony default export */ var Calendar = (Calendar_component.exports);
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Chart/DependencyLines.vue?vue&type=template&id=f1cbf6ba&
-var DependencyLinesvue_type_template_id_f1cbf6ba_render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "svg",
-    {
-      staticClass: "gantt-elastic__chart-dependency-lines-container",
-      style: Object.assign(
-        {},
-        _vm.root.style["chart-dependency-lines-container"]
-      ),
-      attrs: { x: "0", y: "0", width: "100%", height: "100%" }
-    },
-    _vm._l(_vm.dependencyTasks, function(task) {
-      return _c(
-        "g",
-        { key: task.id, attrs: { task: task } },
-        _vm._l(task.dependencyLines, function(dependencyLine) {
-          return _c("path", {
+
+const DependencyLinesvue_type_template_id_5467c6cc_hoisted_1 = ["task"]
+const DependencyLinesvue_type_template_id_5467c6cc_hoisted_2 = ["task", "d"]
+
+function DependencyLinesvue_type_template_id_5467c6cc_render(_ctx, _cache, $props, $setup, $data, $options) {
+  return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("svg", {
+    x: "0",
+    y: "0",
+    width: "100%",
+    height: "100%",
+    class: "gantt-elastic__chart-dependency-lines-container",
+    style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['chart-dependency-lines-container'] })
+  }, [
+    (Object(external_Vue_["openBlock"])(true), Object(external_Vue_["createElementBlock"])(external_Vue_["Fragment"], null, Object(external_Vue_["renderList"])($options.dependencyTasks, (task) => {
+      return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("g", {
+        key: task.id,
+        task: task
+      }, [
+        (Object(external_Vue_["openBlock"])(true), Object(external_Vue_["createElementBlock"])(external_Vue_["Fragment"], null, Object(external_Vue_["renderList"])(task.dependencyLines, (dependencyLine) => {
+          return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("path", {
+            class: "gantt-elastic__chart-dependency-lines-path",
+            style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['chart-dependency-lines-path'], ...task.style['chart-dependency-lines-path'], ...task.style['chart-dependency-lines-path-' + dependencyLine.task_id] }),
             key: dependencyLine.id,
-            staticClass: "gantt-elastic__chart-dependency-lines-path",
-            style: Object.assign(
-              {},
-              _vm.root.style["chart-dependency-lines-path"],
-              task.style["chart-dependency-lines-path"]
-            ),
-            attrs: { task: task, d: dependencyLine.points }
-          })
-        }),
-        0
-      )
-    }),
-    0
-  )
+            task: task,
+            d: dependencyLine.points
+          }, null, 12 /* STYLE, PROPS */, DependencyLinesvue_type_template_id_5467c6cc_hoisted_2))
+        }), 128 /* KEYED_FRAGMENT */))
+      ], 8 /* PROPS */, DependencyLinesvue_type_template_id_5467c6cc_hoisted_1))
+    }), 128 /* KEYED_FRAGMENT */))
+  ], 4 /* STYLE */))
 }
-var DependencyLinesvue_type_template_id_f1cbf6ba_staticRenderFns = []
-DependencyLinesvue_type_template_id_f1cbf6ba_render._withStripped = true
+// CONCATENATED MODULE: ./src/components/Chart/DependencyLines.vue?vue&type=template&id=5467c6cc
 
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist??ref--7-0!./src/components/Chart/DependencyLines.vue?vue&type=script&lang=js
 
-// CONCATENATED MODULE: ./src/components/Chart/DependencyLines.vue?vue&type=template&id=f1cbf6ba&
-
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/components/Chart/DependencyLines.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/* harmony default export */ var DependencyLinesvue_type_script_lang_js_ = ({
+/* harmony default export */ var DependencyLinesvue_type_script_lang_js = ({
   name: 'DependencyLines',
   inject: ['root'],
   props: ['tasks'],
@@ -3872,7 +2944,7 @@ DependencyLinesvue_type_template_id_f1cbf6ba_render._withStripped = true
         .filter(task => typeof task.dependentOn !== 'undefined')
         .map(task => {
           task.dependencyLines = task.dependentOn.map(id => {
-            return { points: this.getPoints(id, task.id) };
+            return { points: this.getPoints(id, task.id), task_id: id };
           });
           return task;
         })
@@ -3881,315 +2953,172 @@ DependencyLinesvue_type_template_id_f1cbf6ba_render._withStripped = true
   }
 });
 
-// CONCATENATED MODULE: ./src/components/Chart/DependencyLines.vue?vue&type=script&lang=js&
- /* harmony default export */ var Chart_DependencyLinesvue_type_script_lang_js_ = (DependencyLinesvue_type_script_lang_js_); 
+// CONCATENATED MODULE: ./src/components/Chart/DependencyLines.vue?vue&type=script&lang=js
+
 // CONCATENATED MODULE: ./src/components/Chart/DependencyLines.vue
 
 
 
 
 
-/* normalize component */
+const DependencyLines_exports_ = /*#__PURE__*/exportHelper_default()(DependencyLinesvue_type_script_lang_js, [['render',DependencyLinesvue_type_template_id_5467c6cc_render]])
 
-var DependencyLines_component = normalizeComponent(
-  Chart_DependencyLinesvue_type_script_lang_js_,
-  DependencyLinesvue_type_template_id_f1cbf6ba_render,
-  DependencyLinesvue_type_template_id_f1cbf6ba_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
+/* harmony default export */ var DependencyLines = (DependencyLines_exports_);
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ref--5!./node_modules/vue-loader/dist??ref--7-0!./src/components/Chart/Row/Task.vue?vue&type=template&id=4a3c3dc1
 
-/* hot reload */
-if (false) { var DependencyLines_api; }
-DependencyLines_component.options.__file = "src/components/Chart/DependencyLines.vue"
-/* harmony default export */ var DependencyLines = (DependencyLines_component.exports);
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Chart/Row/Task.vue?vue&type=template&id=e9c23eca&
-var Taskvue_type_template_id_e9c23eca_render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "g",
-    {
-      staticClass:
-        "gantt-elastic__chart-row-bar-wrapper gantt-elastic__chart-row-task-wrapper",
-      style: Object.assign(
-        {},
-        _vm.root.style["chart-row-bar-wrapper"],
-        _vm.root.style["chart-row-task-wrapper"],
-        _vm.task.style["chart-row-bar-wrapper"]
-      )
-    },
-    [
-      _vm.displayExpander
-        ? _c(
-            "foreignObject",
-            {
-              staticClass:
-                "gantt-elastic__chart-expander gantt-elastic__chart-expander--task",
-              style: Object.assign(
-                {},
-                _vm.root.style["chart-expander"],
-                _vm.root.style["chart-expander--task"],
-                _vm.task.style["chart-expander"]
-              ),
-              attrs: {
-                x:
-                  _vm.task.x -
-                  _vm.root.state.options.chart.expander.offset -
-                  _vm.root.state.options.chart.expander.size,
-                y:
-                  _vm.task.y +
-                  (_vm.root.state.options.row.height -
-                    _vm.root.state.options.chart.expander.size) /
-                    2,
-                width: _vm.root.state.options.chart.expander.size,
-                height: _vm.root.state.options.chart.expander.size
-              }
-            },
-            [
-              _c("expander", {
-                attrs: {
-                  tasks: [_vm.task],
-                  options: _vm.root.state.options.chart.expander,
-                  type: "chart"
-                }
-              })
-            ],
-            1
-          )
-        : _vm._e(),
-      _vm._v(" "),
-      _c(
-        "svg",
-        {
-          staticClass:
-            "gantt-elastic__chart-row-bar gantt-elastic__chart-row-task",
-          style: Object.assign(
-            {},
-            _vm.root.style["chart-row-bar"],
-            _vm.root.style["chart-row-task"],
-            _vm.task.style["chart-row-bar"]
-          ),
-          attrs: {
-            x: _vm.task.x,
-            y: _vm.task.y,
-            width: _vm.task.width,
-            height: _vm.task.height,
-            viewBox: "0 0 " + _vm.task.width + " " + _vm.task.height,
-            xmlns: "http://www.w3.org/2000/svg"
-          },
-          on: {
-            click: function($event) {
-              return _vm.emitEvent("click", $event)
-            },
-            mouseenter: function($event) {
-              return _vm.emitEvent("mouseenter", $event)
-            },
-            mouseover: function($event) {
-              return _vm.emitEvent("mouseover", $event)
-            },
-            mouseout: function($event) {
-              return _vm.emitEvent("mouseout", $event)
-            },
-            mousemove: function($event) {
-              return _vm.emitEvent("mousemove", $event)
-            },
-            mousedown: function($event) {
-              return _vm.emitEvent("mousedown", $event)
-            },
-            mouseup: function($event) {
-              return _vm.emitEvent("mouseup", $event)
-            },
-            mousewheel: function($event) {
-              return _vm.emitEvent("mousewheel", $event)
-            },
-            touchstart: function($event) {
-              return _vm.emitEvent("touchstart", $event)
-            },
-            touchmove: function($event) {
-              return _vm.emitEvent("touchmove", $event)
-            },
-            touchend: function($event) {
-              return _vm.emitEvent("touchend", $event)
-            }
-          }
-        },
-        [
-          _c("defs", [
-            _c("clipPath", { attrs: { id: _vm.clipPathId } }, [
-              _c("polygon", { attrs: { points: _vm.getPoints } })
-            ])
-          ]),
-          _vm._v(" "),
-          _c("polygon", {
-            staticClass:
-              "gantt-elastic__chart-row-bar-polygon gantt-elastic__chart-row-task-polygon",
-            style: Object.assign(
-              {},
-              _vm.root.style["chart-row-bar-polygon"],
-              _vm.root.style["chart-row-task-polygon"],
-              _vm.task.style["base"],
-              _vm.task.style["chart-row-bar-polygon"]
-            ),
-            attrs: { points: _vm.getPoints }
-          }),
-          _vm._v(" "),
-          _c("progress-bar", {
-            attrs: {
-              task: _vm.task,
-              "clip-path": "url(#" + _vm.clipPathId + ")"
-            }
+
+const Taskvue_type_template_id_4a3c3dc1_hoisted_1 = ["x", "y", "width", "height"]
+const Taskvue_type_template_id_4a3c3dc1_hoisted_2 = ["x", "y", "width", "height", "viewBox"]
+const Taskvue_type_template_id_4a3c3dc1_hoisted_3 = ["id"]
+const Taskvue_type_template_id_4a3c3dc1_hoisted_4 = ["points"]
+const _hoisted_5 = ["points"]
+
+function Taskvue_type_template_id_4a3c3dc1_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_expander = Object(external_Vue_["resolveComponent"])("expander")
+  const _component_progress_bar = Object(external_Vue_["resolveComponent"])("progress-bar")
+  const _component_chart_text = Object(external_Vue_["resolveComponent"])("chart-text")
+
+  return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("g", {
+    class: "gantt-elastic__chart-row-bar-wrapper gantt-elastic__chart-row-task-wrapper",
+    style: Object(external_Vue_["normalizeStyle"])({
+      ...$options.root.style['chart-row-bar-wrapper'],
+      ...$options.root.style['chart-row-task-wrapper'],
+      ...$props.task.style['chart-row-bar-wrapper']
+    })
+  }, [
+    (_ctx.displayExpander)
+      ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("foreignObject", {
+          key: 0,
+          class: "gantt-elastic__chart-expander gantt-elastic__chart-expander--task",
+          style: Object(external_Vue_["normalizeStyle"])({
+        ...$options.root.style['chart-expander'],
+        ...$options.root.style['chart-expander--task'],
+        ...$props.task.style['chart-expander']
+      }),
+          x: $props.task.x - $options.root.state.options.chart.expander.offset - $options.root.state.options.chart.expander.size,
+          y: $props.task.y + ($options.root.state.options.row.height - $options.root.state.options.chart.expander.size) / 2,
+          width: $options.root.state.options.chart.expander.size,
+          height: $options.root.state.options.chart.expander.size
+        }, [
+          Object(external_Vue_["createVNode"])(_component_expander, {
+            tasks: [$props.task],
+            options: $options.root.state.options.chart.expander,
+            type: "chart"
+          }, null, 8 /* PROPS */, ["tasks", "options"])
+        ], 12 /* STYLE, PROPS */, Taskvue_type_template_id_4a3c3dc1_hoisted_1))
+      : Object(external_Vue_["createCommentVNode"])("v-if", true),
+    (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("svg", {
+      class: "gantt-elastic__chart-row-bar gantt-elastic__chart-row-task",
+      style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['chart-row-bar'], ...$options.root.style['chart-row-task'], ...$props.task.style['chart-row-bar'] }),
+      x: $props.task.x,
+      y: $props.task.y,
+      width: $props.task.width,
+      height: $props.task.height,
+      viewBox: `0 0 ${$props.task.width} ${$props.task.height}`,
+      onClick: _cache[0] || (_cache[0] = $event => (_ctx.emitEvent('click', $event))),
+      onMouseenter: _cache[1] || (_cache[1] = $event => (_ctx.emitEvent('mouseenter', $event))),
+      onMouseover: _cache[2] || (_cache[2] = $event => (_ctx.emitEvent('mouseover', $event))),
+      onMouseout: _cache[3] || (_cache[3] = $event => (_ctx.emitEvent('mouseout', $event))),
+      onMousemove: _cache[4] || (_cache[4] = $event => (_ctx.emitEvent('mousemove', $event))),
+      onMousedown: _cache[5] || (_cache[5] = $event => (_ctx.emitEvent('mousedown', $event))),
+      onMouseup: _cache[6] || (_cache[6] = $event => (_ctx.emitEvent('mouseup', $event))),
+      onMousewheel: _cache[7] || (_cache[7] = $event => (_ctx.emitEvent('mousewheel', $event))),
+      onTouchstart: _cache[8] || (_cache[8] = $event => (_ctx.emitEvent('touchstart', $event))),
+      onTouchmove: _cache[9] || (_cache[9] = $event => (_ctx.emitEvent('touchmove', $event))),
+      onTouchend: _cache[10] || (_cache[10] = $event => (_ctx.emitEvent('touchend', $event))),
+      xmlns: "http://www.w3.org/2000/svg"
+    }, [
+      Object(external_Vue_["createElementVNode"])("defs", null, [
+        Object(external_Vue_["createElementVNode"])("clipPath", { id: $options.clipPathId }, [
+          Object(external_Vue_["createElementVNode"])("polygon", { points: $options.getPoints }, null, 8 /* PROPS */, Taskvue_type_template_id_4a3c3dc1_hoisted_4)
+        ], 8 /* PROPS */, Taskvue_type_template_id_4a3c3dc1_hoisted_3)
+      ]),
+      Object(external_Vue_["createElementVNode"])("polygon", {
+        class: "gantt-elastic__chart-row-bar-polygon gantt-elastic__chart-row-task-polygon",
+        style: Object(external_Vue_["normalizeStyle"])({
+          ...$options.root.style['chart-row-bar-polygon'],
+          ...$options.root.style['chart-row-task-polygon'],
+          ...$props.task.style['base'],
+          ...$props.task.style['chart-row-bar-polygon']
+        }),
+        points: $options.getPoints
+      }, null, 12 /* STYLE, PROPS */, _hoisted_5),
+      Object(external_Vue_["createVNode"])(_component_progress_bar, {
+        task: $props.task,
+        "clip-path": 'url(#' + $options.clipPathId + ')'
+      }, null, 8 /* PROPS */, ["task", "clip-path"])
+    ], 44 /* STYLE, PROPS, NEED_HYDRATION */, Taskvue_type_template_id_4a3c3dc1_hoisted_2)),
+    ($options.root.state.options.chart.text.display)
+      ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createBlock"])(_component_chart_text, {
+          key: 1,
+          task: $props.task
+        }, null, 8 /* PROPS */, ["task"]))
+      : Object(external_Vue_["createCommentVNode"])("v-if", true)
+  ], 4 /* STYLE */))
+}
+// CONCATENATED MODULE: ./src/components/Chart/Row/Task.vue?vue&type=template&id=4a3c3dc1
+
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ref--5!./node_modules/vue-loader/dist??ref--7-0!./src/components/Chart/Text.vue?vue&type=template&id=dfc2b57a
+
+
+const Textvue_type_template_id_dfc2b57a_hoisted_1 = ["x", "y", "width", "height"]
+const Textvue_type_template_id_dfc2b57a_hoisted_2 = ["height"]
+const Textvue_type_template_id_dfc2b57a_hoisted_3 = ["innerHTML"]
+
+function Textvue_type_template_id_dfc2b57a_render(_ctx, _cache, $props, $setup, $data, $options) {
+  return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("svg", {
+    class: "gantt-elastic__chart-row-text-wrapper",
+    style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['chart-row-text-wrapper'] }),
+    x: $props.task.x + $props.task.width + $options.root.state.options.chart.text.offset,
+    y: $props.task.y - $options.root.state.options.chart.grid.horizontal.gap,
+    width: $options.getWidth,
+    height: $options.getHeight
+  }, [
+    (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("foreignObject", {
+      x: "0",
+      y: "0",
+      width: "100%",
+      height: $options.getHeight
+    }, [
+      Object(external_Vue_["createElementVNode"])("div", {
+        xmlns: "http://www.w3.org/1999/xhtml",
+        class: "gantt-elastic__chart-row-text",
+        style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['chart-row-text'] })
+      }, [
+        (!$options.html)
+          ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("div", {
+              key: 0,
+              class: "gantt-elastic__chart-row-text-content gantt-elastic__chart-row-text-content--text",
+              style: Object(external_Vue_["normalizeStyle"])({
+            ...$options.root.style['chart-row-text-content'],
+            ...$options.root.style['chart-row-text-content--text'],
+            ...$options.contentStyle
           })
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _vm.root.state.options.chart.text.display
-        ? _c("chart-text", { attrs: { task: _vm.task } })
-        : _vm._e()
-    ],
-    1
-  )
+            }, [
+              Object(external_Vue_["createElementVNode"])("div", null, Object(external_Vue_["toDisplayString"])($props.task.label), 1 /* TEXT */)
+            ], 4 /* STYLE */))
+          : Object(external_Vue_["createCommentVNode"])("v-if", true),
+        ($options.html)
+          ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("div", {
+              key: 1,
+              class: "gantt-elastic__chart-row-text-content gantt-elastic__chart-row-text-content--html",
+              style: Object(external_Vue_["normalizeStyle"])({
+            ...$options.root.style['chart-row-text-content'],
+            ...$options.root.style['chart-row-text-content--html'],
+            ...$options.contentStyle
+          }),
+              innerHTML: $props.task.label
+            }, null, 12 /* STYLE, PROPS */, Textvue_type_template_id_dfc2b57a_hoisted_3))
+          : Object(external_Vue_["createCommentVNode"])("v-if", true)
+      ], 4 /* STYLE */)
+    ], 8 /* PROPS */, Textvue_type_template_id_dfc2b57a_hoisted_2))
+  ], 12 /* STYLE, PROPS */, Textvue_type_template_id_dfc2b57a_hoisted_1))
 }
-var Taskvue_type_template_id_e9c23eca_staticRenderFns = []
-Taskvue_type_template_id_e9c23eca_render._withStripped = true
+// CONCATENATED MODULE: ./src/components/Chart/Text.vue?vue&type=template&id=dfc2b57a
 
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist??ref--7-0!./src/components/Chart/Text.vue?vue&type=script&lang=js
 
-// CONCATENATED MODULE: ./src/components/Chart/Row/Task.vue?vue&type=template&id=e9c23eca&
-
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Chart/Text.vue?vue&type=template&id=459c2fe4&
-var Textvue_type_template_id_459c2fe4_render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "svg",
-    {
-      staticClass: "gantt-elastic__chart-row-text-wrapper",
-      style: Object.assign({}, _vm.root.style["chart-row-text-wrapper"]),
-      attrs: {
-        x:
-          _vm.task.x +
-          _vm.task.width +
-          _vm.root.state.options.chart.text.offset,
-        y: _vm.task.y - _vm.root.state.options.chart.grid.horizontal.gap,
-        width: _vm.getWidth,
-        height: _vm.getHeight
-      }
-    },
-    [
-      _c(
-        "foreignObject",
-        { attrs: { x: "0", y: "0", width: "100%", height: _vm.getHeight } },
-        [
-          _c(
-            "div",
-            {
-              staticClass: "gantt-elastic__chart-row-text",
-              style: Object.assign({}, _vm.root.style["chart-row-text"]),
-              attrs: { xmlns: "http://www.w3.org/1999/xhtml" }
-            },
-            [
-              !_vm.html
-                ? _c(
-                    "div",
-                    {
-                      staticClass:
-                        "gantt-elastic__chart-row-text-content gantt-elastic__chart-row-text-content--text",
-                      style: Object.assign(
-                        {},
-                        _vm.root.style["chart-row-text-content"],
-                        _vm.root.style["chart-row-text-content--text"],
-                        _vm.contentStyle
-                      )
-                    },
-                    [_c("div", [_vm._v(_vm._s(_vm.task.label))])]
-                  )
-                : _vm._e(),
-              _vm._v(" "),
-              _vm.html
-                ? _c("div", {
-                    staticClass:
-                      "gantt-elastic__chart-row-text-content gantt-elastic__chart-row-text-content--html",
-                    style: Object.assign(
-                      {},
-                      _vm.root.style["chart-row-text-content"],
-                      _vm.root.style["chart-row-text-content--html"],
-                      _vm.contentStyle
-                    ),
-                    domProps: { innerHTML: _vm._s(_vm.task.label) }
-                  })
-                : _vm._e()
-            ]
-          )
-        ]
-      )
-    ],
-    1
-  )
-}
-var Textvue_type_template_id_459c2fe4_staticRenderFns = []
-Textvue_type_template_id_459c2fe4_render._withStripped = true
-
-
-// CONCATENATED MODULE: ./src/components/Chart/Text.vue?vue&type=template&id=459c2fe4&
-
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/components/Chart/Text.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/* harmony default export */ var Textvue_type_script_lang_js_ = ({
+/* harmony default export */ var Textvue_type_script_lang_js = ({
   name: 'ChartText',
   inject: ['root'],
   props: ['task'],
@@ -4245,192 +3174,88 @@ Textvue_type_template_id_459c2fe4_render._withStripped = true
   }
 });
 
-// CONCATENATED MODULE: ./src/components/Chart/Text.vue?vue&type=script&lang=js&
- /* harmony default export */ var Chart_Textvue_type_script_lang_js_ = (Textvue_type_script_lang_js_); 
+// CONCATENATED MODULE: ./src/components/Chart/Text.vue?vue&type=script&lang=js
+
 // CONCATENATED MODULE: ./src/components/Chart/Text.vue
 
 
 
 
 
-/* normalize component */
+const Text_exports_ = /*#__PURE__*/exportHelper_default()(Textvue_type_script_lang_js, [['render',Textvue_type_template_id_dfc2b57a_render]])
 
-var Text_component = normalizeComponent(
-  Chart_Textvue_type_script_lang_js_,
-  Textvue_type_template_id_459c2fe4_render,
-  Textvue_type_template_id_459c2fe4_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
+/* harmony default export */ var Text = (Text_exports_);
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ref--5!./node_modules/vue-loader/dist??ref--7-0!./src/components/Chart/ProgressBar.vue?vue&type=template&id=6e839ac8
 
-/* hot reload */
-if (false) { var Text_api; }
-Text_component.options.__file = "src/components/Chart/Text.vue"
-/* harmony default export */ var Text = (Text_component.exports);
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Chart/ProgressBar.vue?vue&type=template&id=4bc39355&
-var ProgressBarvue_type_template_id_4bc39355_render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "g",
-    {
-      staticClass: "gantt-elastic__chart-row-progress-bar-wrapper",
-      style: Object.assign(
-        {},
-        _vm.root.style["chart-row-progress-bar-wrapper"],
-        _vm.task.style["chart-row-progress-bar-wrapper"]
-      )
-    },
-    [
-      _c("defs", [
-        _c(
-          "pattern",
-          {
-            attrs: {
-              id: "diagonalHatch",
-              width: _vm.root.state.options.chart.progress.width,
-              height: _vm.root.state.options.chart.progress.width,
-              patternTransform: "rotate(45 0 0)",
-              patternUnits: "userSpaceOnUse"
-            }
-          },
-          [
-            _c("line", {
-              staticClass: "chart-row-progress-bar-line",
-              style: Object.assign(
-                {},
-                _vm.root.style["chart-row-progress-bar-line"],
-                _vm.task.style["chart-row-progress-bar-line"]
-              ),
-              attrs: {
-                x1: "0",
-                y1: "0",
-                x2: "0",
-                y2: _vm.root.state.options.chart.progress.width
-              }
-            })
-          ]
-        )
-      ]),
-      _vm._v(" "),
-      _vm.root.state.options.chart.progress.bar
-        ? _c("rect", {
-            staticClass: "gantt-elastic__chart-row-progress-bar-solid",
-            style: Object.assign(
-              {},
-              _vm.root.style["chart-row-progress-bar-solid"],
-              _vm.task.style["chart-row-progress-bar-solid"]
-            ),
-            attrs: { x: "0", y: "0", width: _vm.getProgressWidth }
-          })
-        : _vm._e(),
-      _vm._v(" "),
-      _vm.root.state.options.chart.progress.pattern
-        ? _c("g", [
-            _c("rect", {
-              staticClass: "gantt-elastic__chart-row-progress-bar-pattern",
-              style: Object.assign(
-                {},
-                _vm.root.style["chart-row-progress-bar-pattern"],
-                _vm.task.style["chart-row-progress-bar-pattern"]
-              ),
-              attrs: {
-                x: _vm.getProgressWidth,
-                y: "0",
-                width: 100 - _vm.task.progress + "%",
-                height: "100%"
-              }
-            }),
-            _vm._v(" "),
-            _c("path", {
-              staticClass: "gantt-elastic__chart-row-progress-bar-outline",
-              style: Object.assign(
-                {},
-                _vm.root.style["chart-row-progress-bar-outline"],
-                _vm.task.style["base"],
-                _vm.task.style["chart-row-progress-bar-outline"]
-              ),
-              attrs: { d: _vm.getLinePoints }
-            })
-          ])
-        : _vm._e()
-    ]
-  )
+
+const ProgressBarvue_type_template_id_6e839ac8_hoisted_1 = ["width", "height"]
+const ProgressBarvue_type_template_id_6e839ac8_hoisted_2 = ["y2"]
+const ProgressBarvue_type_template_id_6e839ac8_hoisted_3 = ["width"]
+const ProgressBarvue_type_template_id_6e839ac8_hoisted_4 = { key: 1 }
+const ProgressBarvue_type_template_id_6e839ac8_hoisted_5 = ["x", "width"]
+const _hoisted_6 = ["d"]
+
+function ProgressBarvue_type_template_id_6e839ac8_render(_ctx, _cache, $props, $setup, $data, $options) {
+  return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("g", {
+    class: "gantt-elastic__chart-row-progress-bar-wrapper",
+    style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['chart-row-progress-bar-wrapper'], ...$props.task.style['chart-row-progress-bar-wrapper'] })
+  }, [
+    Object(external_Vue_["createElementVNode"])("defs", null, [
+      Object(external_Vue_["createElementVNode"])("pattern", {
+        id: "diagonalHatch",
+        width: $options.root.state.options.chart.progress.width,
+        height: $options.root.state.options.chart.progress.width,
+        patternTransform: "rotate(45 0 0)",
+        patternUnits: "userSpaceOnUse"
+      }, [
+        Object(external_Vue_["createElementVNode"])("line", {
+          class: "chart-row-progress-bar-line",
+          style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['chart-row-progress-bar-line'], ...$props.task.style['chart-row-progress-bar-line'] }),
+          x1: "0",
+          y1: "0",
+          x2: "0",
+          y2: $options.root.state.options.chart.progress.width
+        }, null, 12 /* STYLE, PROPS */, ProgressBarvue_type_template_id_6e839ac8_hoisted_2)
+      ], 8 /* PROPS */, ProgressBarvue_type_template_id_6e839ac8_hoisted_1)
+    ]),
+    ($options.root.state.options.chart.progress.bar)
+      ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("rect", {
+          key: 0,
+          class: "gantt-elastic__chart-row-progress-bar-solid",
+          style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['chart-row-progress-bar-solid'], ...$props.task.style['chart-row-progress-bar-solid'] }),
+          x: "0",
+          y: "0",
+          width: $options.getProgressWidth
+        }, null, 12 /* STYLE, PROPS */, ProgressBarvue_type_template_id_6e839ac8_hoisted_3))
+      : Object(external_Vue_["createCommentVNode"])("v-if", true),
+    ($options.root.state.options.chart.progress.pattern)
+      ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("g", ProgressBarvue_type_template_id_6e839ac8_hoisted_4, [
+          Object(external_Vue_["createElementVNode"])("rect", {
+            class: "gantt-elastic__chart-row-progress-bar-pattern",
+            style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['chart-row-progress-bar-pattern'], ...$props.task.style['chart-row-progress-bar-pattern'] }),
+            x: $options.getProgressWidth,
+            y: "0",
+            width: 100 - $props.task.progress + '%',
+            height: "100%"
+          }, null, 12 /* STYLE, PROPS */, ProgressBarvue_type_template_id_6e839ac8_hoisted_5),
+          Object(external_Vue_["createElementVNode"])("path", {
+            class: "gantt-elastic__chart-row-progress-bar-outline",
+            style: Object(external_Vue_["normalizeStyle"])({
+          ...$options.root.style['chart-row-progress-bar-outline'],
+          ...$props.task.style['base'],
+          ...$props.task.style['chart-row-progress-bar-outline']
+        }),
+            d: $options.getLinePoints
+          }, null, 12 /* STYLE, PROPS */, _hoisted_6)
+        ]))
+      : Object(external_Vue_["createCommentVNode"])("v-if", true)
+  ], 4 /* STYLE */))
 }
-var ProgressBarvue_type_template_id_4bc39355_staticRenderFns = []
-ProgressBarvue_type_template_id_4bc39355_render._withStripped = true
+// CONCATENATED MODULE: ./src/components/Chart/ProgressBar.vue?vue&type=template&id=6e839ac8
 
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist??ref--7-0!./src/components/Chart/ProgressBar.vue?vue&type=script&lang=js
 
-// CONCATENATED MODULE: ./src/components/Chart/ProgressBar.vue?vue&type=template&id=4bc39355&
-
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/components/Chart/ProgressBar.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-
-/* harmony default export */ var ProgressBarvue_type_script_lang_js_ = ({
+/* harmony default export */ var ProgressBarvue_type_script_lang_js = ({
   name: 'ProgressBar',
   inject: ['root'],
   props: ['task'],
@@ -4485,31 +3310,17 @@ ProgressBarvue_type_template_id_4bc39355_render._withStripped = true
   }
 });
 
-// CONCATENATED MODULE: ./src/components/Chart/ProgressBar.vue?vue&type=script&lang=js&
- /* harmony default export */ var Chart_ProgressBarvue_type_script_lang_js_ = (ProgressBarvue_type_script_lang_js_); 
+// CONCATENATED MODULE: ./src/components/Chart/ProgressBar.vue?vue&type=script&lang=js
+
 // CONCATENATED MODULE: ./src/components/Chart/ProgressBar.vue
 
 
 
 
 
-/* normalize component */
+const ProgressBar_exports_ = /*#__PURE__*/exportHelper_default()(ProgressBarvue_type_script_lang_js, [['render',ProgressBarvue_type_template_id_6e839ac8_render]])
 
-var ProgressBar_component = normalizeComponent(
-  Chart_ProgressBarvue_type_script_lang_js_,
-  ProgressBarvue_type_template_id_4bc39355_render,
-  ProgressBarvue_type_template_id_4bc39355_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* hot reload */
-if (false) { var ProgressBar_api; }
-ProgressBar_component.options.__file = "src/components/Chart/ProgressBar.vue"
-/* harmony default export */ var ProgressBar = (ProgressBar_component.exports);
+/* harmony default export */ var ProgressBar = (ProgressBar_exports_);
 // CONCATENATED MODULE: ./src/components/Chart/Row/Task.mixin.js
 /**
  * @fileoverview Task mixin
@@ -4558,93 +3369,19 @@ ProgressBar_component.options.__file = "src/components/Chart/ProgressBar.vue"
      */
     emitEvent(eventName, event) {
       if (!this.root.state.options.scroll.scrolling) {
-        this.root.$emit(`chart-${this.task.type}-${eventName}`, { event, data: this.task });
+        this.root.$emitBus.emit(`chart-${this.task.type}-${eventName}`, { event, data: this.task });
       }
     }
   }
 });
 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/components/Chart/Row/Task.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist??ref--7-0!./src/components/Chart/Row/Task.vue?vue&type=script&lang=js
 
 
 
 
 
-/* harmony default export */ var Taskvue_type_script_lang_js_ = ({
+/* harmony default export */ var Taskvue_type_script_lang_js = ({
   name: 'Task',
   components: {
     ChartText: Text,
@@ -4679,267 +3416,118 @@ ProgressBar_component.options.__file = "src/components/Chart/ProgressBar.vue"
   }
 });
 
-// CONCATENATED MODULE: ./src/components/Chart/Row/Task.vue?vue&type=script&lang=js&
- /* harmony default export */ var Row_Taskvue_type_script_lang_js_ = (Taskvue_type_script_lang_js_); 
+// CONCATENATED MODULE: ./src/components/Chart/Row/Task.vue?vue&type=script&lang=js
+
 // CONCATENATED MODULE: ./src/components/Chart/Row/Task.vue
 
 
 
 
 
-/* normalize component */
+const Task_exports_ = /*#__PURE__*/exportHelper_default()(Taskvue_type_script_lang_js, [['render',Taskvue_type_template_id_4a3c3dc1_render]])
 
-var Task_component = normalizeComponent(
-  Row_Taskvue_type_script_lang_js_,
-  Taskvue_type_template_id_e9c23eca_render,
-  Taskvue_type_template_id_e9c23eca_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
+/* harmony default export */ var Task = (Task_exports_);
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ref--5!./node_modules/vue-loader/dist??ref--7-0!./src/components/Chart/Row/Milestone.vue?vue&type=template&id=6d69cd05
 
-/* hot reload */
-if (false) { var Task_api; }
-Task_component.options.__file = "src/components/Chart/Row/Task.vue"
-/* harmony default export */ var Task = (Task_component.exports);
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Chart/Row/Milestone.vue?vue&type=template&id=3013006c&
-var Milestonevue_type_template_id_3013006c_render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "g",
-    {
-      staticClass:
-        "gantt-elastic__chart-row-bar-wrapper gantt-elastic__chart-row-milestone-wrapper",
-      style: Object.assign(
-        {},
-        _vm.root.style["chart-row-bar-wrapper"],
-        _vm.root.style["chart-row-milestone-wrapper"],
-        _vm.task.style["chart-row-bar-wrapper"]
-      )
-    },
-    [
-      _vm.displayExpander
-        ? _c(
-            "foreignObject",
-            {
-              staticClass:
-                "gantt-elastic__chart-expander gantt-elastic__chart-expander--milestone",
-              style: Object.assign(
-                {},
-                _vm.root.style["chart-expander"],
-                _vm.root.style["chart-expander--milestone"],
-                _vm.task.style["chart-expander"]
-              ),
-              attrs: {
-                x:
-                  _vm.task.x -
-                  _vm.root.state.options.chart.expander.offset -
-                  _vm.root.state.options.chart.expander.size,
-                y:
-                  _vm.task.y +
-                  (_vm.root.state.options.row.height -
-                    _vm.root.state.options.chart.expander.size) /
-                    2,
-                width: _vm.root.state.options.chart.expander.size,
-                height: _vm.root.state.options.chart.expander.size
-              }
-            },
-            [
-              _c("expander", {
-                attrs: {
-                  tasks: [_vm.task],
-                  options: _vm.root.state.options.chart.expander,
-                  type: "chart"
-                }
-              })
-            ],
-            1
-          )
-        : _vm._e(),
-      _vm._v(" "),
-      _c(
-        "svg",
-        {
-          staticClass:
-            "gantt-elastic__chart-row-bar gantt-elastic__chart-row-milestone",
-          style: Object.assign(
-            {},
-            _vm.root.style["chart-row-bar"],
-            _vm.root.style["chart-row-milestone"],
-            _vm.task.style["chart-row-bar"]
-          ),
-          attrs: {
-            x: _vm.task.x,
-            y: _vm.task.y,
-            width: _vm.task.width,
-            height: _vm.task.height,
-            viewBox: "0 0 " + _vm.task.width + " " + _vm.task.height,
-            xmlns: "http://www.w3.org/2000/svg"
-          },
-          on: {
-            click: function($event) {
-              return _vm.emitEvent("click", $event)
-            },
-            mouseenter: function($event) {
-              return _vm.emitEvent("mouseenter", $event)
-            },
-            mouseover: function($event) {
-              return _vm.emitEvent("mouseover", $event)
-            },
-            mouseout: function($event) {
-              return _vm.emitEvent("mouseout", $event)
-            },
-            mousemove: function($event) {
-              return _vm.emitEvent("mousemove", $event)
-            },
-            mousedown: function($event) {
-              return _vm.emitEvent("mousedown", $event)
-            },
-            mouseup: function($event) {
-              return _vm.emitEvent("mouseup", $event)
-            },
-            mousewheel: function($event) {
-              return _vm.emitEvent("mousewheel", $event)
-            },
-            touchstart: function($event) {
-              return _vm.emitEvent("touchstart", $event)
-            },
-            touchmove: function($event) {
-              return _vm.emitEvent("touchmove", $event)
-            },
-            touchend: function($event) {
-              return _vm.emitEvent("touchend", $event)
-            }
-          }
-        },
-        [
-          _c("defs", [
-            _c("clipPath", { attrs: { id: _vm.clipPathId } }, [
-              _c("polygon", { attrs: { points: _vm.getPoints } })
-            ])
-          ]),
-          _vm._v(" "),
-          _c("polygon", {
-            staticClass:
-              "gantt-elastic__chart-row-bar-polygon gantt-elastic__chart-row-milestone-polygon",
-            style: Object.assign(
-              {},
-              _vm.root.style["chart-row-bar-polygon"],
-              _vm.root.style["chart-row-milestone-polygon"],
-              _vm.task.style["base"],
-              _vm.task.style["chart-row-bar-polygon"]
-            ),
-            attrs: { points: _vm.getPoints }
-          }),
-          _vm._v(" "),
-          _c("progress-bar", {
-            attrs: {
-              task: _vm.task,
-              "clip-path": "url(#" + _vm.clipPathId + ")"
-            }
-          })
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _vm.root.state.options.chart.text.display
-        ? _c("chart-text", { attrs: { task: _vm.task } })
-        : _vm._e()
-    ],
-    1
-  )
+
+const Milestonevue_type_template_id_6d69cd05_hoisted_1 = ["x", "y", "width", "height"]
+const Milestonevue_type_template_id_6d69cd05_hoisted_2 = ["x", "y", "width", "height", "viewBox"]
+const Milestonevue_type_template_id_6d69cd05_hoisted_3 = ["id"]
+const Milestonevue_type_template_id_6d69cd05_hoisted_4 = ["points"]
+const Milestonevue_type_template_id_6d69cd05_hoisted_5 = ["points"]
+
+function Milestonevue_type_template_id_6d69cd05_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_expander = Object(external_Vue_["resolveComponent"])("expander")
+  const _component_progress_bar = Object(external_Vue_["resolveComponent"])("progress-bar")
+  const _component_chart_text = Object(external_Vue_["resolveComponent"])("chart-text")
+
+  return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("g", {
+    class: "gantt-elastic__chart-row-bar-wrapper gantt-elastic__chart-row-milestone-wrapper",
+    style: Object(external_Vue_["normalizeStyle"])({
+      ...$options.root.style['chart-row-bar-wrapper'],
+      ...$options.root.style['chart-row-milestone-wrapper'],
+      ...$props.task.style['chart-row-bar-wrapper']
+    })
+  }, [
+    (_ctx.displayExpander)
+      ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("foreignObject", {
+          key: 0,
+          class: "gantt-elastic__chart-expander gantt-elastic__chart-expander--milestone",
+          style: Object(external_Vue_["normalizeStyle"])({
+        ...$options.root.style['chart-expander'],
+        ...$options.root.style['chart-expander--milestone'],
+        ...$props.task.style['chart-expander']
+      }),
+          x: $props.task.x - $options.root.state.options.chart.expander.offset - $options.root.state.options.chart.expander.size,
+          y: $props.task.y + ($options.root.state.options.row.height - $options.root.state.options.chart.expander.size) / 2,
+          width: $options.root.state.options.chart.expander.size,
+          height: $options.root.state.options.chart.expander.size
+        }, [
+          Object(external_Vue_["createVNode"])(_component_expander, {
+            tasks: [$props.task],
+            options: $options.root.state.options.chart.expander,
+            type: "chart"
+          }, null, 8 /* PROPS */, ["tasks", "options"])
+        ], 12 /* STYLE, PROPS */, Milestonevue_type_template_id_6d69cd05_hoisted_1))
+      : Object(external_Vue_["createCommentVNode"])("v-if", true),
+    (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("svg", {
+      class: "gantt-elastic__chart-row-bar gantt-elastic__chart-row-milestone",
+      style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['chart-row-bar'], ...$options.root.style['chart-row-milestone'], ...$props.task.style['chart-row-bar'] }),
+      x: $props.task.x,
+      y: $props.task.y,
+      width: $props.task.width,
+      height: $props.task.height,
+      viewBox: `0 0 ${$props.task.width} ${$props.task.height}`,
+      onClick: _cache[0] || (_cache[0] = $event => (_ctx.emitEvent('click', $event))),
+      onMouseenter: _cache[1] || (_cache[1] = $event => (_ctx.emitEvent('mouseenter', $event))),
+      onMouseover: _cache[2] || (_cache[2] = $event => (_ctx.emitEvent('mouseover', $event))),
+      onMouseout: _cache[3] || (_cache[3] = $event => (_ctx.emitEvent('mouseout', $event))),
+      onMousemove: _cache[4] || (_cache[4] = $event => (_ctx.emitEvent('mousemove', $event))),
+      onMousedown: _cache[5] || (_cache[5] = $event => (_ctx.emitEvent('mousedown', $event))),
+      onMouseup: _cache[6] || (_cache[6] = $event => (_ctx.emitEvent('mouseup', $event))),
+      onMousewheel: _cache[7] || (_cache[7] = $event => (_ctx.emitEvent('mousewheel', $event))),
+      onTouchstart: _cache[8] || (_cache[8] = $event => (_ctx.emitEvent('touchstart', $event))),
+      onTouchmove: _cache[9] || (_cache[9] = $event => (_ctx.emitEvent('touchmove', $event))),
+      onTouchend: _cache[10] || (_cache[10] = $event => (_ctx.emitEvent('touchend', $event))),
+      xmlns: "http://www.w3.org/2000/svg"
+    }, [
+      Object(external_Vue_["createElementVNode"])("defs", null, [
+        Object(external_Vue_["createElementVNode"])("clipPath", { id: $options.clipPathId }, [
+          Object(external_Vue_["createElementVNode"])("polygon", { points: $options.getPoints }, null, 8 /* PROPS */, Milestonevue_type_template_id_6d69cd05_hoisted_4)
+        ], 8 /* PROPS */, Milestonevue_type_template_id_6d69cd05_hoisted_3)
+      ]),
+      Object(external_Vue_["createElementVNode"])("polygon", {
+        class: "gantt-elastic__chart-row-bar-polygon gantt-elastic__chart-row-milestone-polygon",
+        style: Object(external_Vue_["normalizeStyle"])({
+          ...$options.root.style['chart-row-bar-polygon'],
+          ...$options.root.style['chart-row-milestone-polygon'],
+          ...$props.task.style['base'],
+          ...$props.task.style['chart-row-bar-polygon']
+        }),
+        points: $options.getPoints
+      }, null, 12 /* STYLE, PROPS */, Milestonevue_type_template_id_6d69cd05_hoisted_5),
+      Object(external_Vue_["createVNode"])(_component_progress_bar, {
+        task: $props.task,
+        "clip-path": 'url(#' + $options.clipPathId + ')'
+      }, null, 8 /* PROPS */, ["task", "clip-path"])
+    ], 44 /* STYLE, PROPS, NEED_HYDRATION */, Milestonevue_type_template_id_6d69cd05_hoisted_2)),
+    ($options.root.state.options.chart.text.display)
+      ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createBlock"])(_component_chart_text, {
+          key: 1,
+          task: $props.task
+        }, null, 8 /* PROPS */, ["task"]))
+      : Object(external_Vue_["createCommentVNode"])("v-if", true)
+  ], 4 /* STYLE */))
 }
-var Milestonevue_type_template_id_3013006c_staticRenderFns = []
-Milestonevue_type_template_id_3013006c_render._withStripped = true
+// CONCATENATED MODULE: ./src/components/Chart/Row/Milestone.vue?vue&type=template&id=6d69cd05
 
-
-// CONCATENATED MODULE: ./src/components/Chart/Row/Milestone.vue?vue&type=template&id=3013006c&
-
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/components/Chart/Row/Milestone.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist??ref--7-0!./src/components/Chart/Row/Milestone.vue?vue&type=script&lang=js
 
 
 
 
 
-/* harmony default export */ var Milestonevue_type_script_lang_js_ = ({
+/* harmony default export */ var Milestonevue_type_script_lang_js = ({
   name: 'Milestone',
   components: {
     ChartText: Text,
@@ -4984,267 +3572,118 @@ Milestonevue_type_template_id_3013006c_render._withStripped = true
   }
 });
 
-// CONCATENATED MODULE: ./src/components/Chart/Row/Milestone.vue?vue&type=script&lang=js&
- /* harmony default export */ var Row_Milestonevue_type_script_lang_js_ = (Milestonevue_type_script_lang_js_); 
+// CONCATENATED MODULE: ./src/components/Chart/Row/Milestone.vue?vue&type=script&lang=js
+
 // CONCATENATED MODULE: ./src/components/Chart/Row/Milestone.vue
 
 
 
 
 
-/* normalize component */
+const Milestone_exports_ = /*#__PURE__*/exportHelper_default()(Milestonevue_type_script_lang_js, [['render',Milestonevue_type_template_id_6d69cd05_render]])
 
-var Milestone_component = normalizeComponent(
-  Row_Milestonevue_type_script_lang_js_,
-  Milestonevue_type_template_id_3013006c_render,
-  Milestonevue_type_template_id_3013006c_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
+/* harmony default export */ var Milestone = (Milestone_exports_);
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ref--5!./node_modules/vue-loader/dist??ref--7-0!./src/components/Chart/Row/Project.vue?vue&type=template&id=5a17b514
 
-/* hot reload */
-if (false) { var Milestone_api; }
-Milestone_component.options.__file = "src/components/Chart/Row/Milestone.vue"
-/* harmony default export */ var Milestone = (Milestone_component.exports);
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./src/components/Chart/Row/Project.vue?vue&type=template&id=077bbd73&
-var Projectvue_type_template_id_077bbd73_render = function() {
-  var _vm = this
-  var _h = _vm.$createElement
-  var _c = _vm._self._c || _h
-  return _c(
-    "g",
-    {
-      staticClass:
-        "gantt-elastic__chart-row-bar-wrapper gantt-elastic__chart-row-project-wrapper",
-      style: Object.assign(
-        {},
-        _vm.root.style["chart-row-bar-wrapper"],
-        _vm.root.style["chart-row-project-wrapper"],
-        _vm.task.style["chart-row-bar-wrapper"]
-      )
-    },
-    [
-      _vm.displayExpander
-        ? _c(
-            "foreignObject",
-            {
-              staticClass:
-                "gantt-elastic__chart-expander gantt-elastic__chart-expander--project",
-              style: Object.assign(
-                {},
-                _vm.root.style["chart-expander"],
-                _vm.root.style["chart-expander--project"],
-                _vm.task.style["chart-expander"]
-              ),
-              attrs: {
-                x:
-                  _vm.task.x -
-                  _vm.root.state.options.chart.expander.offset -
-                  _vm.root.state.options.chart.expander.size,
-                y:
-                  _vm.task.y +
-                  (_vm.root.state.options.row.height -
-                    _vm.root.state.options.chart.expander.size) /
-                    2,
-                width: _vm.root.state.options.chart.expander.size,
-                height: _vm.root.state.options.chart.expander.size
-              }
-            },
-            [
-              _c("expander", {
-                attrs: {
-                  tasks: [_vm.task],
-                  options: _vm.root.state.options.chart.expander,
-                  type: "chart"
-                }
-              })
-            ],
-            1
-          )
-        : _vm._e(),
-      _vm._v(" "),
-      _c(
-        "svg",
-        {
-          staticClass:
-            "gantt-elastic__chart-row-bar gantt-elastic__chart-row-project",
-          style: Object.assign(
-            {},
-            _vm.root.style["chart-row-bar"],
-            _vm.root.style["chart-row-project"],
-            _vm.task.style["chart-row-bar"]
-          ),
-          attrs: {
-            x: _vm.task.x,
-            y: _vm.task.y,
-            width: _vm.task.width,
-            height: _vm.task.height,
-            viewBox: "0 0 " + _vm.task.width + " " + _vm.task.height,
-            xmlns: "http://www.w3.org/2000/svg"
-          },
-          on: {
-            click: function($event) {
-              return _vm.emitEvent("click", $event)
-            },
-            mouseenter: function($event) {
-              return _vm.emitEvent("mouseenter", $event)
-            },
-            mouseover: function($event) {
-              return _vm.emitEvent("mouseover", $event)
-            },
-            mouseout: function($event) {
-              return _vm.emitEvent("mouseout", $event)
-            },
-            mousemove: function($event) {
-              return _vm.emitEvent("mousemove", $event)
-            },
-            mousedown: function($event) {
-              return _vm.emitEvent("mousedown", $event)
-            },
-            mouseup: function($event) {
-              return _vm.emitEvent("mouseup", $event)
-            },
-            mousewheel: function($event) {
-              return _vm.emitEvent("mousewheel", $event)
-            },
-            touchstart: function($event) {
-              return _vm.emitEvent("touchstart", $event)
-            },
-            touchmove: function($event) {
-              return _vm.emitEvent("touchmove", $event)
-            },
-            touchend: function($event) {
-              return _vm.emitEvent("touchend", $event)
-            }
-          }
-        },
-        [
-          _c("defs", [
-            _c("clipPath", { attrs: { id: _vm.clipPathId } }, [
-              _c("path", { attrs: { d: _vm.getPoints } })
-            ])
-          ]),
-          _vm._v(" "),
-          _c("path", {
-            staticClass:
-              "gantt-elastic__chart-row-bar-polygon gantt-elastic__chart-row-project-polygon",
-            style: Object.assign(
-              {},
-              _vm.root.style["chart-row-bar-polygon"],
-              _vm.root.style["chart-row-project-polygon"],
-              _vm.task.style["base"],
-              _vm.task.style["chart-row-bar-polygon"]
-            ),
-            attrs: { d: _vm.getPoints }
-          }),
-          _vm._v(" "),
-          _c("progress-bar", {
-            attrs: {
-              task: _vm.task,
-              "clip-path": "url(#" + _vm.clipPathId + ")"
-            }
-          })
-        ],
-        1
-      ),
-      _vm._v(" "),
-      _vm.root.state.options.chart.text.display
-        ? _c("chart-text", { attrs: { task: _vm.task } })
-        : _vm._e()
-    ],
-    1
-  )
+
+const Projectvue_type_template_id_5a17b514_hoisted_1 = ["x", "y", "width", "height"]
+const Projectvue_type_template_id_5a17b514_hoisted_2 = ["x", "y", "width", "height", "viewBox"]
+const Projectvue_type_template_id_5a17b514_hoisted_3 = ["id"]
+const Projectvue_type_template_id_5a17b514_hoisted_4 = ["d"]
+const Projectvue_type_template_id_5a17b514_hoisted_5 = ["d"]
+
+function Projectvue_type_template_id_5a17b514_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_expander = Object(external_Vue_["resolveComponent"])("expander")
+  const _component_progress_bar = Object(external_Vue_["resolveComponent"])("progress-bar")
+  const _component_chart_text = Object(external_Vue_["resolveComponent"])("chart-text")
+
+  return (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("g", {
+    class: "gantt-elastic__chart-row-bar-wrapper gantt-elastic__chart-row-project-wrapper",
+    style: Object(external_Vue_["normalizeStyle"])({
+      ...$options.root.style['chart-row-bar-wrapper'],
+      ...$options.root.style['chart-row-project-wrapper'],
+      ...$props.task.style['chart-row-bar-wrapper']
+    })
+  }, [
+    ($options.displayExpander)
+      ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("foreignObject", {
+          key: 0,
+          class: "gantt-elastic__chart-expander gantt-elastic__chart-expander--project",
+          style: Object(external_Vue_["normalizeStyle"])({
+        ...$options.root.style['chart-expander'],
+        ...$options.root.style['chart-expander--project'],
+        ...$props.task.style['chart-expander']
+      }),
+          x: $props.task.x - $options.root.state.options.chart.expander.offset - $options.root.state.options.chart.expander.size,
+          y: $props.task.y + ($options.root.state.options.row.height - $options.root.state.options.chart.expander.size) / 2,
+          width: $options.root.state.options.chart.expander.size,
+          height: $options.root.state.options.chart.expander.size
+        }, [
+          Object(external_Vue_["createVNode"])(_component_expander, {
+            tasks: [$props.task],
+            options: $options.root.state.options.chart.expander,
+            type: "chart"
+          }, null, 8 /* PROPS */, ["tasks", "options"])
+        ], 12 /* STYLE, PROPS */, Projectvue_type_template_id_5a17b514_hoisted_1))
+      : Object(external_Vue_["createCommentVNode"])("v-if", true),
+    (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createElementBlock"])("svg", {
+      class: "gantt-elastic__chart-row-bar gantt-elastic__chart-row-project",
+      style: Object(external_Vue_["normalizeStyle"])({ ...$options.root.style['chart-row-bar'], ...$options.root.style['chart-row-project'], ...$props.task.style['chart-row-bar'] }),
+      x: $props.task.x,
+      y: $props.task.y,
+      width: $props.task.width,
+      height: $props.task.height,
+      viewBox: `0 0 ${$props.task.width} ${$props.task.height}`,
+      onClick: _cache[0] || (_cache[0] = $event => (_ctx.emitEvent('click', $event))),
+      onMouseenter: _cache[1] || (_cache[1] = $event => (_ctx.emitEvent('mouseenter', $event))),
+      onMouseover: _cache[2] || (_cache[2] = $event => (_ctx.emitEvent('mouseover', $event))),
+      onMouseout: _cache[3] || (_cache[3] = $event => (_ctx.emitEvent('mouseout', $event))),
+      onMousemove: _cache[4] || (_cache[4] = $event => (_ctx.emitEvent('mousemove', $event))),
+      onMousedown: _cache[5] || (_cache[5] = $event => (_ctx.emitEvent('mousedown', $event))),
+      onMouseup: _cache[6] || (_cache[6] = $event => (_ctx.emitEvent('mouseup', $event))),
+      onMousewheel: _cache[7] || (_cache[7] = $event => (_ctx.emitEvent('mousewheel', $event))),
+      onTouchstart: _cache[8] || (_cache[8] = $event => (_ctx.emitEvent('touchstart', $event))),
+      onTouchmove: _cache[9] || (_cache[9] = $event => (_ctx.emitEvent('touchmove', $event))),
+      onTouchend: _cache[10] || (_cache[10] = $event => (_ctx.emitEvent('touchend', $event))),
+      xmlns: "http://www.w3.org/2000/svg"
+    }, [
+      Object(external_Vue_["createElementVNode"])("defs", null, [
+        Object(external_Vue_["createElementVNode"])("clipPath", { id: $options.clipPathId }, [
+          Object(external_Vue_["createElementVNode"])("path", { d: $options.getPoints }, null, 8 /* PROPS */, Projectvue_type_template_id_5a17b514_hoisted_4)
+        ], 8 /* PROPS */, Projectvue_type_template_id_5a17b514_hoisted_3)
+      ]),
+      Object(external_Vue_["createElementVNode"])("path", {
+        class: "gantt-elastic__chart-row-bar-polygon gantt-elastic__chart-row-project-polygon",
+        style: Object(external_Vue_["normalizeStyle"])({
+          ...$options.root.style['chart-row-bar-polygon'],
+          ...$options.root.style['chart-row-project-polygon'],
+          ...$props.task.style['base'],
+          ...$props.task.style['chart-row-bar-polygon']
+        }),
+        d: $options.getPoints
+      }, null, 12 /* STYLE, PROPS */, Projectvue_type_template_id_5a17b514_hoisted_5),
+      Object(external_Vue_["createVNode"])(_component_progress_bar, {
+        task: $props.task,
+        "clip-path": 'url(#' + $options.clipPathId + ')'
+      }, null, 8 /* PROPS */, ["task", "clip-path"])
+    ], 44 /* STYLE, PROPS, NEED_HYDRATION */, Projectvue_type_template_id_5a17b514_hoisted_2)),
+    ($options.root.state.options.chart.text.display)
+      ? (Object(external_Vue_["openBlock"])(), Object(external_Vue_["createBlock"])(_component_chart_text, {
+          key: 1,
+          task: $props.task
+        }, null, 8 /* PROPS */, ["task"]))
+      : Object(external_Vue_["createCommentVNode"])("v-if", true)
+  ], 4 /* STYLE */))
 }
-var Projectvue_type_template_id_077bbd73_staticRenderFns = []
-Projectvue_type_template_id_077bbd73_render._withStripped = true
+// CONCATENATED MODULE: ./src/components/Chart/Row/Project.vue?vue&type=template&id=5a17b514
 
-
-// CONCATENATED MODULE: ./src/components/Chart/Row/Project.vue?vue&type=template&id=077bbd73&
-
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/components/Chart/Row/Project.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist??ref--7-0!./src/components/Chart/Row/Project.vue?vue&type=script&lang=js
 
 
 
 
 
-/* harmony default export */ var Projectvue_type_script_lang_js_ = ({
+/* harmony default export */ var Projectvue_type_script_lang_js = ({
   name: 'Project',
   components: {
     ChartText: Text,
@@ -5303,102 +3742,18 @@ Projectvue_type_template_id_077bbd73_render._withStripped = true
   }
 });
 
-// CONCATENATED MODULE: ./src/components/Chart/Row/Project.vue?vue&type=script&lang=js&
- /* harmony default export */ var Row_Projectvue_type_script_lang_js_ = (Projectvue_type_script_lang_js_); 
+// CONCATENATED MODULE: ./src/components/Chart/Row/Project.vue?vue&type=script&lang=js
+
 // CONCATENATED MODULE: ./src/components/Chart/Row/Project.vue
 
 
 
 
 
-/* normalize component */
+const Project_exports_ = /*#__PURE__*/exportHelper_default()(Projectvue_type_script_lang_js, [['render',Projectvue_type_template_id_5a17b514_render]])
 
-var Project_component = normalizeComponent(
-  Row_Projectvue_type_script_lang_js_,
-  Projectvue_type_template_id_077bbd73_render,
-  Projectvue_type_template_id_077bbd73_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* hot reload */
-if (false) { var Project_api; }
-Project_component.options.__file = "src/components/Chart/Row/Project.vue"
-/* harmony default export */ var Project = (Project_component.exports);
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/components/Chart/Chart.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+/* harmony default export */ var Project = (Project_exports_);
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist??ref--7-0!./src/components/Chart/Chart.vue?vue&type=script&lang=js
 
 
 
@@ -5407,7 +3762,7 @@ Project_component.options.__file = "src/components/Chart/Row/Project.vue"
 
 
 
-/* harmony default export */ var Chartvue_type_script_lang_js_ = ({
+/* harmony default export */ var Chartvue_type_script_lang_js = ({
   name: 'Chart',
   components: {
     Grid: Grid,
@@ -5447,130 +3802,25 @@ Project_component.options.__file = "src/components/Chart/Row/Project.vue"
   }
 });
 
-// CONCATENATED MODULE: ./src/components/Chart/Chart.vue?vue&type=script&lang=js&
- /* harmony default export */ var Chart_Chartvue_type_script_lang_js_ = (Chartvue_type_script_lang_js_); 
+// CONCATENATED MODULE: ./src/components/Chart/Chart.vue?vue&type=script&lang=js
+
 // CONCATENATED MODULE: ./src/components/Chart/Chart.vue
 
 
 
 
 
-/* normalize component */
+const Chart_exports_ = /*#__PURE__*/exportHelper_default()(Chartvue_type_script_lang_js, [['render',Chartvue_type_template_id_491a2e0a_render]])
 
-var Chart_component = normalizeComponent(
-  Chart_Chartvue_type_script_lang_js_,
-  Chartvue_type_template_id_67c3f5cd_render,
-  Chartvue_type_template_id_67c3f5cd_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* hot reload */
-if (false) { var Chart_api; }
-Chart_component.options.__file = "src/components/Chart/Chart.vue"
-/* harmony default export */ var Chart = (Chart_component.exports);
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/components/MainView.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+/* harmony default export */ var Chart = (Chart_exports_);
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist??ref--7-0!./src/components/MainView.vue?vue&type=script&lang=js
 
 
 
 
 let ignoreScrollEvents = false;
 
-/* harmony default export */ var MainViewvue_type_script_lang_js_ = ({
+/* harmony default export */ var MainViewvue_type_script_lang_js = ({
   name: 'MainView',
   components: {
     TaskList: TaskList,
@@ -5654,35 +3904,35 @@ let ignoreScrollEvents = false;
      * Emit event when mouse is moving inside main view
      */
     mouseMove(event) {
-      this.root.$emit('main-view-mousemove', event);
+      this.root.$emitBus.emit('main-view-mousemove', event);
     },
 
     /**
      * Emit mouseup event inside main view
      */
     mouseUp(event) {
-      this.root.$emit('main-view-mouseup', event);
+      this.root.$emitBus.emit('main-view-mouseup', event);
     },
 
     /**
      * Horizontal scroll event handler
      */
     onHorizontalScroll(ev) {
-      this.root.$emit('chart-scroll-horizontal', ev);
+      this.root.$emitBus.emit('chart-scroll-horizontal', ev);
     },
 
     /**
      * Vertical scroll event handler
      */
     onVerticalScroll(ev) {
-      this.root.$emit('chart-scroll-vertical', ev);
+      this.root.$emitBus.emit('chart-scroll-vertical', ev);
     },
 
     /**
      * Mouse wheel event handler
      */
     chartWheel(ev) {
-      this.root.$emit('chart-wheel', ev);
+      this.root.$emitBus.emit('chart-wheel', ev);
     },
 
     /**
@@ -5754,7 +4004,7 @@ let ignoreScrollEvents = false;
   /**
    * Before destroy event - clean up
    */
-  beforeDestroy() {
+  beforeUnmount() {
     document.removeEventListener('mouseup', this.chartMouseUp);
     document.removeEventListener('mousemove', this.chartMouseMove);
     document.removeEventListener('touchmove', this.chartMouseMove);
@@ -5762,31 +4012,17 @@ let ignoreScrollEvents = false;
   }
 });
 
-// CONCATENATED MODULE: ./src/components/MainView.vue?vue&type=script&lang=js&
- /* harmony default export */ var components_MainViewvue_type_script_lang_js_ = (MainViewvue_type_script_lang_js_); 
+// CONCATENATED MODULE: ./src/components/MainView.vue?vue&type=script&lang=js
+
 // CONCATENATED MODULE: ./src/components/MainView.vue
 
 
 
 
 
-/* normalize component */
+const MainView_exports_ = /*#__PURE__*/exportHelper_default()(MainViewvue_type_script_lang_js, [['render',MainViewvue_type_template_id_7ac81826_render]])
 
-var MainView_component = normalizeComponent(
-  components_MainViewvue_type_script_lang_js_,
-  MainViewvue_type_template_id_0bc4212e_render,
-  MainViewvue_type_template_id_0bc4212e_staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
-
-/* hot reload */
-if (false) { var MainView_api; }
-MainView_component.options.__file = "src/components/MainView.vue"
-/* harmony default export */ var MainView = (MainView_component.exports);
+/* harmony default export */ var MainView = (MainView_exports_);
 // CONCATENATED MODULE: ./src/style.js
 /**
  * @fileoverview Styles for gantt-elastic
@@ -6104,25 +4340,10 @@ function getStyle(fontSize = '12px', fontFamily = 'Arial, sans-serif') {
 }
 
 // EXTERNAL MODULE: ./node_modules/resize-observer-polyfill/dist/ResizeObserver.es.js
-var ResizeObserver_es = __webpack_require__(3);
+var ResizeObserver_es = __webpack_require__(4);
 
-// CONCATENATED MODULE: ./node_modules/vue-loader/lib??vue-loader-options!./src/GanttElastic.vue?vue&type=script&lang=js&
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+// CONCATENATED MODULE: ./node_modules/vue-loader/dist??ref--7-0!./src/GanttElastic.vue?vue&type=script&lang=js
+
 
 
 
@@ -7200,14 +5421,14 @@ const GanttElastic = {
      * Listen to specified event names
      */
     initializeEvents() {
-      this.$on('chart-scroll-horizontal', this.onScrollChart);
-      this.$on('chart-scroll-vertical', this.onScrollChart);
-      this.$on('chart-wheel', this.onWheelChart);
-      this.$on('times-timeZoom-change', this.onTimeZoomChange);
-      this.$on('row-height-change', this.onRowHeightChange);
-      this.$on('scope-change', this.onScopeChange);
-      this.$on('taskList-width-change', this.onTaskListWidthChange);
-      this.$on('taskList-column-width-change', this.onTaskListColumnWidthChange);
+      this.$emitBus.on('chart-scroll-horizontal', this.onScrollChart);
+      this.$emitBus.on('chart-scroll-vertical', this.onScrollChart);
+      this.$emitBus.on('chart-wheel', this.onWheelChart);
+      this.$emitBus.on('times-timeZoom-change', this.onTimeZoomChange);
+      this.$emitBus.on('row-height-change', this.onRowHeightChange);
+      this.$emitBus.on('scope-change', this.onScopeChange);
+      this.$emitBus.on('taskList-width-change', this.onTaskListWidthChange);
+      this.$emitBus.on('taskList-column-width-change', this.onTaskListColumnWidthChange);
     },
 
     /**
@@ -7579,6 +5800,10 @@ const GanttElastic = {
    * Watch tasks after gantt instance is created and react when we have new kids on the block
    */
   created() {
+    this.$set = function(obj, key, val) { obj[key] = val; };
+    this.$delete = function(obj, key) { delete obj[key]; };
+    this.root = this.$parent;
+    this.$emitBus = mitt();
     this.initializeEvents();
     this.setup();
     this.state.unwatchTasks = this.$watch(
@@ -7589,7 +5814,7 @@ const GanttElastic = {
           this.setup('tasks');
         }
       },
-      { deep: true }
+      { deep: false }
     );
     this.state.unwatchOptions = this.$watch(
       'options',
@@ -7599,7 +5824,7 @@ const GanttElastic = {
           this.setup('options');
         }
       },
-      { deep: true }
+      { deep: false }
     );
     this.state.unwatchStyle = this.$watch(
       'dynamicStyle',
@@ -7609,32 +5834,32 @@ const GanttElastic = {
           this.initializeStyle();
         }
       },
-      { deep: true, immediate: true }
+      { deep: false }
     );
 
     this.state.unwatchOutputTasks = this.$watch(
       'outputTasks',
       tasks => {
-        this.$emit('tasks-changed', tasks.map(task => task));
+        /* this.$emit('tasks-changed', tasks.map(task => task)); */
       },
-      { deep: true }
+      { deep: false }
     );
     this.state.unwatchOutputOptions = this.$watch(
       'outputOptions',
       options => {
-        this.$emit('options-changed', mergeDeep({}, options));
+        /* this.$emit('options-changed', mergeDeep({}, options)); */
       },
-      { deep: true }
+      { deep: false }
     );
     this.state.unwatchOutputStyle = this.$watch(
       'style',
       style => {
-        this.$emit('dynamic-style-changed', mergeDeep({}, style));
+        /* this.$emit('dynamic-style-changed', mergeDeep({}, style)); */
       },
-      { deep: true }
+      { deep: false }
     );
 
-    this.$root.$emit('gantt-elastic-created', this);
+    this.$emitBus.emit('gantt-elastic-created', this);
     this.$emit('created', this);
   },
 
@@ -7656,9 +5881,9 @@ const GanttElastic = {
     this.state.resizeObserver.observe(this.$el.parentNode);
     this.globalOnResize();
     this.$emit('ready', this);
-    this.$root.$emit('gantt-elastic-mounted', this);
+    this.$emitBus.emit('gantt-elastic-mounted', this);
     this.$emit('mounted', this);
-    this.$root.$emit('gantt-elastic-ready', this);
+    this.$emitBus.emit('gantt-elastic-ready', this);
   },
 
   /**
@@ -7680,7 +5905,7 @@ const GanttElastic = {
   /**
    * Before destroy event - clean up
    */
-  beforeDestroy() {
+  beforeUnmount() {
     this.state.resizeObserver.unobserve(this.$el.parentNode);
     this.state.unwatchTasks();
     this.state.unwatchOptions();
@@ -7694,51 +5919,39 @@ const GanttElastic = {
   /**
    * Emit event after gantt-elastic was destroyed
    */
-  destroyed() {
+  unmounted() {
     this.$emit('destroyed');
   }
 };
-/* harmony default export */ var GanttElasticvue_type_script_lang_js_ = (GanttElastic);
+/* harmony default export */ var GanttElasticvue_type_script_lang_js = (GanttElastic);
 
-// CONCATENATED MODULE: ./src/GanttElastic.vue?vue&type=script&lang=js&
- /* harmony default export */ var src_GanttElasticvue_type_script_lang_js_ = (GanttElasticvue_type_script_lang_js_); 
-// EXTERNAL MODULE: ./src/GanttElastic.vue?vue&type=style&index=0&lang=css&
-var GanttElasticvue_type_style_index_0_lang_css_ = __webpack_require__(5);
+// CONCATENATED MODULE: ./src/GanttElastic.vue?vue&type=script&lang=js
+
+// EXTERNAL MODULE: ./src/GanttElastic.vue?vue&type=style&index=0&id=fcce3488&lang=css
+var GanttElasticvue_type_style_index_0_id_fcce3488_lang_css = __webpack_require__(6);
 
 // CONCATENATED MODULE: ./src/GanttElastic.vue
-/* concated harmony reexport mergeDeep */__webpack_require__.d(__webpack_exports__, "mergeDeep", function() { return mergeDeep; });
-/* concated harmony reexport mergeDeepReactive */__webpack_require__.d(__webpack_exports__, "mergeDeepReactive", function() { return mergeDeepReactive; });
-/* concated harmony reexport notEqualDeep */__webpack_require__.d(__webpack_exports__, "notEqualDeep", function() { return notEqualDeep; });
 
 
 
 
 
 
-/* normalize component */
 
-var GanttElastic_component = normalizeComponent(
-  src_GanttElasticvue_type_script_lang_js_,
-  render,
-  staticRenderFns,
-  false,
-  null,
-  null,
-  null
-  
-)
+const GanttElastic_exports_ = /*#__PURE__*/exportHelper_default()(GanttElasticvue_type_script_lang_js, [['render',render]])
 
-/* hot reload */
-if (false) { var GanttElastic_api; }
-GanttElastic_component.options.__file = "src/GanttElastic.vue"
-/* harmony default export */ var src_GanttElastic = __webpack_exports__["default"] = (GanttElastic_component.exports);
+/* harmony default export */ var src_GanttElastic = __webpack_exports__["default"] = (GanttElastic_exports_);
 
 /***/ }),
-/* 9 */
+/* 10 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+// ESM COMPAT FLAG
 __webpack_require__.r(__webpack_exports__);
+
+// EXPORTS
+__webpack_require__.d(__webpack_exports__, "default", function() { return /* binding */ addStylesClient; });
 
 // CONCATENATED MODULE: ./node_modules/vue-style-loader/lib/listToStyles.js
 /**
@@ -7770,7 +5983,6 @@ function listToStyles (parentId, list) {
 }
 
 // CONCATENATED MODULE: ./node_modules/vue-style-loader/lib/addStylesClient.js
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "default", function() { return addStylesClient; });
 /*
   MIT License http://www.opensource.org/licenses/mit-license.php
   Author Tobias Koppers @sokra

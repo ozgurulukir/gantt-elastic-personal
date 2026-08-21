@@ -4,7 +4,7 @@
  * @author Rafal Pospiech <neuronet.io@gmail.com>
  * @package GanttElasticStandalone
  */
-import Vue from 'vue';
+import { createApp } from 'vue';
 import { mergeDeep } from './GanttElastic.vue';
 import GanttElasticStandalone from './GanttElastic.standalone.vue';
 
@@ -27,7 +27,14 @@ window.GanttElastic = {
       }
       ganttElastic[prop] = cfg[prop];
     }
-    return new Vue(ganttElastic).$on('gantt-elastic-ready', ready).$mount(cfg.el);
+
+    const app = createApp(ganttElastic);
+    const instance = app.mount(cfg.el);
+    if(instance.$emitBus) {
+       instance.$emitBus.on('gantt-elastic-ready', ready);
+    }
+    return instance;
+
   }
 };
 export default GanttElasticStandalone;

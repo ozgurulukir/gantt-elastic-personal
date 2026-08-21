@@ -70,7 +70,7 @@ export default {
       if (typeof this.column.events !== 'undefined' && typeof this.column.events[eventName] === 'function') {
         this.column.events[eventName]({ event, data: this.task, column: this.column });
       }
-      this.root.$emit(`taskList-${this.task.type}-${eventName}`, { event, data: this.task, column: this.column });
+      this.root.$emitBus.emit(`taskList-${this.task.type}-${eventName}`, { event, data: this.task, column: this.column });
     }
   },
   computed: {

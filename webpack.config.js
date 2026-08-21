@@ -18,7 +18,7 @@ module.exports = [
     },
     optimization: {
       minimize: true,
-      namedModules: false,
+      moduleIds: "natural",
       minimizer: [
         new TerserPlugin({
           terserOptions: {
@@ -90,7 +90,7 @@ module.exports = [
     mode: 'production',
     optimization: {
       minimize: true,
-      namedModules: true,
+      moduleIds: "named",
       minimizer: [
         new TerserPlugin({
           terserOptions: {
@@ -164,7 +164,7 @@ module.exports = [
     mode: 'production',
     optimization: {
       minimize: true,
-      namedModules: true,
+      moduleIds: "named",
       minimizer: [
         new TerserPlugin({
           terserOptions: {

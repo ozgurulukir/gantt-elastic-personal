@@ -17,6 +17,7 @@
 <script>
 import VueInstance from 'vue';
 import dayjs from 'dayjs';
+import mitt from 'mitt';
 import MainView from './components/MainView.vue';
 import getStyle from './style.js';
 import ResizeObserver from 'resize-observer-polyfill';
@@ -1091,14 +1092,14 @@ const GanttElastic = {
      * Listen to specified event names
      */
     initializeEvents() {
-      this.$on('chart-scroll-horizontal', this.onScrollChart);
-      this.$on('chart-scroll-vertical', this.onScrollChart);
-      this.$on('chart-wheel', this.onWheelChart);
-      this.$on('times-timeZoom-change', this.onTimeZoomChange);
-      this.$on('row-height-change', this.onRowHeightChange);
-      this.$on('scope-change', this.onScopeChange);
-      this.$on('taskList-width-change', this.onTaskListWidthChange);
-      this.$on('taskList-column-width-change', this.onTaskListColumnWidthChange);
+      this.$emitBus.on('chart-scroll-horizontal', this.onScrollChart);
+      this.$emitBus.on('chart-scroll-vertical', this.onScrollChart);
+      this.$emitBus.on('chart-wheel', this.onWheelChart);
+      this.$emitBus.on('times-timeZoom-change', this.onTimeZoomChange);
+      this.$emitBus.on('row-height-change', this.onRowHeightChange);
+      this.$emitBus.on('scope-change', this.onScopeChange);
+      this.$emitBus.on('taskList-width-change', this.onTaskListWidthChange);
+      this.$emitBus.on('taskList-column-width-change', this.onTaskListColumnWidthChange);
     },
 
     /**
@@ -1470,6 +1471,10 @@ const GanttElastic = {
    * Watch tasks after gantt instance is created and react when we have new kids on the block
    */
   created() {
+    this.$set = function(obj, key, val) { obj[key] = val; };
+    this.$delete = function(obj, key) { delete obj[key]; };
+    this.root = this.$parent;
+    this.$emitBus = mitt();
     this.initializeEvents();
     this.setup();
     this.state.unwatchTasks = this.$watch(
@@ -1480,7 +1485,7 @@ const GanttElastic = {
           this.setup('tasks');
         }
       },
-      { deep: true }
+      { deep: false }
     );
     this.state.unwatchOptions = this.$watch(
       'options',
@@ -1490,7 +1495,7 @@ const GanttElastic = {
           this.setup('options');
         }
       },
-      { deep: true }
+      { deep: false }
     );
     this.state.unwatchStyle = this.$watch(
       'dynamicStyle',
@@ -1500,32 +1505,32 @@ const GanttElastic = {
           this.initializeStyle();
         }
       },
-      { deep: true, immediate: true }
+      { deep: false }
     );
 
     this.state.unwatchOutputTasks = this.$watch(
       'outputTasks',
       tasks => {
-        this.$emit('tasks-changed', tasks.map(task => task));
+        /* this.$emit('tasks-changed', tasks.map(task => task)); */
       },
-      { deep: true }
+      { deep: false }
     );
     this.state.unwatchOutputOptions = this.$watch(
       'outputOptions',
       options => {
-        this.$emit('options-changed', mergeDeep({}, options));
+        /* this.$emit('options-changed', mergeDeep({}, options)); */
       },
-      { deep: true }
+      { deep: false }
     );
     this.state.unwatchOutputStyle = this.$watch(
       'style',
       style => {
-        this.$emit('dynamic-style-changed', mergeDeep({}, style));
+        /* this.$emit('dynamic-style-changed', mergeDeep({}, style)); */
       },
-      { deep: true }
+      { deep: false }
     );
 
-    this.$root.$emit('gantt-elastic-created', this);
+    this.$emitBus.emit('gantt-elastic-created', this);
     this.$emit('created', this);
   },
 
@@ -1547,9 +1552,9 @@ const GanttElastic = {
     this.state.resizeObserver.observe(this.$el.parentNode);
     this.globalOnResize();
     this.$emit('ready', this);
-    this.$root.$emit('gantt-elastic-mounted', this);
+    this.$emitBus.emit('gantt-elastic-mounted', this);
     this.$emit('mounted', this);
-    this.$root.$emit('gantt-elastic-ready', this);
+    this.$emitBus.emit('gantt-elastic-ready', this);
   },
 
   /**
@@ -1571,7 +1576,7 @@ const GanttElastic = {
   /**
    * Before destroy event - clean up
    */
-  beforeDestroy() {
+  beforeUnmount() {
     this.state.resizeObserver.unobserve(this.$el.parentNode);
     this.state.unwatchTasks();
     this.state.unwatchOptions();
@@ -1585,7 +1590,7 @@ const GanttElastic = {
   /**
    * Emit event after gantt-elastic was destroyed
    */
-  destroyed() {
+  unmounted() {
     this.$emit('destroyed');
   }
 };
