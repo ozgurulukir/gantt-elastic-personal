@@ -79,6 +79,10 @@ export default {
     });
   },
 
+  beforeUnmount() {
+    this.root.$emitBus.off('recenterPosition', this.recenterPosition);
+  },
+
   methods: {
     /**
      * Recenter position - go to current time line

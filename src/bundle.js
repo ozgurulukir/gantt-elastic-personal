@@ -17,6 +17,7 @@ window.GanttElastic = {
       cfg.dynamicStyle = {};
     }
     const ganttElastic = { ...GanttElasticStandalone };
+    ganttElastic.ready = ready;
     for (let prop in cfg) {
       if (['el', 'ready'].includes(prop)) {
         continue;

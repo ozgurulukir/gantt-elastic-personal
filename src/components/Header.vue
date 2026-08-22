@@ -263,7 +263,7 @@ export default {
       });
     },
     recenterPosition() {
-      this.root.emitBus.emit("recenterPosition");
+      this.root.$emitBus.emit("recenterPosition");
     },
     setScale(value) {
       if (this.scaleTimeoutId !== null) {
@@ -273,11 +273,11 @@ export default {
       // debouncing
       if (this.firstScale) {
         this.scaleTimeoutId = setTimeout(() => {
-          this.root.emitBus.emit("times-timeZoom-change", value);
+          this.root.$emitBus.emit("times-timeZoom-change", value);
           this.scaleTimeoutId = null;
         }, 50);
       } else {
-        this.root.emitBus.emit("times-timeZoom-change", value);
+        this.root.$emitBus.emit("times-timeZoom-change", value);
         this.firstScale = true;
       }
     }
@@ -322,7 +322,7 @@ export default {
       },
       set(value) {
         this.localHeight = Number(value);
-        this.root.emitBus.emit("row-height-change", Number(value));
+        this.root.$emitBus.emit("row-height-change", Number(value));
       }
     },
     scope: {
@@ -331,7 +331,7 @@ export default {
       },
       set(value) {
         this.localBefore = Number(value);
-        this.root.emitBus.emit("scope-change", Number(value));
+        this.root.$emitBus.emit("scope-change", Number(value));
       }
     },
     divider: {
@@ -340,7 +340,7 @@ export default {
       },
       set(value) {
         this.localPercent = Number(value);
-        this.root.emitBus.emit("taskList-width-change", Number(value));
+        this.root.$emitBus.emit("taskList-width-change", Number(value));
       }
     }
   }

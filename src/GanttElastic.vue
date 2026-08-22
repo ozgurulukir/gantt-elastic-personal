@@ -1485,7 +1485,7 @@ const GanttElastic = {
           this.setup('tasks');
         }
       },
-      { deep: false }
+      { deep: true }
     );
     this.state.unwatchOptions = this.$watch(
       'options',
@@ -1495,7 +1495,7 @@ const GanttElastic = {
           this.setup('options');
         }
       },
-      { deep: false }
+      { deep: true }
     );
     this.state.unwatchStyle = this.$watch(
       'dynamicStyle',
@@ -1505,29 +1505,29 @@ const GanttElastic = {
           this.initializeStyle();
         }
       },
-      { deep: false }
+      { deep: true, immediate: true }
     );
 
     this.state.unwatchOutputTasks = this.$watch(
       'outputTasks',
       tasks => {
-        /* this.$emit('tasks-changed', tasks.map(task => task)); */
+        this.$emit('tasks-changed', tasks.map(task => task));
       },
-      { deep: false }
+      { deep: true }
     );
     this.state.unwatchOutputOptions = this.$watch(
       'outputOptions',
       options => {
-        /* this.$emit('options-changed', mergeDeep({}, options)); */
+        this.$emit('options-changed', mergeDeep({}, options));
       },
-      { deep: false }
+      { deep: true }
     );
     this.state.unwatchOutputStyle = this.$watch(
       'style',
       style => {
-        /* this.$emit('dynamic-style-changed', mergeDeep({}, style)); */
+        this.$emit('dynamic-style-changed', mergeDeep({}, style));
       },
-      { deep: false }
+      { deep: true }
     );
 
     this.$emitBus.emit('gantt-elastic-created', this);
@@ -1555,6 +1555,7 @@ const GanttElastic = {
     this.$emitBus.emit('gantt-elastic-mounted', this);
     this.$emit('mounted', this);
     this.$emitBus.emit('gantt-elastic-ready', this);
+    this.$emit('gantt-elastic-ready', this);
   },
 
   /**

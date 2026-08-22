@@ -7,13 +7,16 @@
  */
 -->
 <template>
-  <gantt-elastic :tasks="tasks" :options="options" :dynamicStyle="dynamicStyle">
-    <component v-if="components.header" :is="components.header" #header></component>
-    <component v-if="components.footer" :is="components.footer" #footer></component>
+  <gantt-elastic ref="gantt" :tasks="tasks" :options="options" :dynamicStyle="dynamicStyle" @gantt-elastic-ready="onReady">
+    <template v-if="components.header" #header>
+      <component :is="components.header" />
+    </template>
+    <template v-if="components.footer" #footer>
+      <component :is="components.footer" />
+    </template>
   </gantt-elastic>
 </template>
 <script>
-import Vue from 'vue';
 import GanttElastic from './GanttElastic.vue';
 export default {
   name: 'GanttElasticStandalone',
@@ -26,6 +29,13 @@ export default {
     tasks: [],
     options: {},
     dynamicStyle: {} };
+  },
+  methods: {
+    onReady(instance) {
+      if (typeof this.ready === 'function') {
+        this.ready(instance);
+      }
+    }
   }
 };
 </script>

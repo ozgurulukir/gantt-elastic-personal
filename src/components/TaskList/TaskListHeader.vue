@@ -168,6 +168,8 @@ export default {
   beforeUnmount() {
     document.removeEventListener('mouseup', this.resizerMouseUp);
     document.removeEventListener('mousemove', this.resizerMouseMove);
+    this.root.$emitBus.off('main-view-mousemove', this.resizerMouseMove);
+    this.root.$emitBus.off('main-view-mouseup', this.resizerMouseUp);
   }
 };
 </script>
