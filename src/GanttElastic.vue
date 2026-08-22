@@ -1499,7 +1499,7 @@ const GanttElastic = {
     this.state.unwatchStyle = this.$watch(
       'dynamicStyle',
       style => {
-        const notEqual = notEqualDeep(style, this.dynamicStyle);
+        const notEqual = notEqualDeep(style, this.style());
         if (notEqual) {
           this.initializeStyle();
         }
