@@ -1473,7 +1473,6 @@ const GanttElastic = {
   created() {
     this.$set = function(obj, key, val) { obj[key] = val; };
     this.$delete = function(obj, key) { delete obj[key]; };
-    this.root = this.$parent;
     this.$emitBus = mitt();
     this.initializeEvents();
     this.setup();

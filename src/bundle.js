@@ -31,9 +31,6 @@ window.GanttElastic = {
 
     const app = createApp(ganttElastic);
     const instance = app.mount(cfg.el);
-    if(instance.$emitBus) {
-       instance.$emitBus.on('gantt-elastic-ready', ready);
-    }
     return instance;
 
   }

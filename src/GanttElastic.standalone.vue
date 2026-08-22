@@ -32,8 +32,11 @@ export default {
   },
   methods: {
     onReady(instance) {
-      if (typeof this.ready === 'function') {
-        this.ready(instance);
+      // `ready` is supplied as a top-level option on the standalone component
+      // (see bundle.js). In Vue 3 arbitrary top-level options are not exposed
+      // on `this`, so read it from `$options`.
+      if (typeof this.$options.ready === 'function') {
+        this.$options.ready(instance);
       }
     }
   }
