@@ -18,21 +18,20 @@ window.GanttElastic = {
     }
     const ganttElastic = { ...GanttElasticStandalone };
     ganttElastic.ready = ready;
-    for (let prop in cfg) {
-      if (['el', 'ready'].includes(prop)) {
-        continue;
-      }
-      if (typeof ganttElastic[prop] !== 'undefined') {
-        ganttElastic[prop] = { ...ganttElastic[prop], ...cfg[prop] };
-        continue;
-      }
-      ganttElastic[prop] = cfg[prop];
-    }
+    // standalone.vue's data() returns empty defaults, so the user config must be
+    // delivered through data() - merging it onto the options object is ignored by Vue 3
+    ganttElastic.data = function () {
+      return {
+        components: cfg.components || {},
+        tasks: Array.isArray(cfg.tasks) ? cfg.tasks : [],
+        options: cfg.options || {},
+        dynamicStyle: cfg.dynamicStyle || {}
+      };
+    };
 
     const app = createApp(ganttElastic);
     const instance = app.mount(cfg.el);
     return instance;
-
   }
 };
 export default GanttElasticStandalone;

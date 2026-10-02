@@ -75,6 +75,17 @@ export default {
   },
   computed: {
     /**
+     * Column style; can be a function with a 'task' param,
+     * so users can render different column styles depending on task attributes
+     *
+     * @returns {object}
+     */
+    columnStyle() {
+      const style = typeof this.column.style === 'function' ? this.column.style(this.task) : this.column.style;
+      return style || {};
+    },
+
+    /**
      * Should we display html or just text?
      *
      * @returns {boolean}
@@ -101,7 +112,7 @@ export default {
     itemColumnStyle() {
       return {
         ...this.root.style['task-list-item-column'],
-        ...this.column.style['task-list-item-column'],
+        ...this.columnStyle['task-list-item-column'],
         width: this.column.finalWidth + 'px',
         height: this.column.height + 'px'
       };
@@ -110,19 +121,19 @@ export default {
     wrapperStyle() {
       return {
         ...this.root.style['task-list-item-value-wrapper'],
-        ...this.column.style['task-list-item-value-wrapper']
+        ...this.columnStyle['task-list-item-value-wrapper']
       };
     },
 
     containerStyle() {
       return {
         ...this.root.style['task-list-item-value-container'],
-        ...this.column.style['task-list-item-value-container']
+        ...this.columnStyle['task-list-item-value-container']
       };
     },
 
     valueStyle() {
-      return { ...this.root.style['task-list-item-value'], ...this.column.style['task-list-item-value'] };
+      return { ...this.root.style['task-list-item-value'], ...this.columnStyle['task-list-item-value'] };
     }
   }
 };

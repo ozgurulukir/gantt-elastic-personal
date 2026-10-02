@@ -1,7 +1,7 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 931
+/***/ 341
 (module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -55,7 +55,393 @@ foreignObject > * {
 .gantt-elastic__task-list-item-value-wrapper:hover > .gantt-elastic__task-list-item-value {
   position: absolute;
 }
-`, "",{"version":3,"sources":["webpack://./src/GanttElastic.vue"],"names":[],"mappings":";AAgkDA;;EAEE,sBAAsB;AACxB;AACA;EACE,cAAc;AAChB;AACA;;EAEE,eAAe;EACf,eAAe;AACjB;AACA;EACE,WAAW;AACb;AACA;EACE,cAAc;AAChB;AACA;;EAEE,gBAAgB;EAChB,eAAe;AACjB;AACA;EACE,iCAAiC;AACnC;AACA;EACE,kCAAkC;AACpC;AACA;EACE,4BAA4B;AAC9B;AACA;EACE,kBAAkB;EAClB,4BAA4B;AAC9B;AACA;EACE,kBAAkB;AACpB","sourcesContent":["<!--\n/**\n * @fileoverview GanttElastic component\n * @license MIT\n * @author Rafal Pospiech <neuronet.io@gmail.com>\n * @package GanttElastic\n */\n-->\n<template>\n  <div class=\"gantt-elastic\" style=\"width:100%\">\n    <slot name=\"header\"></slot>\n    <main-view ref=\"mainView\"></main-view>\n    <slot name=\"footer\"></slot>\n  </div>\n</template>\n\n<script>\nimport VueInstance from 'vue';\nimport dayjs from 'dayjs';\nimport mitt from 'mitt';\nimport MainView from './components/MainView.vue';\nimport getStyle from './style.js';\nimport ResizeObserver from 'resize-observer-polyfill';\n\nconst ctx = document.createElement('canvas').getContext('2d');\nlet VueInst = VueInstance;\nfunction initVue() {\n  if (typeof Vue !== 'undefined' && typeof VueInst === 'undefined') {\n    VueInst = Vue;\n  }\n}\ninitVue();\n\nlet hourWidthCache = null;\n\n/**\n * Helper function to fill out empty options in user settings\n *\n * @param {object} userOptions - initial user options that will merge with those below\n * @returns {object} merged options\n */\nfunction getOptions(userOptions) {\n  let localeName = 'en';\n  if (typeof userOptions.locale !== 'undefined' && typeof userOptions.locale.name !== 'undefined') {\n    localeName = userOptions.locale.name;\n  }\n  return {\n    slots: {\n      header: {}\n    },\n    taskMapping: {\n      //*\n      id: 'id',\n      start: 'start',\n      label: 'label',\n      duration: 'duration',\n      progress: 'progress',\n      type: 'type',\n      style: 'style',\n      collapsed: 'collapsed'\n    },\n    width: 0,\n    height: 0,\n    clientWidth: 0,\n    outerHeight: 0,\n    rowsHeight: 0,\n    allVisibleTasksHeight: 0,\n    scroll: {\n      scrolling: false,\n      dragXMoveMultiplier: 3, //*\n      dragYMoveMultiplier: 2, //*\n      top: 0,\n      taskList: {\n        left: 0,\n        right: 0,\n        top: 0,\n        bottom: 0\n      },\n      chart: {\n        left: 0,\n        right: 0,\n        percent: 0,\n        timePercent: 0,\n        top: 0,\n        bottom: 0,\n        time: 0,\n        timeCenter: 0,\n        dateTime: {\n          left: '',\n          right: ''\n        }\n      }\n    },\n    scope: {\n      //*\n      before: 1,\n      after: 1\n    },\n    times: {\n      timeScale: 60 * 1000,\n      timeZoom: 17, //*\n      timePerPixel: 0,\n      firstTime: null,\n      lastTime: null,\n      firstTaskTime: 0,\n      lastTaskTime: 0,\n      totalViewDurationMs: 0,\n      totalViewDurationPx: 0,\n      stepDuration: 'day',\n      steps: []\n    },\n    row: {\n      height: 24 //*\n    },\n    maxRows: 20, //*\n    maxHeight: 0, //*\n    chart: {\n      grid: {\n        horizontal: {\n          gap: 6 //*\n        }\n      },\n      progress: {\n        width: 20, //*\n        height: 6, //*\n        pattern: true,\n        bar: false\n      },\n      text: {\n        offset: 4, //*\n        xPadding: 10, //*\n        display: true //*\n      },\n      expander: {\n        type: 'chart',\n        display: false, //*\n        displayIfTaskListHidden: true, //*\n        offset: 4, //*\n        size: 18\n      }\n    },\n    taskList: {\n      display: true, //*\n      resizeAfterThreshold: true, //*\n      widthThreshold: 75, //*\n      columns: [\n        //*\n        {\n          id: 0,\n          label: 'ID',\n          value: 'id',\n          width: 40\n        }\n      ],\n      percent: 100, //*\n      width: 0,\n      finalWidth: 0,\n      widthFromPercentage: 0,\n      minWidth: 18,\n      expander: {\n        type: 'task-list',\n        size: 16,\n        columnWidth: 24,\n        padding: 16,\n        margin: 10,\n        straight: false\n      }\n    },\n    calendar: {\n      workingDays: [1, 2, 3, 4, 5], //*\n      gap: 6, //*\n      height: 0,\n      strokeWidth: 1,\n      hour: {\n        height: 20, //*\n        display: true, //*\n        widths: [],\n        maxWidths: { short: 0, medium: 0, long: 0 },\n        formatted: {\n          long: [],\n          medium: [],\n          short: []\n        },\n        format: {\n          //*\n          long(date) {\n            return date.format('HH:mm');\n          },\n          medium(date) {\n            return date.format('HH:mm');\n          },\n          short(date) {\n            return date.format('HH');\n          }\n        }\n      },\n      day: {\n        height: 20, //*\n        display: true, //*\n        widths: [],\n        maxWidths: { short: 0, medium: 0, long: 0 },\n        format: {\n          long(date) {\n            return date.format('DD dddd');\n          },\n          medium(date) {\n            return date.format('DD ddd');\n          },\n          short(date) {\n            return date.format('DD');\n          }\n        }\n      },\n      month: {\n        height: 20, //*\n        display: true, //*\n        widths: [],\n        maxWidths: { short: 0, medium: 0, long: 0 },\n        format: {\n          //*\n          short(date) {\n            return date.format('MM');\n          },\n          medium(date) {\n            return date.format(\"MMM 'YY\");\n          },\n          long(date) {\n            return date.format('MMMM YYYY');\n          }\n        }\n      }\n    },\n    locale: {\n      //*\n      name: 'en',\n      weekdays: 'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split('_'),\n      weekdaysShort: 'Sun_Mon_Tue_Wed_Thu_Fri_Sat'.split('_'),\n      weekdaysMin: 'Su_Mo_Tu_We_Th_Fr_Sa'.split('_'),\n      months: 'January_February_March_April_May_June_July_August_September_October_November_December'.split('_'),\n      monthsShort: 'Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec'.split('_'),\n      weekStart: 1,\n      relativeTime: {\n        future: 'in %s',\n        past: '%s ago',\n        s: 'a few seconds',\n        m: 'a minute',\n        mm: '%d minutes',\n        h: 'an hour',\n        hh: '%d hours',\n        d: 'a day',\n        dd: '%d days',\n        M: 'a month',\n        MM: '%d months',\n        y: 'a year',\n        yy: '%d years'\n      },\n      formats: {\n        LT: 'HH:mm',\n        LTS: 'HH:mm:ss',\n        L: 'DD/MM/YYYY',\n        LL: 'D MMMM YYYY',\n        LLL: 'D MMMM YYYY HH:mm',\n        LLLL: 'dddd, D MMMM YYYY HH:mm'\n      },\n      ordinal: n => {\n        const s = ['th', 'st', 'nd', 'rd'];\n        const v = n % 100;\n        return `[${n}${s[(v - 20) % 10] || s[v] || s[0]}]`;\n      }\n    }\n  };\n}\n\n/**\n * Prepare style\n *\n * @returns {object}\n */\nfunction prepareStyle(userStyle) {\n  let fontSize = '12px';\n  let fontFamily = window\n    .getComputedStyle(document.body)\n    .getPropertyValue('font-family')\n    .toString();\n  if (typeof userStyle !== 'undefined') {\n    if (typeof userStyle.fontSize !== 'undefined') {\n      fontSize = userStyle.fontSize;\n    }\n    if (typeof userStyle.fontFamily !== 'undefined') {\n      fontFamily = userStyle.fontFamily;\n    }\n  }\n  return getStyle(fontSize, fontFamily);\n}\n\n/**\n * Helper function to determine if specified variable is an object\n *\n * @param {any} item\n *\n * @returns {boolean}\n */\nfunction isObject(item) {\n  return (\n    item &&\n    typeof item === 'object' &&\n    !Array.isArray(item) &&\n    !(item instanceof HTMLElement) &&\n    !(item instanceof CanvasRenderingContext2D) &&\n    typeof item !== 'function'\n  );\n}\n\n/**\n * Helper function which will merge objects recursively - creating brand new one - like clone\n *\n * @param {object} target\n * @params {object} sources\n *\n * @returns {object}\n */\nexport function mergeDeep(target, ...sources) {\n  if (!sources.length) {\n    return target;\n  }\n  const source = sources.shift();\n  if (isObject(target) && isObject(source)) {\n    for (const key in source) {\n      if (isObject(source[key])) {\n        if (typeof target[key] === 'undefined') {\n          target[key] = {};\n        }\n        target[key] = mergeDeep(target[key], source[key]);\n      } else if (Array.isArray(source[key])) {\n        target[key] = [];\n        for (let item of source[key]) {\n          if (isObject(item)) {\n            target[key].push(mergeDeep({}, item));\n            continue;\n          }\n          target[key].push(item);\n        }\n      } else {\n        target[key] = source[key];\n      }\n    }\n  }\n  return mergeDeep(target, ...sources);\n}\n\n/**\n * Detect if object or array is observable\n *\n * @param {object|array} obj\n *\n * @returns {boolean}\n */\nfunction isObservable(obj) {\n  return typeof obj === 'object' && obj.hasOwnProperty('__ob__');\n}\n\n/**\n * Same as above but with reactivity in mind\n *\n * @param {object} target\n * @params {object} sources\n *\n * @returns {object}\n */\nexport function mergeDeepReactive(component, target, ...sources) {\n  if (!sources.length) {\n    return target;\n  }\n  const source = sources.shift();\n  if (isObject(target) && isObject(source)) {\n    for (const key in source) {\n      if (isObject(source[key])) {\n        if (typeof target[key] === 'undefined') {\n          component.$set(target, key, {});\n        }\n        mergeDeepReactive(component, target[key], source[key]);\n      } else if (Array.isArray(source[key])) {\n        component.$set(target, key, source[key]);\n      } else if (typeof source[key] === 'function') {\n        if (source[key].toString().indexOf('[native code]') === -1) {\n          target[key] = source[key];\n        }\n      } else {\n        component.$set(target, key, source[key]);\n      }\n    }\n  }\n  return mergeDeepReactive(component, target, ...sources);\n}\n/**\n * Check if objects or arrays are equal by comparing nested values\n *\n * @param {object|array} left\n * @param {object|array} right\n *\n * @returns {boolean}\n */\nexport function notEqualDeep(left, right, cache = [], path = '') {\n  if (typeof right !== typeof left) {\n    return { left, right, what: path + '.typeof' };\n  } else if (Array.isArray(left) && !Array.isArray(right)) {\n    return { left, right, what: path + '.isArray' };\n  } else if (Array.isArray(right) && !Array.isArray(left)) {\n    return { left, right, what: path + '.isArray' };\n  } else if (Array.isArray(left) && Array.isArray(right)) {\n    if (left.length !== right.length) {\n      return { left, right, what: path + '.length' };\n    }\n    let what;\n    for (let index = 0, len = left.length; index < len; index++) {\n      if ((what = notEqualDeep(left[index], right[index], cache, path + '.' + index))) {\n        return what;\n      }\n    }\n  } else if (isObject(left) && !isObject(right)) {\n    return { left, right, what: path + '.isObject' };\n  } else if (isObject(right) && !isObject(left)) {\n    return { left, right, what: path + '.isObject' };\n  } else if (isObject(left) && isObject(right)) {\n    for (let key in left) {\n      if (!left.hasOwnProperty(key) || !left.propertyIsEnumerable(key)) {\n        continue;\n      }\n      if (!right.hasOwnProperty(key)) {\n        return { left, right, what: path + '.' + key };\n      }\n      let what;\n      if ((what = notEqualDeep(left[key], right[key], cache, path + '.' + key))) {\n        return what;\n      }\n    }\n  } else if (left !== right) {\n    return { left, right, what: path + '. !==' };\n  }\n  return false;\n}\n\n/**\n * GanttElastic\n * Main vue component\n */\nconst GanttElastic = {\n  name: 'GanttElastic',\n  components: {\n    MainView\n  },\n  props: ['tasks', 'options', 'dynamicStyle'],\n  provide() {\n    const provider = {};\n    const self = this;\n    Object.defineProperty(provider, 'root', {\n      enumerable: true,\n      get: () => self\n    });\n    return provider;\n  },\n  data() {\n    return {\n      state: {\n        tasks: [],\n        options: {\n          scrollBarHeight: 0,\n          allVisibleTasksHeight: 0,\n          outerHeight: 0,\n          scroll: {\n            left: 0,\n            top: 0\n          }\n        },\n        dynamicStyle: {},\n        refs: {},\n        tasksById: {},\n        taskTree: {},\n        ctx,\n        emitTasksChanges: true, // some operations may pause emitting changes to parent component\n        emitOptionsChanges: true, // some operations may pause emitting changes to parent component\n        resizeObserver: null,\n        unwatchTasks: null,\n        unwatchOptions: null,\n        unwatchStyle: null,\n        unwatchOutputTasks: null,\n        unwatchOutputOptions: null,\n        unwatchOutputStyle: null\n      }\n    };\n  },\n  methods: {\n    mergeDeep,\n    mergeDeepReactive,\n\n    /**\n     * Calculate height of scrollbar in current browser\n     *\n     * @returns {number}\n     */\n    getScrollBarHeight() {\n      const outer = document.createElement('div');\n      outer.style.visibility = 'hidden';\n      outer.style.height = '100px';\n      outer.style.msOverflowStyle = 'scrollbar';\n      document.body.appendChild(outer);\n      var noScroll = outer.offsetHeight;\n      outer.style.overflow = 'scroll';\n      var inner = document.createElement('div');\n      inner.style.height = '100%';\n      outer.appendChild(inner);\n      var withScroll = inner.offsetHeight;\n      outer.parentNode.removeChild(outer);\n      const height = noScroll - withScroll;\n      this.style['chart-scroll-container--vertical']['margin-left'] = `-${height}px`;\n      return (this.state.options.scrollBarHeight = height);\n    },\n\n    /**\n     * Fill out empty task properties and make it reactive\n     *\n     * @param {array} tasks\n     */\n    fillTasks(tasks) {\n      for (let task of tasks) {\n        if (typeof task.x === 'undefined') {\n          task.x = 0;\n        }\n        if (typeof task.y === 'undefined') {\n          task.y = 0;\n        }\n        if (typeof task.width === 'undefined') {\n          task.width = 0;\n        }\n        if (typeof task.height === 'undefined') {\n          task.height = 0;\n        }\n        if (typeof task.mouseOver === 'undefined') {\n          task.mouseOver = false;\n        }\n        if (typeof task.collapsed === 'undefined') {\n          task.collapsed = false;\n        }\n        if (typeof task.dependentOn === 'undefined') {\n          task.dependentOn = [];\n        }\n        if (typeof task.parentId === 'undefined') {\n          task.parentId = null;\n        }\n        if (typeof task.style === 'undefined') {\n          task.style = {};\n        }\n        if (typeof task.children === 'undefined') {\n          task.children = [];\n        }\n        if (typeof task.allChildren === 'undefined') {\n          task.allChildren = [];\n        }\n        if (typeof task.parents === 'undefined') {\n          task.parents = [];\n        }\n        if (typeof task.parent === 'undefined') {\n          task.parent = null;\n        }\n        if (typeof task.startTime === 'undefined') {\n          task.startTime = dayjs(task.start).valueOf();\n        }\n        if (typeof task.endTime === 'undefined' && task.hasOwnProperty('end')) {\n          task.endTime = dayjs(task.end).valueOf();\n        } else if (typeof task.endTime === 'undefined' && task.hasOwnProperty('duration')) {\n          task.endTime = task.startTime + task.duration;\n        }\n        if (typeof task.duration === 'undefined' && task.hasOwnProperty('endTime')) {\n          task.duration = task.endTime - task.startTime;\n        }\n      }\n      return tasks;\n    },\n\n    /**\n     * Map tasks\n     *\n     * @param {Array} tasks\n     * @param {Object} options\n     */\n    mapTasks(tasks, options) {\n      for (let [index, task] of tasks.entries()) {\n        tasks[index] = {\n          ...task,\n          id: task[options.taskMapping.id],\n          start: task[options.taskMapping.start],\n          label: task[options.taskMapping.label],\n          duration: task[options.taskMapping.duration],\n          progress: task[options.taskMapping.progress],\n          type: task[options.taskMapping.type],\n          style: task[options.taskMapping.style],\n          collapsed: task[options.taskMapping.collapsed]\n        };\n      }\n      return tasks;\n    },\n\n    /**\n     * Initialize component\n     */\n    initialize(itsUpdate = '') {\n      let options = mergeDeep({}, this.state.options, getOptions(this.options), this.options);\n      let tasks = this.mapTasks(this.tasks, options);\n      if (Object.keys(this.state.dynamicStyle).length === 0) {\n        this.initializeStyle();\n      }\n      dayjs.locale(options.locale, null, true);\n      dayjs.locale(options.locale.name);\n      if (typeof options.taskList === 'undefined') {\n        options.taskList = {};\n      }\n      options.taskList.columns = options.taskList.columns.map((column, index) => {\n        column.thresholdPercent = 100;\n        column.widthFromPercentage = 0;\n        column.finalWidth = 0;\n        if (typeof column.height === 'undefined') {\n          column.height = 0;\n        }\n        if (typeof column.style === 'undefined') {\n          column.style = {};\n        }\n        column._id = `${index}-${column.label}`;\n        return column;\n      });\n      this.state.options = options;\n      tasks = this.fillTasks(tasks);\n      this.state.tasksById = this.resetTaskTree(tasks);\n      this.state.taskTree = this.makeTaskTree(this.state.rootTask, tasks);\n      this.state.tasks = this.state.taskTree.allChildren.map(childId => this.getTask(childId));\n      this.calculateTaskListColumnsDimensions();\n      this.state.options.scrollBarHeight = this.getScrollBarHeight();\n      this.state.options.outerHeight = this.state.options.height + this.state.options.scrollBarHeight;\n      this.globalOnResize();\n    },\n\n    /**\n     * Initialize style\n     */\n    initializeStyle() {\n      this.state.dynamicStyle = mergeDeep({}, prepareStyle(this.dynamicStyle), this.dynamicStyle);\n    },\n\n    /**\n     * Get calendar rows outer height\n     *\n     * @returns {int}\n     */\n    getCalendarHeight() {\n      return this.state.options.calendar.height + this.state.options.calendar.strokeWidth;\n    },\n\n    /**\n     * Get maximal level of nested task children\n     *\n     * @returns {int}\n     */\n    getMaximalLevel() {\n      let maximalLevel = 0;\n      this.state.tasks.forEach(task => {\n        if (task.parents.length > maximalLevel) {\n          maximalLevel = task.parents.length;\n        }\n      });\n      return maximalLevel - 1;\n    },\n\n    /**\n     * Get maximal expander width - to calculate straight task list text\n     *\n     * @returns {int}\n     */\n    getMaximalExpanderWidth() {\n      return (\n        this.getMaximalLevel() * this.state.options.taskList.expander.padding +\n        this.state.options.taskList.expander.margin\n      );\n    },\n\n    /**\n     * Synchronize scrollTop property when row height is changed\n     */\n    syncScrollTop() {\n      if (\n        this.state.refs.taskListItems &&\n        this.state.refs.chartGraph.scrollTop !== this.state.refs.taskListItems.scrollTop\n      ) {\n        this.state.options.scroll.top = this.state.refs.taskListItems.scrollTop = this.state.refs.chartScrollContainerVertical.scrollTop = this.state.refs.chartGraph.scrollTop;\n      }\n    },\n\n    /**\n     * Calculate task list columns dimensions\n     */\n    calculateTaskListColumnsDimensions() {\n      let final = 0;\n      let percentage = 0;\n      for (let column of this.state.options.taskList.columns) {\n        if (column.expander) {\n          column.widthFromPercentage =\n            ((this.getMaximalExpanderWidth() + column.width) / 100) * this.state.options.taskList.percent;\n        } else {\n          column.widthFromPercentage = (column.width / 100) * this.state.options.taskList.percent;\n        }\n        percentage += column.widthFromPercentage;\n        column.finalWidth = (column.thresholdPercent * column.widthFromPercentage) / 100;\n        final += column.finalWidth;\n        column.height = this.getTaskHeight() - this.style['grid-line-horizontal']['stroke-width'];\n      }\n      this.state.options.taskList.widthFromPercentage = percentage;\n      this.state.options.taskList.finalWidth = final;\n    },\n\n    /**\n     * Reset task tree - which is used to create tree like structure inside task list\n     */\n    resetTaskTree(tasks) {\n      this.$set(this.state, 'rootTask', {\n        id: null,\n        label: 'root',\n        children: [],\n        allChildren: [],\n        parents: [],\n        parent: null,\n        __root: true\n      });\n      const tasksById = {};\n      for (let i = 0, len = tasks.length; i < len; i++) {\n        let current = tasks[i];\n        current.children = [];\n        current.allChildren = [];\n        current.parent = null;\n        current.parents = [];\n        tasksById[current.id] = current;\n      }\n      return tasksById;\n    },\n\n    /**\n     * Make task tree, after reset - look above\n     *\n     * @param {object} task\n     * @returns {object} tasks with children and parents\n     */\n    makeTaskTree(task, tasks) {\n      for (let i = 0, len = tasks.length; i < len; i++) {\n        let current = tasks[i];\n        if (current.parentId === task.id) {\n          if (task.parents.length) {\n            task.parents.forEach(parent => current.parents.push(parent));\n          }\n          if (!task.propertyIsEnumerable('__root')) {\n            current.parents.push(task.id);\n            current.parent = task.id;\n          } else {\n            current.parents = [];\n            current.parent = null;\n          }\n          current = this.makeTaskTree(current, tasks);\n          task.allChildren.push(current.id);\n          task.children.push(current.id);\n          current.allChildren.forEach(childId => task.allChildren.push(childId));\n        }\n      }\n      return task;\n    },\n\n    /**\n     * Get task by id\n     *\n     * @param {any} taskId\n     * @returns {object|null} task\n     */\n    getTask(taskId) {\n      if (typeof this.state.tasksById[taskId] !== 'undefined') {\n        return this.state.tasksById[taskId];\n      }\n      return null;\n    },\n\n    /**\n     * Get children tasks for specified taskId\n     *\n     * @param {any} taskId\n     * @returns {array} children\n     */\n    getChildren(taskId) {\n      return this.state.tasks.filter(task => task.parent === taskId);\n    },\n\n    /**\n     * Is task visible\n     *\n     * @param {Number|String|Task} task\n     */\n    isTaskVisible(task) {\n      if (typeof task === 'number' || typeof task === 'string') {\n        task = this.getTask(task);\n      }\n      for (let i = 0, len = task.parents.length; i < len; i++) {\n        if (this.getTask(task.parents[i]).collapsed) {\n          return false;\n        }\n      }\n      return true;\n    },\n\n    /**\n     * Get svg\n     *\n     * @returns {string} html svg image of gantt\n     */\n    getSVG() {\n      return this.state.options.mainView.outerHTML;\n    },\n\n    /**\n     * Get image\n     *\n     * @param {string} type image format\n     * @returns {Promise} when resolved returns base64 image string of gantt\n     */\n    getImage(type = 'image/png') {\n      return new Promise(resolve => {\n        const img = new Image();\n        img.onload = () => {\n          const canvas = document.createElement('canvas');\n          canvas.width = this.state.options.mainView.clientWidth;\n          canvas.height = this.state.options.rowsHeight;\n          canvas.getContext('2d').drawImage(img, 0, 0);\n          resolve(canvas.toDataURL(type));\n        };\n        img.src = 'data:image/svg+xml,' + encodeURIComponent(this.getSVG());\n      });\n    },\n\n    /**\n     * Get gantt total height\n     *\n     * @returns {number}\n     */\n    getHeight(visibleTasks, outer = false) {\n      let height =\n        visibleTasks.length * (this.state.options.row.height + this.state.options.chart.grid.horizontal.gap * 2) +\n        this.state.options.calendar.height +\n        this.state.options.calendar.strokeWidth +\n        this.state.options.calendar.gap;\n      if (outer) {\n        height += this.state.options.scrollBarHeight;\n      }\n      return height;\n    },\n\n    /**\n     * Get one task height\n     *\n     * @returns {number}\n     */\n    getTaskHeight(withStroke = false) {\n      if (withStroke) {\n        return (\n          this.state.options.row.height +\n          this.state.options.chart.grid.horizontal.gap * 2 +\n          this.style['grid-line-horizontal']['stroke-width']\n        );\n      }\n      return this.state.options.row.height + this.state.options.chart.grid.horizontal.gap * 2;\n    },\n\n    /**\n     * Get specified tasks height\n     *\n     * @returns {number}\n     */\n    getTasksHeight(visibleTasks) {\n      return visibleTasks.length * this.getTaskHeight();\n    },\n\n    /**\n     * Convert time (in milliseconds) to pixel offset inside chart\n     *\n     * @param {int} ms\n     * @returns {number}\n     */\n    timeToPixelOffsetX(ms) {\n      let x = ms - this.state.options.times.firstTime;\n      if (x) {\n        x = x / this.state.options.times.timePerPixel;\n      }\n      return x;\n    },\n\n    /**\n     * Convert pixel offset inside chart to corresponding time offset in milliseconds\n     *\n     * @param {number} pixelOffsetX\n     * @returns {int} milliseconds\n     */\n    pixelOffsetXToTime(pixelOffsetX) {\n      let offset = pixelOffsetX + this.style['grid-line-vertical']['stroke-width'] / 2;\n      return offset * this.state.options.times.timePerPixel + this.state.options.times.firstTime;\n    },\n\n    /**\n     * Determine if element is inside current view port\n     *\n     * @param {number} x - element placement\n     * @param {number} width - element width\n     * @param {int} buffer - or threshold, if element is outside viewport but offset from view port is below this value return true\n     * @returns {boolean}\n     */\n    isInsideViewPort(x, width, buffer = 5000) {\n      return (\n        (x + width + buffer >= this.state.options.scroll.chart.left &&\n          x - buffer <= this.state.options.scroll.chart.right) ||\n        (x - buffer <= this.state.options.scroll.chart.left &&\n          x + width + buffer >= this.state.options.scroll.chart.right)\n      );\n    },\n\n    /**\n     * Chart scroll event handler\n     *\n     * @param {event} ev\n     */\n    onScrollChart(ev) {\n      this._onScrollChart(\n        this.state.refs.chartScrollContainerHorizontal.scrollLeft,\n        this.state.refs.chartScrollContainerVertical.scrollTop\n      );\n    },\n\n    /**\n     * After same as above but with different arguments - normalized\n     *\n     * @param {number} left\n     * @param {number} top\n     */\n    _onScrollChart(left, top) {\n      if (this.state.options.scroll.chart.left === left && this.state.options.scroll.chart.top === top) {\n        return;\n      }\n      const chartContainerWidth = this.state.refs.chartContainer.clientWidth;\n      this.state.options.scroll.chart.left = left;\n      this.state.options.scroll.chart.right = left + chartContainerWidth;\n      this.state.options.scroll.chart.percent = (left / this.state.options.times.totalViewDurationPx) * 100;\n      this.state.options.scroll.chart.top = top;\n      this.state.options.scroll.chart.time = this.pixelOffsetXToTime(left);\n      this.state.options.scroll.chart.timeCenter = this.pixelOffsetXToTime(left + chartContainerWidth / 2);\n      this.state.options.scroll.chart.dateTime.left = dayjs(this.state.options.scroll.chart.time).valueOf();\n      this.state.options.scroll.chart.dateTime.right = dayjs(\n        this.pixelOffsetXToTime(left + this.state.refs.chart.clientWidth)\n      ).valueOf();\n      this.scrollTo(left, top);\n    },\n\n    /**\n     * Scroll current chart to specified time (in milliseconds)\n     *\n     * @param {int} time\n     */\n    scrollToTime(time) {\n      let pos = this.timeToPixelOffsetX(time);\n      const chartContainerWidth = this.state.refs.chartContainer.clientWidth;\n      pos = pos - chartContainerWidth / 2;\n      if (pos > this.state.options.width) {\n        pos = this.state.options.width - chartContainerWidth;\n      }\n      this.scrollTo(pos);\n    },\n\n    /**\n     * Scroll chart or task list to specified pixel values\n     *\n     * @param {number|null} left\n     * @param {number|null} top\n     */\n    scrollTo(left = null, top = null) {\n      if (left !== null) {\n        this.state.refs.chartCalendarContainer.scrollLeft = left;\n        this.state.refs.chartGraphContainer.scrollLeft = left;\n        this.state.refs.chartScrollContainerHorizontal.scrollLeft = left;\n        this.state.options.scroll.left = left;\n      }\n      if (top !== null) {\n        this.state.refs.chartScrollContainerVertical.scrollTop = top;\n        this.state.refs.chartGraph.scrollTop = top;\n        this.state.refs.taskListItems.scrollTop = top;\n        this.state.options.scroll.top = top;\n        this.syncScrollTop();\n      }\n    },\n\n    /**\n     * After some actions like time zoom change we need to recompensate scroll position\n     * so as a result everything will be in same place\n     */\n    fixScrollPos() {\n      this.scrollToTime(this.state.options.scroll.chart.timeCenter);\n    },\n\n    /**\n     * Mouse wheel event handler\n     */\n    onWheelChart(ev) {\n      if (!ev.shiftKey && ev.deltaX === 0) {\n        let top = this.state.options.scroll.top + ev.deltaY;\n        const chartClientHeight = this.state.options.rowsHeight;\n        const scrollHeight = this.state.refs.chartGraph.scrollHeight - chartClientHeight;\n        if (top < 0) {\n          top = 0;\n        } else if (top > scrollHeight) {\n          top = scrollHeight;\n        }\n        this.scrollTo(null, top);\n      } else if (ev.shiftKey && ev.deltaX === 0) {\n        let left = this.state.options.scroll.left + ev.deltaY;\n        const chartClientWidth = this.state.refs.chartScrollContainerHorizontal.clientWidth;\n        const scrollWidth = this.state.refs.chartScrollContainerHorizontal.scrollWidth - chartClientWidth;\n        if (left < 0) {\n          left = 0;\n        } else if (left > scrollWidth) {\n          left = scrollWidth;\n        }\n        this.scrollTo(left);\n      } else {\n        let left = this.state.options.scroll.left + ev.deltaX;\n        const chartClientWidth = this.state.refs.chartScrollContainerHorizontal.clientWidth;\n        const scrollWidth = this.state.refs.chartScrollContainerHorizontal.scrollWidth - chartClientWidth;\n        if (left < 0) {\n          left = 0;\n        } else if (left > scrollWidth) {\n          left = scrollWidth;\n        }\n        this.scrollTo(left);\n      }\n    },\n\n    /**\n     * Time zoom change event handler\n     */\n    onTimeZoomChange(timeZoom) {\n      this.state.options.times.timeZoom = timeZoom;\n      this.recalculateTimes();\n      this.calculateSteps();\n      this.fixScrollPos();\n    },\n\n    /**\n     * Row height change event handler\n     */\n    onRowHeightChange(height) {\n      this.state.options.row.height = height;\n      this.calculateTaskListColumnsDimensions();\n      this.syncScrollTop();\n    },\n\n    /**\n     * Scope change event handler\n     */\n    onScopeChange(value) {\n      this.state.options.scope.before = value;\n      this.state.options.scope.after = value;\n      this.initTimes();\n      this.calculateSteps();\n      this.computeCalendarWidths();\n      this.fixScrollPos();\n    },\n\n    /**\n     * Task list width change event handler\n     */\n    onTaskListWidthChange(value) {\n      this.state.options.taskList.percent = value;\n      this.calculateTaskListColumnsDimensions();\n      this.fixScrollPos();\n    },\n\n    /**\n     * Task list column width change event handler\n     */\n    onTaskListColumnWidthChange() {\n      this.calculateTaskListColumnsDimensions();\n      this.fixScrollPos();\n    },\n\n    /**\n     * Listen to specified event names\n     */\n    initializeEvents() {\n      this.$emitBus.on('chart-scroll-horizontal', this.onScrollChart);\n      this.$emitBus.on('chart-scroll-vertical', this.onScrollChart);\n      this.$emitBus.on('chart-wheel', this.onWheelChart);\n      this.$emitBus.on('times-timeZoom-change', this.onTimeZoomChange);\n      this.$emitBus.on('row-height-change', this.onRowHeightChange);\n      this.$emitBus.on('scope-change', this.onScopeChange);\n      this.$emitBus.on('taskList-width-change', this.onTaskListWidthChange);\n      this.$emitBus.on('taskList-column-width-change', this.onTaskListColumnWidthChange);\n    },\n\n    /**\n     * When some action was performed (scale change for example) - recalculate time variables\n     */\n    recalculateTimes() {\n      let max = this.state.options.times.timeScale * 60;\n      let min = this.state.options.times.timeScale;\n      let steps = max / min;\n      let percent = this.state.options.times.timeZoom / 100;\n      this.state.options.times.timePerPixel =\n        this.state.options.times.timeScale * steps * percent + Math.pow(2, this.state.options.times.timeZoom);\n      this.state.options.times.totalViewDurationMs = dayjs(this.state.options.times.lastTime).diff(\n        this.state.options.times.firstTime,\n        'milliseconds'\n      );\n      this.state.options.times.totalViewDurationPx =\n        this.state.options.times.totalViewDurationMs / this.state.options.times.timePerPixel;\n      this.state.options.width =\n        this.state.options.times.totalViewDurationPx + this.style['grid-line-vertical']['stroke-width'];\n    },\n\n    /**\n     * Initialize time variables\n     */\n    initTimes() {\n      this.state.options.times.firstTime = dayjs(this.state.options.times.firstTaskTime)\n        .locale(this.state.options.locale.name)\n        .startOf('day')\n        .subtract(this.state.options.scope.before, 'days')\n        .startOf('day')\n        .valueOf();\n      this.state.options.times.lastTime = dayjs(this.state.options.times.lastTaskTime)\n        .locale(this.state.options.locale.name)\n        .endOf('day')\n        .add(this.state.options.scope.after, 'days')\n        .endOf('day')\n        .valueOf();\n      this.recalculateTimes();\n    },\n\n    /**\n     * Calculate steps\n     * Steps are days by default\n     * Each step contain information about time offset and pixel offset of this time inside gantt chart\n     */\n    calculateSteps() {\n      const steps = [];\n      const lastMs = dayjs(this.state.options.times.lastTime).valueOf();\n      const currentDate = dayjs(this.state.options.times.firstTime);\n      steps.push({\n        time: currentDate.valueOf(),\n        offset: {\n          ms: 0,\n          px: 0\n        }\n      });\n      for (\n        let currentDate = dayjs(this.state.options.times.firstTime)\n          .add(1, this.state.options.times.stepDuration)\n          .startOf('day');\n        currentDate.valueOf() <= lastMs;\n        currentDate = currentDate.add(1, this.state.options.times.stepDuration).startOf('day')\n      ) {\n        const offsetMs = currentDate.diff(this.state.options.times.firstTime, 'milliseconds');\n        const offsetPx = offsetMs / this.state.options.times.timePerPixel;\n        const step = {\n          time: currentDate.valueOf(),\n          offset: {\n            ms: offsetMs,\n            px: offsetPx\n          }\n        };\n        const previousStep = steps[steps.length - 1];\n        previousStep.width = {\n          ms: offsetMs - previousStep.offset.ms,\n          px: offsetPx - previousStep.offset.px\n        };\n        steps.push(step);\n      }\n      const lastStep = steps[steps.length - 1];\n      lastStep.width = {\n        ms: this.state.options.times.totalViewDurationMs - lastStep.offset.ms,\n        px: this.state.options.times.totalViewDurationPx - lastStep.offset.px\n      };\n      this.state.options.times.steps = steps;\n    },\n\n    /**\n     * Calculate calendar widths - when scale was changed for example\n     */\n    computeCalendarWidths() {\n      this.computeDayWidths();\n      this.computeHourWidths();\n      this.computeMonthWidths();\n    },\n\n    /**\n     * Compute width of calendar hours column widths basing on text widths\n     */\n    computeHourWidths() {\n      const style = { ...this.style['calendar-row-text'], ...this.style['calendar-row-text--hour'] };\n      this.state.ctx.font = style['font-size'] + ' ' + style['font-family'];\n      const localeName = this.state.options.locale.name;\n      let currentDate = dayjs('2018-01-01T00:00:00').locale(localeName); // any date will be good for hours\n      let maxWidths = this.state.options.calendar.hour.maxWidths;\n      if (maxWidths.length) {\n        return;\n      }\n      for (let formatName in this.state.options.calendar.hour.format) {\n        maxWidths[formatName] = 0;\n      }\n      for (let hour = 0; hour < 24; hour++) {\n        let widths = { hour };\n        for (let formatName in this.state.options.calendar.hour.format) {\n          const hourFormatted = this.state.options.calendar.hour.format[formatName](currentDate);\n          this.state.options.calendar.hour.formatted[formatName].push(hourFormatted);\n          widths[formatName] = this.state.ctx.measureText(hourFormatted).width;\n        }\n        this.state.options.calendar.hour.widths.push(widths);\n        for (let formatName in this.state.options.calendar.hour.format) {\n          if (widths[formatName] > maxWidths[formatName]) {\n            maxWidths[formatName] = widths[formatName];\n          }\n        }\n        currentDate = currentDate.add(1, 'hour');\n      }\n    },\n\n    /**\n     * Compute calendar days column widths basing on text widths\n     */\n    computeDayWidths() {\n      const style = { ...this.style['calendar-row-text'], ...this.style['calendar-row-text--day'] };\n      this.state.ctx.font = style['font-size'] + ' ' + style['font-family'];\n      const localeName = this.state.options.locale.name;\n      let currentDate = dayjs(this.state.options.times.steps[0].time).locale(localeName);\n      let maxWidths = this.state.options.calendar.day.maxWidths;\n      this.state.options.calendar.day.widths = [];\n      Object.keys(this.state.options.calendar.day.format).forEach(formatName => {\n        maxWidths[formatName] = 0;\n      });\n      for (let day = 0, daysLen = this.state.options.times.steps.length; day < daysLen; day++) {\n        const widths = {\n          day\n        };\n        Object.keys(this.state.options.calendar.day.format).forEach(formatName => {\n          widths[formatName] = this.state.ctx.measureText(\n            this.state.options.calendar.day.format[formatName](currentDate)\n          ).width;\n        });\n        this.state.options.calendar.day.widths.push(widths);\n        Object.keys(this.state.options.calendar.day.format).forEach(formatName => {\n          if (widths[formatName] > maxWidths[formatName]) {\n            maxWidths[formatName] = widths[formatName];\n          }\n        });\n        currentDate = currentDate.add(1, 'day');\n      }\n    },\n\n    /**\n     * Months count\n     *\n     * @description Returns number of different months in specified time range\n     *\n     * @param {number} fromTime - date in ms\n     * @param {number} toTime - date in ms\n     *\n     * @returns {number} different months count\n     */\n    monthsCount(fromTime, toTime) {\n      if (fromTime > toTime) {\n        return 0;\n      }\n      let currentMonth = dayjs(fromTime);\n      let previousMonth = currentMonth.clone();\n      let monthsCount = 1;\n      while (currentMonth.valueOf() <= toTime) {\n        currentMonth = currentMonth.add(1, 'day');\n        if (previousMonth.month() !== currentMonth.month()) {\n          monthsCount++;\n        }\n        previousMonth = currentMonth.clone();\n      }\n      return monthsCount;\n    },\n\n    /**\n     * Compute month calendar columns widths basing on text widths\n     */\n    computeMonthWidths() {\n      const style = { ...this.style['calendar-row-text'], ...this.style['calendar-row-text--month'] };\n      this.state.ctx.font = style['font-size'] + ' ' + style['font-family'];\n      let maxWidths = this.state.options.calendar.month.maxWidths;\n      this.state.options.calendar.month.widths = [];\n      Object.keys(this.state.options.calendar.month.format).forEach(formatName => {\n        maxWidths[formatName] = 0;\n      });\n      const localeName = this.state.options.locale.name;\n      let currentDate = dayjs(this.state.options.times.firstTime).locale(localeName);\n      const monthsCount = this.monthsCount(this.state.options.times.firstTime, this.state.options.times.lastTime);\n      for (let month = 0; month < monthsCount; month++) {\n        const widths = {\n          month\n        };\n        Object.keys(this.state.options.calendar.month.format).forEach(formatName => {\n          widths[formatName] = this.state.ctx.measureText(\n            this.state.options.calendar.month.format[formatName](currentDate)\n          ).width;\n        });\n        this.state.options.calendar.month.widths.push(widths);\n        Object.keys(this.state.options.calendar.month.format).forEach(formatName => {\n          if (widths[formatName] > maxWidths[formatName]) {\n            maxWidths[formatName] = widths[formatName];\n          }\n        });\n        currentDate = currentDate.add(1, 'month');\n      }\n    },\n\n    /**\n     * Prepare time and date variables for gantt\n     */\n    prepareDates() {\n      let firstTaskTime = Number.MAX_SAFE_INTEGER;\n      let lastTaskTime = 0;\n      for (let index = 0, len = this.state.tasks.length; index < len; index++) {\n        let task = this.state.tasks[index];\n        if (task.startTime < firstTaskTime) {\n          firstTaskTime = task.startTime;\n        }\n        if (task.startTime + task.duration > lastTaskTime) {\n          lastTaskTime = task.startTime + task.duration;\n        }\n      }\n      this.state.options.times.firstTaskTime = firstTaskTime;\n      this.state.options.times.lastTaskTime = lastTaskTime;\n      this.state.options.times.firstTime = dayjs(firstTaskTime)\n        .locale(this.state.options.locale.name)\n        .startOf('day')\n        .subtract(this.state.options.scope.before, 'days')\n        .startOf('day')\n        .valueOf();\n      this.state.options.times.lastTime = dayjs(lastTaskTime)\n        .locale(this.state.options.locale.name)\n        .endOf('day')\n        .add(this.state.options.scope.after, 'days')\n        .endOf('day')\n        .valueOf();\n    },\n\n    /**\n     * Setup and calculate everything\n     */\n    setup(itsUpdate = '') {\n      this.initialize(itsUpdate);\n      this.prepareDates();\n      this.initTimes();\n      this.calculateSteps();\n      this.computeCalendarWidths();\n      this.state.options.taskList.width = this.state.options.taskList.columns.reduce(\n        (prev, current) => {\n          return { width: prev.width + current.width };\n        },\n        { width: 0 }\n      ).width;\n    },\n\n    /**\n     * Global resize event (from window.addEventListener)\n     */\n    globalOnResize() {\n      if (typeof this.$el === 'undefined' || !this.$el) {\n        return;\n      }\n      this.state.options.clientWidth = this.$el.clientWidth;\n      if (\n        this.state.options.taskList.widthFromPercentage >\n        (this.state.options.clientWidth / 100) * this.state.options.taskList.widthThreshold\n      ) {\n        const diff =\n          this.state.options.taskList.widthFromPercentage -\n          (this.state.options.clientWidth / 100) * this.state.options.taskList.widthThreshold;\n        let diffPercent = 100 - (diff / this.state.options.taskList.widthFromPercentage) * 100;\n        if (diffPercent < 0) {\n          diffPercent = 0;\n        }\n        this.state.options.taskList.columns.forEach(column => {\n          column.thresholdPercent = diffPercent;\n        });\n      } else {\n        this.state.options.taskList.columns.forEach(column => {\n          column.thresholdPercent = 100;\n        });\n      }\n      this.calculateTaskListColumnsDimensions();\n      this.$emit('calendar-recalculate');\n      this.syncScrollTop();\n    }\n  },\n\n  computed: {\n    /**\n     * Get visible tasks\n     * Very important method which will bring us only those tasks that are visible inside gantt chart\n     * For example when task is collapsed - children of this task are not visible - we should not render them\n     */\n    visibleTasks() {\n      const visibleTasks = this.state.tasks.filter(task => this.isTaskVisible(task));\n      const maxRows = visibleTasks.slice(0, this.state.options.maxRows);\n      this.state.options.rowsHeight = this.getTasksHeight(maxRows);\n      let heightCompensation = 0;\n      if (this.state.options.maxHeight && this.state.options.rowsHeight > this.state.options.maxHeight) {\n        heightCompensation = this.state.options.rowsHeight - this.state.options.maxHeight;\n        this.state.options.rowsHeight = this.state.options.maxHeight;\n      }\n      this.state.options.height = this.getHeight(maxRows) - heightCompensation;\n      this.state.options.allVisibleTasksHeight = this.getTasksHeight(visibleTasks);\n      this.state.options.outerHeight = this.getHeight(maxRows, true) - heightCompensation;\n      let len = visibleTasks.length;\n      for (let index = 0; index < len; index++) {\n        let task = visibleTasks[index];\n        task.width =\n          task.duration / this.state.options.times.timePerPixel - this.style['grid-line-vertical']['stroke-width'];\n        if (task.width < 0) {\n          task.width = 0;\n        }\n        task.height = this.state.options.row.height;\n        task.x = this.timeToPixelOffsetX(task.startTime);\n        task.y =\n          (this.state.options.row.height + this.state.options.chart.grid.horizontal.gap * 2) * index +\n          this.state.options.chart.grid.horizontal.gap;\n      }\n      return visibleTasks;\n    },\n\n    /**\n     * Style shortcut\n     */\n    style() {\n      return this.state.dynamicStyle;\n    },\n\n    /**\n     * Get columns and compute dimensions on the fly\n     */\n    getTaskListColumns() {\n      this.calculateTaskListColumnsDimensions();\n      return this.state.options.taskList.columns;\n    },\n\n    /**\n     * Tasks used for communicate with parent component\n     */\n    outputTasks() {\n      return this.state.tasks;\n    },\n\n    /**\n     * Options used to communicate with parent component\n     */\n    outputOptions() {\n      return this.state.options;\n    }\n  },\n\n  /**\n   * Watch tasks after gantt instance is created and react when we have new kids on the block\n   */\n  created() {\n    this.$set = function(obj, key, val) { obj[key] = val; };\n    this.$delete = function(obj, key) { delete obj[key]; };\n    this.$emitBus = mitt();\n    this.initializeEvents();\n    this.setup();\n    this.state.unwatchTasks = this.$watch(\n      'tasks',\n      tasks => {\n        const notEqual = notEqualDeep(tasks, this.outputTasks);\n        if (notEqual) {\n          this.setup('tasks');\n        }\n      },\n      { deep: true }\n    );\n    this.state.unwatchOptions = this.$watch(\n      'options',\n      opts => {\n        const notEqual = notEqualDeep(opts, this.outputOptions);\n        if (notEqual) {\n          this.setup('options');\n        }\n      },\n      { deep: true }\n    );\n    this.state.unwatchStyle = this.$watch(\n      'dynamicStyle',\n      style => {\n        const notEqual = notEqualDeep(style, this.style());\n        if (notEqual) {\n          this.initializeStyle();\n        }\n      },\n      { deep: true, immediate: true }\n    );\n\n    this.state.unwatchOutputTasks = this.$watch(\n      'outputTasks',\n      tasks => {\n        this.$emit('tasks-changed', tasks.map(task => task));\n      },\n      { deep: true }\n    );\n    this.state.unwatchOutputOptions = this.$watch(\n      'outputOptions',\n      options => {\n        this.$emit('options-changed', mergeDeep({}, options));\n      },\n      { deep: true }\n    );\n    this.state.unwatchOutputStyle = this.$watch(\n      'style',\n      style => {\n        this.$emit('dynamic-style-changed', mergeDeep({}, style));\n      },\n      { deep: true }\n    );\n\n    this.$emitBus.emit('gantt-elastic-created', this);\n    this.$emit('created', this);\n  },\n\n  /**\n   * Emit before-mount event\n   */\n  beforeMount() {\n    this.$emit('before-mount', this);\n  },\n\n  /**\n   * Emit ready/mounted events and deliver this gantt instance to outside world when needed\n   */\n  mounted() {\n    this.state.options.clientWidth = this.$el.clientWidth;\n    this.state.resizeObserver = new ResizeObserver((entries, observer) => {\n      this.globalOnResize();\n    });\n    this.state.resizeObserver.observe(this.$el.parentNode);\n    this.globalOnResize();\n    this.$emit('ready', this);\n    this.$emitBus.emit('gantt-elastic-mounted', this);\n    this.$emit('mounted', this);\n    this.$emitBus.emit('gantt-elastic-ready', this);\n    this.$emit('gantt-elastic-ready', this);\n  },\n\n  /**\n   * Emit event when data was changed and before update (you can cleanup dom events here for example)\n   */\n  beforeUpdate() {\n    this.$emit('before-update');\n  },\n\n  /**\n   * Emit event when gantt-elastic view was updated\n   */\n  updated() {\n    this.$nextTick(() => {\n      this.$emit('updated');\n    });\n  },\n\n  /**\n   * Before destroy event - clean up\n   */\n  beforeUnmount() {\n    this.state.resizeObserver.unobserve(this.$el.parentNode);\n    this.state.unwatchTasks();\n    this.state.unwatchOptions();\n    this.state.unwatchStyle();\n    this.state.unwatchOutputTasks();\n    this.state.unwatchOutputOptions();\n    this.state.unwatchOutputStyle();\n    this.$emit('before-destroy');\n  },\n\n  /**\n   * Emit event after gantt-elastic was destroyed\n   */\n  unmounted() {\n    this.$emit('destroyed');\n  }\n};\nexport default GanttElastic;\n</script>\n\n<style>\n[class^='gantt-elastic'],\n[class*=' gantt-elastic'] {\n  box-sizing: border-box;\n}\n.gantt-elastic__main-view svg {\n  display: block;\n}\n.gantt-elastic__grid-horizontal-line,\n.gantt-elastic__grid-vertical-line {\n  stroke: #a0a0a0;\n  stroke-width: 1;\n}\nforeignObject > * {\n  margin: 0px;\n}\n.gantt-elastic .p-2 {\n  padding: 10rem;\n}\n.gantt-elastic__main-view-main-container,\n.gantt-elastic__main-view-container {\n  overflow: hidden;\n  max-width: 100%;\n}\n.gantt-elastic__task-list-header-column:last-of-type {\n  border-right: 1px solid #00000050;\n}\n.gantt-elastic__task-list-item:last-of-type {\n  border-bottom: 1px solid #00000050;\n}\n.gantt-elastic__task-list-item-value-wrapper:hover {\n  overflow: visible !important;\n}\n.gantt-elastic__task-list-item-value-wrapper:hover > .gantt-elastic__task-list-item-value-container {\n  position: relative;\n  overflow: visible !important;\n}\n.gantt-elastic__task-list-item-value-wrapper:hover > .gantt-elastic__task-list-item-value {\n  position: absolute;\n}\n</style>\n"],"sourceRoot":""}]);
+`, "",{"version":3,"sources":["webpack://./src/GanttElastic.vue"],"names":[],"mappings":";AAmmDA;;EAEE,sBAAsB;AACxB;AACA;EACE,cAAc;AAChB;AACA;;EAEE,eAAe;EACf,eAAe;AACjB;AACA;EACE,WAAW;AACb;AACA;EACE,cAAc;AAChB;AACA;;EAEE,gBAAgB;EAChB,eAAe;AACjB;AACA;EACE,iCAAiC;AACnC;AACA;EACE,kCAAkC;AACpC;AACA;EACE,4BAA4B;AAC9B;AACA;EACE,kBAAkB;EAClB,4BAA4B;AAC9B;AACA;EACE,kBAAkB;AACpB","sourcesContent":["<!--\n/**\n * @fileoverview GanttElastic component\n * @license MIT\n * @author Rafal Pospiech <neuronet.io@gmail.com>\n * @package GanttElastic\n */\n-->\n<template>\n  <div class=\"gantt-elastic\" style=\"width:100%\">\n    <slot name=\"header\">\n      <!-- default header when the consumer does not provide one (Vue 3 port: the old\n           external gantt-elastic-header UMD is Vue 2 only, so the local Header ships in) -->\n      <gantt-header></gantt-header>\n    </slot>\n    <main-view ref=\"mainView\"></main-view>\n    <slot name=\"footer\"></slot>\n  </div>\n</template>\n\n<script>\nimport VueInstance from 'vue';\nimport dayjs from 'dayjs';\nimport mitt from 'mitt';\nimport MainView from './components/MainView.vue';\nimport Header from './components/Header.vue';\nimport getStyle from './style.js';\nimport ResizeObserver from 'resize-observer-polyfill';\n\nconst ctx = document.createElement('canvas').getContext('2d');\nlet VueInst = VueInstance;\nfunction initVue() {\n  if (typeof Vue !== 'undefined' && typeof VueInst === 'undefined') {\n    VueInst = Vue;\n  }\n}\ninitVue();\n\nlet hourWidthCache = null;\n\n/**\n * Helper function to fill out empty options in user settings\n *\n * @param {object} userOptions - initial user options that will merge with those below\n * @returns {object} merged options\n */\nfunction getOptions(userOptions) {\n  let localeName = 'en';\n  if (typeof userOptions.locale !== 'undefined' && typeof userOptions.locale.name !== 'undefined') {\n    localeName = userOptions.locale.name;\n  }\n  return {\n    slots: {\n      header: {}\n    },\n    taskMapping: {\n      //*\n      id: 'id',\n      start: 'start',\n      label: 'label',\n      duration: 'duration',\n      progress: 'progress',\n      type: 'type',\n      style: 'style',\n      collapsed: 'collapsed'\n    },\n    width: 0,\n    height: 0,\n    clientWidth: 0,\n    outerHeight: 0,\n    rowsHeight: 0,\n    allVisibleTasksHeight: 0,\n    scroll: {\n      scrolling: false,\n      dragXMoveMultiplier: 3, //*\n      dragYMoveMultiplier: 2, //*\n      top: 0,\n      taskList: {\n        left: 0,\n        right: 0,\n        top: 0,\n        bottom: 0\n      },\n      chart: {\n        left: 0,\n        right: 0,\n        percent: 0,\n        timePercent: 0,\n        top: 0,\n        bottom: 0,\n        time: 0,\n        timeCenter: 0,\n        dateTime: {\n          left: '',\n          right: ''\n        }\n      }\n    },\n    scope: {\n      //*\n      before: 1,\n      after: 1\n    },\n    times: {\n      timeScale: 60 * 1000,\n      timeZoom: 17, //*\n      timePerPixel: 0,\n      firstTime: null,\n      lastTime: null,\n      firstTaskTime: 0,\n      lastTaskTime: 0,\n      totalViewDurationMs: 0,\n      totalViewDurationPx: 0,\n      stepDuration: 'day',\n      steps: []\n    },\n    row: {\n      height: 24 //*\n    },\n    maxRows: 20, //*\n    maxHeight: 0, //*\n    chart: {\n      grid: {\n        horizontal: {\n          gap: 6 //*\n        }\n      },\n      progress: {\n        width: 20, //*\n        height: 6, //*\n        pattern: true,\n        bar: false\n      },\n      text: {\n        offset: 4, //*\n        xPadding: 10, //*\n        display: true //*\n      },\n      expander: {\n        type: 'chart',\n        display: false, //*\n        displayIfTaskListHidden: true, //*\n        offset: 4, //*\n        size: 18\n      }\n    },\n    taskList: {\n      display: true, //*\n      resizeAfterThreshold: true, //*\n      widthThreshold: 75, //*\n      columns: [\n        //*\n        {\n          id: 0,\n          label: 'ID',\n          value: 'id',\n          width: 40\n        }\n      ],\n      percent: 100, //*\n      width: 0,\n      finalWidth: 0,\n      widthFromPercentage: 0,\n      minWidth: 18,\n      expander: {\n        type: 'task-list',\n        size: 16,\n        columnWidth: 24,\n        padding: 16,\n        margin: 10,\n        straight: false\n      }\n    },\n    calendar: {\n      workingDays: [1, 2, 3, 4, 5], //*\n      gap: 6, //*\n      height: 0,\n      strokeWidth: 1,\n      hour: {\n        height: 20, //*\n        display: true, //*\n        widths: [],\n        maxWidths: { short: 0, medium: 0, long: 0 },\n        formatted: {\n          long: [],\n          medium: [],\n          short: []\n        },\n        format: {\n          //*\n          long(date) {\n            return date.format('HH:mm');\n          },\n          medium(date) {\n            return date.format('HH:mm');\n          },\n          short(date) {\n            return date.format('HH');\n          }\n        }\n      },\n      day: {\n        height: 20, //*\n        display: true, //*\n        widths: [],\n        maxWidths: { short: 0, medium: 0, long: 0 },\n        format: {\n          long(date) {\n            return date.format('DD dddd');\n          },\n          medium(date) {\n            return date.format('DD ddd');\n          },\n          short(date) {\n            return date.format('DD');\n          }\n        }\n      },\n      month: {\n        height: 20, //*\n        display: true, //*\n        widths: [],\n        maxWidths: { short: 0, medium: 0, long: 0 },\n        format: {\n          //*\n          short(date) {\n            return date.format('MM');\n          },\n          medium(date) {\n            return date.format(\"MMM 'YY\");\n          },\n          long(date) {\n            return date.format('MMMM YYYY');\n          }\n        }\n      }\n    },\n    locale: {\n      //*\n      name: 'en',\n      weekdays: 'Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday'.split('_'),\n      weekdaysShort: 'Sun_Mon_Tue_Wed_Thu_Fri_Sat'.split('_'),\n      weekdaysMin: 'Su_Mo_Tu_We_Th_Fr_Sa'.split('_'),\n      months: 'January_February_March_April_May_June_July_August_September_October_November_December'.split('_'),\n      monthsShort: 'Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec'.split('_'),\n      weekStart: 1,\n      relativeTime: {\n        future: 'in %s',\n        past: '%s ago',\n        s: 'a few seconds',\n        m: 'a minute',\n        mm: '%d minutes',\n        h: 'an hour',\n        hh: '%d hours',\n        d: 'a day',\n        dd: '%d days',\n        M: 'a month',\n        MM: '%d months',\n        y: 'a year',\n        yy: '%d years'\n      },\n      formats: {\n        LT: 'HH:mm',\n        LTS: 'HH:mm:ss',\n        L: 'DD/MM/YYYY',\n        LL: 'D MMMM YYYY',\n        LLL: 'D MMMM YYYY HH:mm',\n        LLLL: 'dddd, D MMMM YYYY HH:mm'\n      },\n      ordinal: n => {\n        const s = ['th', 'st', 'nd', 'rd'];\n        const v = n % 100;\n        return `[${n}${s[(v - 20) % 10] || s[v] || s[0]}]`;\n      }\n    }\n  };\n}\n\n/**\n * Prepare style\n *\n * @returns {object}\n */\nfunction prepareStyle(userStyle) {\n  let fontSize = '12px';\n  let fontFamily = window\n    .getComputedStyle(document.body)\n    .getPropertyValue('font-family')\n    .toString();\n  if (typeof userStyle !== 'undefined') {\n    if (typeof userStyle.fontSize !== 'undefined') {\n      fontSize = userStyle.fontSize;\n    }\n    if (typeof userStyle.fontFamily !== 'undefined') {\n      fontFamily = userStyle.fontFamily;\n    }\n  }\n  return getStyle(fontSize, fontFamily);\n}\n\n/**\n * Helper function to determine if specified variable is an object\n *\n * @param {any} item\n *\n * @returns {boolean}\n */\nfunction isObject(item) {\n  return (\n    item &&\n    typeof item === 'object' &&\n    !Array.isArray(item) &&\n    !(item instanceof HTMLElement) &&\n    !(item instanceof CanvasRenderingContext2D) &&\n    typeof item !== 'function'\n  );\n}\n\n/**\n * Helper function which will merge objects recursively - creating brand new one - like clone\n *\n * @param {object} target\n * @params {object} sources\n *\n * @returns {object}\n */\nexport function mergeDeep(target, ...sources) {\n  if (!sources.length) {\n    return target;\n  }\n  const source = sources.shift();\n  if (isObject(target) && isObject(source)) {\n    for (const key in source) {\n      if (isObject(source[key])) {\n        if (typeof target[key] === 'undefined') {\n          target[key] = {};\n        }\n        target[key] = mergeDeep(target[key], source[key]);\n      } else if (Array.isArray(source[key])) {\n        target[key] = [];\n        for (let item of source[key]) {\n          if (isObject(item)) {\n            target[key].push(mergeDeep({}, item));\n            continue;\n          }\n          target[key].push(item);\n        }\n      } else {\n        target[key] = source[key];\n      }\n    }\n  }\n  return mergeDeep(target, ...sources);\n}\n\n/**\n * Detect if object or array is observable\n *\n * @param {object|array} obj\n *\n * @returns {boolean}\n */\nfunction isObservable(obj) {\n  return typeof obj === 'object' && obj.hasOwnProperty('__ob__');\n}\n\n/**\n * Same as above but with reactivity in mind\n *\n * @param {object} target\n * @params {object} sources\n *\n * @returns {object}\n */\nexport function mergeDeepReactive(component, target, ...sources) {\n  if (!sources.length) {\n    return target;\n  }\n  const source = sources.shift();\n  if (isObject(target) && isObject(source)) {\n    for (const key in source) {\n      if (isObject(source[key])) {\n        if (typeof target[key] === 'undefined') {\n          component.$set(target, key, {});\n        }\n        mergeDeepReactive(component, target[key], source[key]);\n      } else if (Array.isArray(source[key])) {\n        component.$set(target, key, source[key]);\n      } else if (typeof source[key] === 'function') {\n        if (source[key].toString().indexOf('[native code]') === -1) {\n          target[key] = source[key];\n        }\n      } else {\n        component.$set(target, key, source[key]);\n      }\n    }\n  }\n  return mergeDeepReactive(component, target, ...sources);\n}\n/**\n * Check if objects or arrays are equal by comparing nested values\n *\n * @param {object|array} left\n * @param {object|array} right\n *\n * @returns {boolean}\n */\nexport function notEqualDeep(left, right, cache = [], path = '') {\n  if (typeof right !== typeof left) {\n    return { left, right, what: path + '.typeof' };\n  } else if (Array.isArray(left) && !Array.isArray(right)) {\n    return { left, right, what: path + '.isArray' };\n  } else if (Array.isArray(right) && !Array.isArray(left)) {\n    return { left, right, what: path + '.isArray' };\n  } else if (Array.isArray(left) && Array.isArray(right)) {\n    if (left.length !== right.length) {\n      return { left, right, what: path + '.length' };\n    }\n    let what;\n    for (let index = 0, len = left.length; index < len; index++) {\n      if ((what = notEqualDeep(left[index], right[index], cache, path + '.' + index))) {\n        return what;\n      }\n    }\n  } else if (isObject(left) && !isObject(right)) {\n    return { left, right, what: path + '.isObject' };\n  } else if (isObject(right) && !isObject(left)) {\n    return { left, right, what: path + '.isObject' };\n  } else if (isObject(left) && isObject(right)) {\n    for (let key in left) {\n      if (!left.hasOwnProperty(key) || !left.propertyIsEnumerable(key)) {\n        continue;\n      }\n      if (!right.hasOwnProperty(key)) {\n        return { left, right, what: path + '.' + key };\n      }\n      let what;\n      if ((what = notEqualDeep(left[key], right[key], cache, path + '.' + key))) {\n        return what;\n      }\n    }\n  } else if (left !== right) {\n    return { left, right, what: path + '. !==' };\n  }\n  return false;\n}\n\n/**\n * GanttElastic\n * Main vue component\n */\nconst GanttElastic = {\n  name: 'GanttElastic',\n  components: {\n    MainView,\n    GanttHeader: Header\n  },\n  props: ['tasks', 'options', 'dynamicStyle'],\n  provide() {\n    const provider = {};\n    const self = this;\n    Object.defineProperty(provider, 'root', {\n      enumerable: true,\n      get: () => self\n    });\n    return provider;\n  },\n  data() {\n    return {\n      state: {\n        tasks: [],\n        options: {\n          scrollBarHeight: 0,\n          allVisibleTasksHeight: 0,\n          outerHeight: 0,\n          scroll: {\n            left: 0,\n            top: 0\n          }\n        },\n        dynamicStyle: {},\n        refs: {},\n        tasksById: {},\n        taskTree: {},\n        ctx,\n        emitTasksChanges: true, // some operations may pause emitting changes to parent component\n        emitOptionsChanges: true, // some operations may pause emitting changes to parent component\n        resizeObserver: null,\n        unwatchTasks: null,\n        unwatchOptions: null,\n        unwatchStyle: null,\n        unwatchVisibleTasksGeometry: null,\n        initialized: false,\n        unwatchOutputTasks: null,\n        unwatchOutputOptions: null,\n        unwatchOutputStyle: null\n      }\n    };\n  },\n  methods: {\n    mergeDeep,\n    mergeDeepReactive,\n\n    /**\n     * Calculate height of scrollbar in current browser\n     *\n     * @returns {number}\n     */\n    getScrollBarHeight() {\n      const outer = document.createElement('div');\n      outer.style.visibility = 'hidden';\n      outer.style.height = '100px';\n      outer.style.msOverflowStyle = 'scrollbar';\n      document.body.appendChild(outer);\n      var noScroll = outer.offsetHeight;\n      outer.style.overflow = 'scroll';\n      var inner = document.createElement('div');\n      inner.style.height = '100%';\n      outer.appendChild(inner);\n      var withScroll = inner.offsetHeight;\n      outer.parentNode.removeChild(outer);\n      const height = noScroll - withScroll;\n      this.style['chart-scroll-container--vertical']['margin-left'] = `-${height}px`;\n      return (this.state.options.scrollBarHeight = height);\n    },\n\n    /**\n     * Fill out empty task properties and make it reactive\n     *\n     * @param {array} tasks\n     */\n    fillTasks(tasks) {\n      for (let task of tasks) {\n        if (typeof task.x === 'undefined') {\n          task.x = 0;\n        }\n        if (typeof task.y === 'undefined') {\n          task.y = 0;\n        }\n        if (typeof task.width === 'undefined') {\n          task.width = 0;\n        }\n        if (typeof task.height === 'undefined') {\n          task.height = 0;\n        }\n        if (typeof task.mouseOver === 'undefined') {\n          task.mouseOver = false;\n        }\n        if (typeof task.collapsed === 'undefined') {\n          task.collapsed = false;\n        }\n        if (typeof task.dependentOn === 'undefined') {\n          task.dependentOn = [];\n        }\n        if (typeof task.parentId === 'undefined') {\n          task.parentId = null;\n        }\n        if (typeof task.style === 'undefined') {\n          task.style = {};\n        }\n        if (typeof task.children === 'undefined') {\n          task.children = [];\n        }\n        if (typeof task.allChildren === 'undefined') {\n          task.allChildren = [];\n        }\n        if (typeof task.parents === 'undefined') {\n          task.parents = [];\n        }\n        if (typeof task.parent === 'undefined') {\n          task.parent = null;\n        }\n        if (typeof task.startTime === 'undefined') {\n          task.startTime = dayjs(task.start).valueOf();\n        }\n        if (typeof task.endTime === 'undefined' && task.hasOwnProperty('end')) {\n          task.endTime = dayjs(task.end).valueOf();\n        } else if (typeof task.endTime === 'undefined' && task.hasOwnProperty('duration')) {\n          task.endTime = task.startTime + task.duration;\n        }\n        if (typeof task.duration === 'undefined' && task.hasOwnProperty('endTime')) {\n          task.duration = task.endTime - task.startTime;\n        }\n      }\n      return tasks;\n    },\n\n    /**\n     * Map tasks\n     *\n     * @param {Array} tasks\n     * @param {Object} options\n     */\n    mapTasks(tasks, options) {\n      // do not mutate the reactive props array - replacing its entries\n      // would re-trigger the deep tasks watcher on every setup (infinite loop in Vue 3)\n      return tasks.map(task => ({\n        ...task,\n        id: task[options.taskMapping.id],\n        start: task[options.taskMapping.start],\n        label: task[options.taskMapping.label],\n        duration: task[options.taskMapping.duration],\n        progress: task[options.taskMapping.progress],\n        type: task[options.taskMapping.type],\n        style: task[options.taskMapping.style],\n        collapsed: task[options.taskMapping.collapsed]\n      }));\n    },\n\n    /**\n     * Initialize component\n     */\n    initialize(itsUpdate = '') {\n      // on re-initialization (tasks/options prop changed at runtime) user-modified\n      // runtime values must survive: collapsed flags toggled via the expander and\n      // times.timeZoom changed through the header slider or directly on state\n      const reinit = this.state.initialized === true;\n      const prevTasksById = reinit ? this.state.tasksById : null;\n      let options = mergeDeep({}, this.state.options, getOptions(this.options), this.options);\n      if (reinit && typeof this.options.times === 'undefined') {\n        options.times.timeZoom = this.state.options.times.timeZoom;\n      }\n      let tasks = this.mapTasks(this.tasks, options);\n      if (Object.keys(this.state.dynamicStyle).length === 0) {\n        this.initializeStyle();\n      }\n      dayjs.locale(options.locale, null, true);\n      dayjs.locale(options.locale.name);\n      if (typeof options.taskList === 'undefined') {\n        options.taskList = {};\n      }\n      options.taskList.columns = options.taskList.columns.map((column, index) => {\n        column.thresholdPercent = 100;\n        column.widthFromPercentage = 0;\n        column.finalWidth = 0;\n        if (typeof column.height === 'undefined') {\n          column.height = 0;\n        }\n        if (typeof column.style === 'undefined') {\n          column.style = {};\n        }\n        column._id = `${index}-${column.label}`;\n        return column;\n      });\n      this.state.options = options;\n      tasks = this.fillTasks(tasks);\n      if (reinit && prevTasksById) {\n        for (let task of tasks) {\n          const prev = prevTasksById[task.id];\n          if (prev && typeof prev.collapsed !== 'undefined') {\n            task.collapsed = prev.collapsed;\n          }\n        }\n      }\n      this.state.tasksById = this.resetTaskTree(tasks);\n      this.state.taskTree = this.makeTaskTree(this.state.rootTask, tasks);\n      this.state.tasks = this.state.taskTree.allChildren.map(childId => this.getTask(childId));\n      this.calculateTaskListColumnsDimensions();\n      this.state.options.scrollBarHeight = this.getScrollBarHeight();\n      this.state.options.outerHeight = this.state.options.height + this.state.options.scrollBarHeight;\n      this.state.initialized = true;\n      this.globalOnResize();\n    },\n\n    /**\n     * Initialize style\n     */\n    initializeStyle() {\n      this.state.dynamicStyle = mergeDeep({}, prepareStyle(this.dynamicStyle), this.dynamicStyle);\n    },\n\n    /**\n     * Get calendar rows outer height\n     *\n     * @returns {int}\n     */\n    getCalendarHeight() {\n      return this.state.options.calendar.height + this.state.options.calendar.strokeWidth;\n    },\n\n    /**\n     * Get maximal level of nested task children\n     *\n     * @returns {int}\n     */\n    getMaximalLevel() {\n      let maximalLevel = 0;\n      this.state.tasks.forEach(task => {\n        if (task.parents.length > maximalLevel) {\n          maximalLevel = task.parents.length;\n        }\n      });\n      return maximalLevel - 1;\n    },\n\n    /**\n     * Get maximal expander width - to calculate straight task list text\n     *\n     * @returns {int}\n     */\n    getMaximalExpanderWidth() {\n      return (\n        this.getMaximalLevel() * this.state.options.taskList.expander.padding +\n        this.state.options.taskList.expander.margin\n      );\n    },\n\n    /**\n     * Synchronize scrollTop property when row height is changed\n     */\n    syncScrollTop() {\n      if (\n        this.state.refs.taskListItems &&\n        this.state.refs.chartGraph.scrollTop !== this.state.refs.taskListItems.scrollTop\n      ) {\n        this.state.options.scroll.top = this.state.refs.taskListItems.scrollTop = this.state.refs.chartScrollContainerVertical.scrollTop = this.state.refs.chartGraph.scrollTop;\n      }\n    },\n\n    /**\n     * Calculate task list columns dimensions\n     */\n    calculateTaskListColumnsDimensions() {\n      let final = 0;\n      let percentage = 0;\n      for (let column of this.state.options.taskList.columns) {\n        if (column.expander) {\n          column.widthFromPercentage =\n            ((this.getMaximalExpanderWidth() + column.width) / 100) * this.state.options.taskList.percent;\n        } else {\n          column.widthFromPercentage = (column.width / 100) * this.state.options.taskList.percent;\n        }\n        percentage += column.widthFromPercentage;\n        column.finalWidth = (column.thresholdPercent * column.widthFromPercentage) / 100;\n        final += column.finalWidth;\n        column.height = this.getTaskHeight() - this.style['grid-line-horizontal']['stroke-width'];\n      }\n      this.state.options.taskList.widthFromPercentage = percentage;\n      this.state.options.taskList.finalWidth = final;\n    },\n\n    /**\n     * Reset task tree - which is used to create tree like structure inside task list\n     */\n    resetTaskTree(tasks) {\n      this.$set(this.state, 'rootTask', {\n        id: null,\n        label: 'root',\n        children: [],\n        allChildren: [],\n        parents: [],\n        parent: null,\n        __root: true\n      });\n      const tasksById = {};\n      for (let i = 0, len = tasks.length; i < len; i++) {\n        let current = tasks[i];\n        current.children = [];\n        current.allChildren = [];\n        current.parent = null;\n        current.parents = [];\n        tasksById[current.id] = current;\n      }\n      return tasksById;\n    },\n\n    /**\n     * Make task tree, after reset - look above\n     *\n     * @param {object} task\n     * @returns {object} tasks with children and parents\n     */\n    makeTaskTree(task, tasks) {\n      for (let i = 0, len = tasks.length; i < len; i++) {\n        let current = tasks[i];\n        if (current.parentId === task.id) {\n          if (task.parents.length) {\n            task.parents.forEach(parent => current.parents.push(parent));\n          }\n          if (!task.propertyIsEnumerable('__root')) {\n            current.parents.push(task.id);\n            current.parent = task.id;\n          } else {\n            current.parents = [];\n            current.parent = null;\n          }\n          current = this.makeTaskTree(current, tasks);\n          task.allChildren.push(current.id);\n          task.children.push(current.id);\n          current.allChildren.forEach(childId => task.allChildren.push(childId));\n        }\n      }\n      return task;\n    },\n\n    /**\n     * Get task by id\n     *\n     * @param {any} taskId\n     * @returns {object|null} task\n     */\n    getTask(taskId) {\n      if (typeof this.state.tasksById[taskId] !== 'undefined') {\n        return this.state.tasksById[taskId];\n      }\n      return null;\n    },\n\n    /**\n     * Get children tasks for specified taskId\n     *\n     * @param {any} taskId\n     * @returns {array} children\n     */\n    getChildren(taskId) {\n      return this.state.tasks.filter(task => task.parent === taskId);\n    },\n\n    /**\n     * Is task visible\n     *\n     * @param {Number|String|Task} task\n     */\n    isTaskVisible(task) {\n      if (typeof task === 'number' || typeof task === 'string') {\n        task = this.getTask(task);\n      }\n      for (let i = 0, len = task.parents.length; i < len; i++) {\n        if (this.getTask(task.parents[i]).collapsed) {\n          return false;\n        }\n      }\n      return true;\n    },\n\n    /**\n     * Get svg\n     *\n     * @returns {string} html svg image of gantt\n     */\n    getSVG() {\n      return this.state.options.mainView.outerHTML;\n    },\n\n    /**\n     * Get image\n     *\n     * @param {string} type image format\n     * @returns {Promise} when resolved returns base64 image string of gantt\n     */\n    getImage(type = 'image/png') {\n      return new Promise(resolve => {\n        const img = new Image();\n        img.onload = () => {\n          const canvas = document.createElement('canvas');\n          canvas.width = this.state.options.mainView.clientWidth;\n          canvas.height = this.state.options.rowsHeight;\n          canvas.getContext('2d').drawImage(img, 0, 0);\n          resolve(canvas.toDataURL(type));\n        };\n        img.src = 'data:image/svg+xml,' + encodeURIComponent(this.getSVG());\n      });\n    },\n\n    /**\n     * Get gantt total height\n     *\n     * @returns {number}\n     */\n    getHeight(visibleTasks, outer = false) {\n      let height =\n        visibleTasks.length * (this.state.options.row.height + this.state.options.chart.grid.horizontal.gap * 2) +\n        this.state.options.calendar.height +\n        this.state.options.calendar.strokeWidth +\n        this.state.options.calendar.gap;\n      if (outer) {\n        height += this.state.options.scrollBarHeight;\n      }\n      return height;\n    },\n\n    /**\n     * Get one task height\n     *\n     * @returns {number}\n     */\n    getTaskHeight(withStroke = false) {\n      if (withStroke) {\n        return (\n          this.state.options.row.height +\n          this.state.options.chart.grid.horizontal.gap * 2 +\n          this.style['grid-line-horizontal']['stroke-width']\n        );\n      }\n      return this.state.options.row.height + this.state.options.chart.grid.horizontal.gap * 2;\n    },\n\n    /**\n     * Get specified tasks height\n     *\n     * @returns {number}\n     */\n    getTasksHeight(visibleTasks) {\n      return visibleTasks.length * this.getTaskHeight();\n    },\n\n    /**\n     * Convert time (in milliseconds) to pixel offset inside chart\n     *\n     * @param {int} ms\n     * @returns {number}\n     */\n    timeToPixelOffsetX(ms) {\n      let x = ms - this.state.options.times.firstTime;\n      if (x) {\n        x = x / this.state.options.times.timePerPixel;\n      }\n      return x;\n    },\n\n    /**\n     * Convert pixel offset inside chart to corresponding time offset in milliseconds\n     *\n     * @param {number} pixelOffsetX\n     * @returns {int} milliseconds\n     */\n    pixelOffsetXToTime(pixelOffsetX) {\n      let offset = pixelOffsetX + this.style['grid-line-vertical']['stroke-width'] / 2;\n      return offset * this.state.options.times.timePerPixel + this.state.options.times.firstTime;\n    },\n\n    /**\n     * Determine if element is inside current view port\n     *\n     * @param {number} x - element placement\n     * @param {number} width - element width\n     * @param {int} buffer - or threshold, if element is outside viewport but offset from view port is below this value return true\n     * @returns {boolean}\n     */\n    isInsideViewPort(x, width, buffer = 5000) {\n      return (\n        (x + width + buffer >= this.state.options.scroll.chart.left &&\n          x - buffer <= this.state.options.scroll.chart.right) ||\n        (x - buffer <= this.state.options.scroll.chart.left &&\n          x + width + buffer >= this.state.options.scroll.chart.right)\n      );\n    },\n\n    /**\n     * Chart scroll event handler\n     *\n     * @param {event} ev\n     */\n    onScrollChart(ev) {\n      this._onScrollChart(\n        this.state.refs.chartScrollContainerHorizontal.scrollLeft,\n        this.state.refs.chartScrollContainerVertical.scrollTop\n      );\n    },\n\n    /**\n     * After same as above but with different arguments - normalized\n     *\n     * @param {number} left\n     * @param {number} top\n     */\n    _onScrollChart(left, top) {\n      if (this.state.options.scroll.chart.left === left && this.state.options.scroll.chart.top === top) {\n        return;\n      }\n      const chartContainerWidth = this.state.refs.chartContainer.clientWidth;\n      this.state.options.scroll.chart.left = left;\n      this.state.options.scroll.chart.right = left + chartContainerWidth;\n      this.state.options.scroll.chart.percent = (left / this.state.options.times.totalViewDurationPx) * 100;\n      this.state.options.scroll.chart.top = top;\n      this.state.options.scroll.chart.time = this.pixelOffsetXToTime(left);\n      this.state.options.scroll.chart.timeCenter = this.pixelOffsetXToTime(left + chartContainerWidth / 2);\n      this.state.options.scroll.chart.dateTime.left = dayjs(this.state.options.scroll.chart.time).valueOf();\n      this.state.options.scroll.chart.dateTime.right = dayjs(\n        this.pixelOffsetXToTime(left + this.state.refs.chart.clientWidth)\n      ).valueOf();\n      this.scrollTo(left, top);\n    },\n\n    /**\n     * Scroll current chart to specified time (in milliseconds)\n     *\n     * @param {int} time\n     */\n    scrollToTime(time) {\n      let pos = this.timeToPixelOffsetX(time);\n      const chartContainerWidth = this.state.refs.chartContainer.clientWidth;\n      pos = pos - chartContainerWidth / 2;\n      if (pos > this.state.options.width) {\n        pos = this.state.options.width - chartContainerWidth;\n      }\n      this.scrollTo(pos);\n    },\n\n    /**\n     * Scroll chart or task list to specified pixel values\n     *\n     * @param {number|null} left\n     * @param {number|null} top\n     */\n    scrollTo(left = null, top = null) {\n      if (left !== null) {\n        this.state.refs.chartCalendarContainer.scrollLeft = left;\n        this.state.refs.chartGraphContainer.scrollLeft = left;\n        this.state.refs.chartScrollContainerHorizontal.scrollLeft = left;\n        this.state.options.scroll.left = left;\n      }\n      if (top !== null) {\n        this.state.refs.chartScrollContainerVertical.scrollTop = top;\n        this.state.refs.chartGraph.scrollTop = top;\n        this.state.refs.taskListItems.scrollTop = top;\n        this.state.options.scroll.top = top;\n        this.syncScrollTop();\n      }\n    },\n\n    /**\n     * After some actions like time zoom change we need to recompensate scroll position\n     * so as a result everything will be in same place\n     */\n    fixScrollPos() {\n      this.scrollToTime(this.state.options.scroll.chart.timeCenter);\n    },\n\n    /**\n     * Mouse wheel event handler\n     */\n    onWheelChart(ev) {\n      if (!ev.shiftKey && ev.deltaX === 0) {\n        let top = this.state.options.scroll.top + ev.deltaY;\n        const chartClientHeight = this.state.options.rowsHeight;\n        const scrollHeight = this.state.refs.chartGraph.scrollHeight - chartClientHeight;\n        if (top < 0) {\n          top = 0;\n        } else if (top > scrollHeight) {\n          top = scrollHeight;\n        }\n        this.scrollTo(null, top);\n      } else if (ev.shiftKey && ev.deltaX === 0) {\n        let left = this.state.options.scroll.left + ev.deltaY;\n        const chartClientWidth = this.state.refs.chartScrollContainerHorizontal.clientWidth;\n        const scrollWidth = this.state.refs.chartScrollContainerHorizontal.scrollWidth - chartClientWidth;\n        if (left < 0) {\n          left = 0;\n        } else if (left > scrollWidth) {\n          left = scrollWidth;\n        }\n        this.scrollTo(left);\n      } else {\n        let left = this.state.options.scroll.left + ev.deltaX;\n        const chartClientWidth = this.state.refs.chartScrollContainerHorizontal.clientWidth;\n        const scrollWidth = this.state.refs.chartScrollContainerHorizontal.scrollWidth - chartClientWidth;\n        if (left < 0) {\n          left = 0;\n        } else if (left > scrollWidth) {\n          left = scrollWidth;\n        }\n        this.scrollTo(left);\n      }\n    },\n\n    /**\n     * Time zoom change event handler\n     */\n    onTimeZoomChange(timeZoom) {\n      this.state.options.times.timeZoom = timeZoom;\n      this.recalculateTimes();\n      this.calculateSteps();\n      this.fixScrollPos();\n    },\n\n    /**\n     * Row height change event handler\n     */\n    onRowHeightChange(height) {\n      this.state.options.row.height = height;\n      this.calculateTaskListColumnsDimensions();\n      this.syncScrollTop();\n    },\n\n    /**\n     * Scope change event handler\n     */\n    onScopeChange(value) {\n      this.state.options.scope.before = value;\n      this.state.options.scope.after = value;\n      this.initTimes();\n      this.calculateSteps();\n      this.computeCalendarWidths();\n      this.fixScrollPos();\n    },\n\n    /**\n     * Task list width change event handler\n     */\n    onTaskListWidthChange(value) {\n      this.state.options.taskList.percent = value;\n      this.calculateTaskListColumnsDimensions();\n      this.fixScrollPos();\n    },\n\n    /**\n     * Task list column width change event handler\n     */\n    onTaskListColumnWidthChange() {\n      this.calculateTaskListColumnsDimensions();\n      this.fixScrollPos();\n    },\n\n    /**\n     * Listen to specified event names\n     */\n    initializeEvents() {\n      this.$emitBus.on('chart-scroll-horizontal', this.onScrollChart);\n      this.$emitBus.on('chart-scroll-vertical', this.onScrollChart);\n      this.$emitBus.on('chart-wheel', this.onWheelChart);\n      this.$emitBus.on('times-timeZoom-change', this.onTimeZoomChange);\n      this.$emitBus.on('row-height-change', this.onRowHeightChange);\n      this.$emitBus.on('scope-change', this.onScopeChange);\n      this.$emitBus.on('taskList-width-change', this.onTaskListWidthChange);\n      this.$emitBus.on('taskList-column-width-change', this.onTaskListColumnWidthChange);\n    },\n\n    /**\n     * When some action was performed (scale change for example) - recalculate time variables\n     */\n    recalculateTimes() {\n      let max = this.state.options.times.timeScale * 60;\n      let min = this.state.options.times.timeScale;\n      let steps = max / min;\n      let percent = this.state.options.times.timeZoom / 100;\n      this.state.options.times.timePerPixel =\n        this.state.options.times.timeScale * steps * percent + Math.pow(2, this.state.options.times.timeZoom);\n      this.state.options.times.totalViewDurationMs = dayjs(this.state.options.times.lastTime).diff(\n        this.state.options.times.firstTime,\n        'milliseconds'\n      );\n      this.state.options.times.totalViewDurationPx =\n        this.state.options.times.totalViewDurationMs / this.state.options.times.timePerPixel;\n      this.state.options.width =\n        this.state.options.times.totalViewDurationPx + this.style['grid-line-vertical']['stroke-width'];\n    },\n\n    /**\n     * Initialize time variables\n     */\n    initTimes() {\n      this.state.options.times.firstTime = dayjs(this.state.options.times.firstTaskTime)\n        .locale(this.state.options.locale.name)\n        .startOf('day')\n        .subtract(this.state.options.scope.before, 'days')\n        .startOf('day')\n        .valueOf();\n      this.state.options.times.lastTime = dayjs(this.state.options.times.lastTaskTime)\n        .locale(this.state.options.locale.name)\n        .endOf('day')\n        .add(this.state.options.scope.after, 'days')\n        .endOf('day')\n        .valueOf();\n      this.recalculateTimes();\n    },\n\n    /**\n     * Calculate steps\n     * Steps are days by default\n     * Each step contain information about time offset and pixel offset of this time inside gantt chart\n     */\n    calculateSteps() {\n      const steps = [];\n      const lastMs = dayjs(this.state.options.times.lastTime).valueOf();\n      const currentDate = dayjs(this.state.options.times.firstTime);\n      steps.push({\n        time: currentDate.valueOf(),\n        offset: {\n          ms: 0,\n          px: 0\n        }\n      });\n      for (\n        let currentDate = dayjs(this.state.options.times.firstTime)\n          .add(1, this.state.options.times.stepDuration)\n          .startOf('day');\n        currentDate.valueOf() <= lastMs;\n        currentDate = currentDate.add(1, this.state.options.times.stepDuration).startOf('day')\n      ) {\n        const offsetMs = currentDate.diff(this.state.options.times.firstTime, 'milliseconds');\n        const offsetPx = offsetMs / this.state.options.times.timePerPixel;\n        const step = {\n          time: currentDate.valueOf(),\n          offset: {\n            ms: offsetMs,\n            px: offsetPx\n          }\n        };\n        const previousStep = steps[steps.length - 1];\n        previousStep.width = {\n          ms: offsetMs - previousStep.offset.ms,\n          px: offsetPx - previousStep.offset.px\n        };\n        steps.push(step);\n      }\n      const lastStep = steps[steps.length - 1];\n      lastStep.width = {\n        ms: this.state.options.times.totalViewDurationMs - lastStep.offset.ms,\n        px: this.state.options.times.totalViewDurationPx - lastStep.offset.px\n      };\n      this.state.options.times.steps = steps;\n    },\n\n    /**\n     * Calculate calendar widths - when scale was changed for example\n     */\n    computeCalendarWidths() {\n      this.computeDayWidths();\n      this.computeHourWidths();\n      this.computeMonthWidths();\n    },\n\n    /**\n     * Compute width of calendar hours column widths basing on text widths\n     */\n    computeHourWidths() {\n      const style = { ...this.style['calendar-row-text'], ...this.style['calendar-row-text--hour'] };\n      this.state.ctx.font = style['font-size'] + ' ' + style['font-family'];\n      const localeName = this.state.options.locale.name;\n      let currentDate = dayjs('2018-01-01T00:00:00').locale(localeName); // any date will be good for hours\n      let maxWidths = this.state.options.calendar.hour.maxWidths;\n      if (maxWidths.length) {\n        return;\n      }\n      for (let formatName in this.state.options.calendar.hour.format) {\n        maxWidths[formatName] = 0;\n      }\n      for (let hour = 0; hour < 24; hour++) {\n        let widths = { hour };\n        for (let formatName in this.state.options.calendar.hour.format) {\n          const hourFormatted = this.state.options.calendar.hour.format[formatName](currentDate);\n          this.state.options.calendar.hour.formatted[formatName].push(hourFormatted);\n          widths[formatName] = this.state.ctx.measureText(hourFormatted).width;\n        }\n        this.state.options.calendar.hour.widths.push(widths);\n        for (let formatName in this.state.options.calendar.hour.format) {\n          if (widths[formatName] > maxWidths[formatName]) {\n            maxWidths[formatName] = widths[formatName];\n          }\n        }\n        currentDate = currentDate.add(1, 'hour');\n      }\n    },\n\n    /**\n     * Compute calendar days column widths basing on text widths\n     */\n    computeDayWidths() {\n      const style = { ...this.style['calendar-row-text'], ...this.style['calendar-row-text--day'] };\n      this.state.ctx.font = style['font-size'] + ' ' + style['font-family'];\n      const localeName = this.state.options.locale.name;\n      let currentDate = dayjs(this.state.options.times.steps[0].time).locale(localeName);\n      let maxWidths = this.state.options.calendar.day.maxWidths;\n      this.state.options.calendar.day.widths = [];\n      Object.keys(this.state.options.calendar.day.format).forEach(formatName => {\n        maxWidths[formatName] = 0;\n      });\n      for (let day = 0, daysLen = this.state.options.times.steps.length; day < daysLen; day++) {\n        const widths = {\n          day\n        };\n        Object.keys(this.state.options.calendar.day.format).forEach(formatName => {\n          widths[formatName] = this.state.ctx.measureText(\n            this.state.options.calendar.day.format[formatName](currentDate)\n          ).width;\n        });\n        this.state.options.calendar.day.widths.push(widths);\n        Object.keys(this.state.options.calendar.day.format).forEach(formatName => {\n          if (widths[formatName] > maxWidths[formatName]) {\n            maxWidths[formatName] = widths[formatName];\n          }\n        });\n        currentDate = currentDate.add(1, 'day');\n      }\n    },\n\n    /**\n     * Months count\n     *\n     * @description Returns number of different months in specified time range\n     *\n     * @param {number} fromTime - date in ms\n     * @param {number} toTime - date in ms\n     *\n     * @returns {number} different months count\n     */\n    monthsCount(fromTime, toTime) {\n      if (fromTime > toTime) {\n        return 0;\n      }\n      let currentMonth = dayjs(fromTime);\n      let previousMonth = currentMonth.clone();\n      let monthsCount = 1;\n      while (currentMonth.valueOf() <= toTime) {\n        currentMonth = currentMonth.add(1, 'day');\n        if (previousMonth.month() !== currentMonth.month()) {\n          monthsCount++;\n        }\n        previousMonth = currentMonth.clone();\n      }\n      return monthsCount;\n    },\n\n    /**\n     * Compute month calendar columns widths basing on text widths\n     */\n    computeMonthWidths() {\n      const style = { ...this.style['calendar-row-text'], ...this.style['calendar-row-text--month'] };\n      this.state.ctx.font = style['font-size'] + ' ' + style['font-family'];\n      let maxWidths = this.state.options.calendar.month.maxWidths;\n      this.state.options.calendar.month.widths = [];\n      Object.keys(this.state.options.calendar.month.format).forEach(formatName => {\n        maxWidths[formatName] = 0;\n      });\n      const localeName = this.state.options.locale.name;\n      let currentDate = dayjs(this.state.options.times.firstTime).locale(localeName);\n      const monthsCount = this.monthsCount(this.state.options.times.firstTime, this.state.options.times.lastTime);\n      for (let month = 0; month < monthsCount; month++) {\n        const widths = {\n          month\n        };\n        Object.keys(this.state.options.calendar.month.format).forEach(formatName => {\n          widths[formatName] = this.state.ctx.measureText(\n            this.state.options.calendar.month.format[formatName](currentDate)\n          ).width;\n        });\n        this.state.options.calendar.month.widths.push(widths);\n        Object.keys(this.state.options.calendar.month.format).forEach(formatName => {\n          if (widths[formatName] > maxWidths[formatName]) {\n            maxWidths[formatName] = widths[formatName];\n          }\n        });\n        currentDate = currentDate.add(1, 'month');\n      }\n    },\n\n    /**\n     * Prepare time and date variables for gantt\n     */\n    prepareDates() {\n      let firstTaskTime = Number.MAX_SAFE_INTEGER;\n      let lastTaskTime = 0;\n      for (let index = 0, len = this.state.tasks.length; index < len; index++) {\n        let task = this.state.tasks[index];\n        if (task.startTime < firstTaskTime) {\n          firstTaskTime = task.startTime;\n        }\n        if (task.startTime + task.duration > lastTaskTime) {\n          lastTaskTime = task.startTime + task.duration;\n        }\n      }\n      this.state.options.times.firstTaskTime = firstTaskTime;\n      this.state.options.times.lastTaskTime = lastTaskTime;\n      this.state.options.times.firstTime = dayjs(firstTaskTime)\n        .locale(this.state.options.locale.name)\n        .startOf('day')\n        .subtract(this.state.options.scope.before, 'days')\n        .startOf('day')\n        .valueOf();\n      this.state.options.times.lastTime = dayjs(lastTaskTime)\n        .locale(this.state.options.locale.name)\n        .endOf('day')\n        .add(this.state.options.scope.after, 'days')\n        .endOf('day')\n        .valueOf();\n    },\n\n    /**\n     * Setup and calculate everything\n     */\n    setup(itsUpdate = '') {\n      this.initialize(itsUpdate);\n      this.prepareDates();\n      this.initTimes();\n      this.calculateSteps();\n      this.computeCalendarWidths();\n      this.state.options.taskList.width = this.state.options.taskList.columns.reduce(\n        (prev, current) => {\n          return { width: prev.width + current.width };\n        },\n        { width: 0 }\n      ).width;\n    },\n\n    /**\n     * Global resize event (from window.addEventListener)\n     */\n    globalOnResize() {\n      if (typeof this.$el === 'undefined' || !this.$el) {\n        return;\n      }\n      this.state.options.clientWidth = this.$el.clientWidth;\n      if (\n        this.state.options.taskList.widthFromPercentage >\n        (this.state.options.clientWidth / 100) * this.state.options.taskList.widthThreshold\n      ) {\n        const diff =\n          this.state.options.taskList.widthFromPercentage -\n          (this.state.options.clientWidth / 100) * this.state.options.taskList.widthThreshold;\n        let diffPercent = 100 - (diff / this.state.options.taskList.widthFromPercentage) * 100;\n        if (diffPercent < 0) {\n          diffPercent = 0;\n        }\n        this.state.options.taskList.columns.forEach(column => {\n          column.thresholdPercent = diffPercent;\n        });\n      } else {\n        this.state.options.taskList.columns.forEach(column => {\n          column.thresholdPercent = 100;\n        });\n      }\n      this.calculateTaskListColumnsDimensions();\n      this.$emit('calendar-recalculate');\n      this.syncScrollTop();\n    }\n  },\n\n  computed: {\n    /**\n     * Get visible tasks\n     * Very important method which will bring us only those tasks that are visible inside gantt chart\n     * For example when task is collapsed - children of this task are not visible - we should not render them\n     */\n    visibleTasks() {\n      // pure computed - the geometry side effects live in the visibleTasks watcher,\n      // a computed that mutates reactive state re-triggers itself endlessly in Vue 3\n      return this.state.tasks.filter(task => this.isTaskVisible(task));\n    },\n\n    /**\n     * Style shortcut\n     */\n    style() {\n      return this.state.dynamicStyle;\n    },\n\n    /**\n     * Get task list columns; dimensions are calculated in initialize(),\n     * a computed must not mutate reactive state or Vue 3 will re-trigger it endlessly\n     */\n    getTaskListColumns() {\n      return this.state.options.taskList.columns;\n    },\n\n    /**\n     * Tasks used for communicate with parent component\n     */\n    outputTasks() {\n      return this.state.tasks;\n    },\n\n    /**\n     * Options used to communicate with parent component\n     */\n    outputOptions() {\n      return this.state.options;\n    }\n  },\n\n  /**\n   * Watch tasks after gantt instance is created and react when we have new kids on the block\n   */\n  created() {\n    this.$set = function(obj, key, val) { obj[key] = val; };\n    this.$delete = function(obj, key) { delete obj[key]; };\n    this.$emitBus = mitt();\n    this.initializeEvents();\n    this.setup();\n    this.state.unwatchTasks = this.$watch(\n      'tasks',\n      tasks => {\n        const notEqual = notEqualDeep(tasks, this.outputTasks);\n        if (notEqual) {\n          this.setup('tasks');\n        }\n      },\n      { deep: true }\n    );\n    this.state.unwatchOptions = this.$watch(\n      'options',\n      opts => {\n        const notEqual = notEqualDeep(opts, this.outputOptions);\n        if (notEqual) {\n          this.setup('options');\n        }\n      },\n      { deep: true }\n    );\n    this.state.unwatchStyle = this.$watch(\n      'dynamicStyle',\n      style => {\n        const notEqual = notEqualDeep(style, this.style);\n        if (notEqual) {\n          this.initializeStyle();\n        }\n      },\n      { deep: true, immediate: true }\n    );\n\n    this.state.unwatchOutputTasks = this.$watch(\n      'outputTasks',\n      tasks => {\n        this.$emit('tasks-changed', tasks.map(task => task));\n      },\n      { deep: true }\n    );\n    this.state.unwatchOutputOptions = this.$watch(\n      'outputOptions',\n      options => {\n        this.$emit('options-changed', mergeDeep({}, options));\n      },\n      { deep: true }\n    );\n    this.state.unwatchOutputStyle = this.$watch(\n      'style',\n      style => {\n        this.$emit('dynamic-style-changed', mergeDeep({}, style));\n      },\n      { deep: true }\n    );\n\n    // apply geometry when the set of visible tasks (or anything it depends on) changes;\n    // this used to be a side effect inside the visibleTasks computed, which loops in Vue 3\n    this.state.unwatchVisibleTasksGeometry = this.$watch(\n      'visibleTasks',\n      visibleTasks => {\n        const maxRows = visibleTasks.slice(0, this.state.options.maxRows);\n        this.state.options.rowsHeight = this.getTasksHeight(maxRows);\n        let heightCompensation = 0;\n        if (this.state.options.maxHeight && this.state.options.rowsHeight > this.state.options.maxHeight) {\n          heightCompensation = this.state.options.rowsHeight - this.state.options.maxHeight;\n          this.state.options.rowsHeight = this.state.options.maxHeight;\n        }\n        this.state.options.height = this.getHeight(maxRows) - heightCompensation;\n        this.state.options.allVisibleTasksHeight = this.getTasksHeight(visibleTasks);\n        this.state.options.outerHeight = this.getHeight(maxRows, true) - heightCompensation;\n        let len = visibleTasks.length;\n        for (let index = 0; index < len; index++) {\n          let task = visibleTasks[index];\n          task.width =\n            task.duration / this.state.options.times.timePerPixel - this.style['grid-line-vertical']['stroke-width'];\n          if (task.width < 0) {\n            task.width = 0;\n          }\n          task.height = this.state.options.row.height;\n          task.x = this.timeToPixelOffsetX(task.startTime);\n          task.y =\n            (this.state.options.row.height + this.state.options.chart.grid.horizontal.gap * 2) * index +\n            this.state.options.chart.grid.horizontal.gap;\n        }\n      },\n      { immediate: true }\n    );\n\n    this.$emitBus.emit('gantt-elastic-created', this);\n    this.$emit('created', this);\n  },\n\n  /**\n   * Emit before-mount event\n   */\n  beforeMount() {\n    this.$emit('before-mount', this);\n  },\n\n  /**\n   * Emit ready/mounted events and deliver this gantt instance to outside world when needed\n   */\n  mounted() {\n    this.state.options.clientWidth = this.$el.clientWidth;\n    this.state.resizeObserver = new ResizeObserver((entries, observer) => {\n      this.globalOnResize();\n    });\n    this.state.resizeObserver.observe(this.$el.parentNode);\n    this.globalOnResize();\n    this.$emit('ready', this);\n    this.$emitBus.emit('gantt-elastic-mounted', this);\n    this.$emit('mounted', this);\n    this.$emitBus.emit('gantt-elastic-ready', this);\n    this.$emit('gantt-elastic-ready', this);\n  },\n\n  /**\n   * Emit event when data was changed and before update (you can cleanup dom events here for example)\n   */\n  beforeUpdate() {\n    this.$emit('before-update');\n  },\n\n  /**\n   * Emit event when gantt-elastic view was updated\n   */\n  updated() {\n    this.$nextTick(() => {\n      this.$emit('updated');\n    });\n  },\n\n  /**\n   * Before destroy event - clean up\n   */\n  beforeUnmount() {\n    this.state.resizeObserver.unobserve(this.$el.parentNode);\n    this.state.unwatchTasks();\n    this.state.unwatchOptions();\n    this.state.unwatchStyle();\n    this.state.unwatchVisibleTasksGeometry();\n    this.state.unwatchOutputTasks();\n    this.state.unwatchOutputOptions();\n    this.state.unwatchOutputStyle();\n    this.$emit('before-destroy');\n  },\n\n  /**\n   * Emit event after gantt-elastic was destroyed\n   */\n  unmounted() {\n    this.$emit('destroyed');\n  }\n};\nexport default GanttElastic;\n</script>\n\n<style>\n[class^='gantt-elastic'],\n[class*=' gantt-elastic'] {\n  box-sizing: border-box;\n}\n.gantt-elastic__main-view svg {\n  display: block;\n}\n.gantt-elastic__grid-horizontal-line,\n.gantt-elastic__grid-vertical-line {\n  stroke: #a0a0a0;\n  stroke-width: 1;\n}\nforeignObject > * {\n  margin: 0px;\n}\n.gantt-elastic .p-2 {\n  padding: 10rem;\n}\n.gantt-elastic__main-view-main-container,\n.gantt-elastic__main-view-container {\n  overflow: hidden;\n  max-width: 100%;\n}\n.gantt-elastic__task-list-header-column:last-of-type {\n  border-right: 1px solid #00000050;\n}\n.gantt-elastic__task-list-item:last-of-type {\n  border-bottom: 1px solid #00000050;\n}\n.gantt-elastic__task-list-item-value-wrapper:hover {\n  overflow: visible !important;\n}\n.gantt-elastic__task-list-item-value-wrapper:hover > .gantt-elastic__task-list-item-value-container {\n  position: relative;\n  overflow: visible !important;\n}\n.gantt-elastic__task-list-item-value-wrapper:hover > .gantt-elastic__task-list-item-value {\n  position: absolute;\n}\n</style>\n"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, [
+/* harmony export */   "default", 0, /* export default binding */ __WEBPACK_DEFAULT_EXPORT__
+/* harmony export */ ]);
+
+
+/***/ },
+
+/***/ 917
+(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(354);
+/* harmony import */ var _css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(314);
+/* harmony import */ var _css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/**
+ * Default
+ */
+/**
+ * Bulma
+ */
+/**
+ * Bootstrap
+ */
+.vue-switcher {
+  position: relative;
+  display: inline-block; }
+  .vue-switcher__label {
+    display: block;
+    font-size: 10px;
+    margin-bottom: 5px; }
+  .vue-switcher input {
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 1;
+    cursor: pointer; }
+  .vue-switcher div {
+    height: 15px;
+    width: 36px;
+    position: relative;
+    border-radius: 30px;
+    display: -webkit-flex;
+    display: -ms-flex;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    cursor: pointer;
+    transition: linear .2s, background-color linear .2s; }
+    .vue-switcher div:after {
+      content: '';
+      height: 20px;
+      width: 20px;
+      border-radius: 100px;
+      display: block;
+      transition: linear .15s, background-color linear .15s;
+      position: absolute;
+      left: 100%;
+      margin-left: -18px;
+      cursor: pointer;
+      top: -3px;
+      box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.1); }
+  .vue-switcher--unchecked div {
+    justify-content: flex-end; }
+    .vue-switcher--unchecked div:after {
+      left: 15px; }
+  .vue-switcher--disabled div {
+    opacity: .3; }
+  .vue-switcher--disabled input {
+    cursor: not-allowed; }
+  .vue-switcher--bold div {
+    top: -8px;
+    height: 26px;
+    width: 51px; }
+    .vue-switcher--bold div:after {
+      margin-left: -24px;
+      top: 3px; }
+  .vue-switcher--bold--unchecked div:after {
+    left: 28px; }
+  .vue-switcher--bold .vue-switcher__label span {
+    padding-bottom: 7px;
+    display: inline-block; }
+  .vue-switcher-theme--default.vue-switcher-color--default div {
+    background-color: #b7b7b7; }
+    .vue-switcher-theme--default.vue-switcher-color--default div:after {
+      background-color: #9d9d9d; }
+  .vue-switcher-theme--default.vue-switcher-color--default.vue-switcher--unchecked div {
+    background-color: #aaa; }
+    .vue-switcher-theme--default.vue-switcher-color--default.vue-switcher--unchecked div:after {
+      background-color: #c4c4c4; }
+  .vue-switcher-theme--default.vue-switcher-color--blue div {
+    background-color: #77b0c8; }
+    .vue-switcher-theme--default.vue-switcher-color--blue div:after {
+      background-color: #539bb9; }
+  .vue-switcher-theme--default.vue-switcher-color--blue.vue-switcher--unchecked div {
+    background-color: #c0dae5; }
+    .vue-switcher-theme--default.vue-switcher-color--blue.vue-switcher--unchecked div:after {
+      background-color: #77b0c8; }
+  .vue-switcher-theme--default.vue-switcher-color--red div {
+    background-color: #c87777; }
+    .vue-switcher-theme--default.vue-switcher-color--red div:after {
+      background-color: #b95353; }
+  .vue-switcher-theme--default.vue-switcher-color--red.vue-switcher--unchecked div {
+    background-color: #e5c0c0; }
+    .vue-switcher-theme--default.vue-switcher-color--red.vue-switcher--unchecked div:after {
+      background-color: #c87777; }
+  .vue-switcher-theme--default.vue-switcher-color--yellow div {
+    background-color: #c9c377; }
+    .vue-switcher-theme--default.vue-switcher-color--yellow div:after {
+      background-color: #bab353; }
+  .vue-switcher-theme--default.vue-switcher-color--yellow.vue-switcher--unchecked div {
+    background-color: #e6e3c0; }
+    .vue-switcher-theme--default.vue-switcher-color--yellow.vue-switcher--unchecked div:after {
+      background-color: #c9c377; }
+  .vue-switcher-theme--default.vue-switcher-color--orange div {
+    background-color: #c89577; }
+    .vue-switcher-theme--default.vue-switcher-color--orange div:after {
+      background-color: #b97953; }
+  .vue-switcher-theme--default.vue-switcher-color--orange.vue-switcher--unchecked div {
+    background-color: #e5cec0; }
+    .vue-switcher-theme--default.vue-switcher-color--orange.vue-switcher--unchecked div:after {
+      background-color: #c89577; }
+  .vue-switcher-theme--default.vue-switcher-color--green div {
+    background-color: #77c88d; }
+    .vue-switcher-theme--default.vue-switcher-color--green div:after {
+      background-color: #53b96e; }
+  .vue-switcher-theme--default.vue-switcher-color--green.vue-switcher--unchecked div {
+    background-color: #c0e5ca; }
+    .vue-switcher-theme--default.vue-switcher-color--green.vue-switcher--unchecked div:after {
+      background-color: #77c88d; }
+  .vue-switcher-theme--bulma.vue-switcher-color--default div {
+    background-color: gainsboro; }
+    .vue-switcher-theme--bulma.vue-switcher-color--default div:after {
+      background-color: #f5f5f5; }
+  .vue-switcher-theme--bulma.vue-switcher-color--default.vue-switcher--unchecked div {
+    background-color: #e8e8e8; }
+    .vue-switcher-theme--bulma.vue-switcher-color--default.vue-switcher--unchecked div:after {
+      background-color: #f5f5f5; }
+  .vue-switcher-theme--bulma.vue-switcher-color--primary div {
+    background-color: #05ffda; }
+    .vue-switcher-theme--bulma.vue-switcher-color--primary div:after {
+      background-color: #00d1b2; }
+  .vue-switcher-theme--bulma.vue-switcher-color--primary.vue-switcher--unchecked div {
+    background-color: #6bffe9; }
+    .vue-switcher-theme--bulma.vue-switcher-color--primary.vue-switcher--unchecked div:after {
+      background-color: #05ffda; }
+  .vue-switcher-theme--bulma.vue-switcher-color--blue div {
+    background-color: #5e91e3; }
+    .vue-switcher-theme--bulma.vue-switcher-color--blue div:after {
+      background-color: #3273dc; }
+  .vue-switcher-theme--bulma.vue-switcher-color--blue.vue-switcher--unchecked div {
+    background-color: #b5ccf2; }
+    .vue-switcher-theme--bulma.vue-switcher-color--blue.vue-switcher--unchecked div:after {
+      background-color: #5e91e3; }
+  .vue-switcher-theme--bulma.vue-switcher-color--red div {
+    background-color: #ff6b89; }
+    .vue-switcher-theme--bulma.vue-switcher-color--red div:after {
+      background-color: #ff3860; }
+  .vue-switcher-theme--bulma.vue-switcher-color--red.vue-switcher--unchecked div {
+    background-color: #ffd1da; }
+    .vue-switcher-theme--bulma.vue-switcher-color--red.vue-switcher--unchecked div:after {
+      background-color: #ff6b89; }
+  .vue-switcher-theme--bulma.vue-switcher-color--yellow div {
+    background-color: #ffe78a; }
+    .vue-switcher-theme--bulma.vue-switcher-color--yellow div:after {
+      background-color: #ffdd57; }
+  .vue-switcher-theme--bulma.vue-switcher-color--yellow.vue-switcher--unchecked div {
+    background-color: #fffcf0; }
+    .vue-switcher-theme--bulma.vue-switcher-color--yellow.vue-switcher--unchecked div:after {
+      background-color: #ffe78a; }
+  .vue-switcher-theme--bulma.vue-switcher-color--green div {
+    background-color: #3dde75; }
+    .vue-switcher-theme--bulma.vue-switcher-color--green div:after {
+      background-color: #22c65b; }
+  .vue-switcher-theme--bulma.vue-switcher-color--green.vue-switcher--unchecked div {
+    background-color: #94edb3; }
+    .vue-switcher-theme--bulma.vue-switcher-color--green.vue-switcher--unchecked div:after {
+      background-color: #3dde75; }
+  .vue-switcher-theme--bootstrap.vue-switcher-color--default div {
+    background-color: #e6e6e6; }
+    .vue-switcher-theme--bootstrap.vue-switcher-color--default div:after {
+      background-color: #f0f0f0; }
+  .vue-switcher-theme--bootstrap.vue-switcher-color--default.vue-switcher--unchecked div {
+    background-color: whitesmoke; }
+    .vue-switcher-theme--bootstrap.vue-switcher-color--default.vue-switcher--unchecked div:after {
+      background-color: #f0f0f0; }
+  .vue-switcher-theme--bootstrap.vue-switcher-color--primary div {
+    background-color: #4f93ce; }
+    .vue-switcher-theme--bootstrap.vue-switcher-color--primary div:after {
+      background-color: #337ab7; }
+  .vue-switcher-theme--bootstrap.vue-switcher-color--primary.vue-switcher--unchecked div {
+    background-color: #9fc4e4; }
+    .vue-switcher-theme--bootstrap.vue-switcher-color--primary.vue-switcher--unchecked div:after {
+      background-color: #4f93ce; }
+  .vue-switcher-theme--bootstrap.vue-switcher-color--success div {
+    background-color: #80c780; }
+    .vue-switcher-theme--bootstrap.vue-switcher-color--success div:after {
+      background-color: #5cb85c; }
+  .vue-switcher-theme--bootstrap.vue-switcher-color--success.vue-switcher--unchecked div {
+    background-color: #c7e6c7; }
+    .vue-switcher-theme--bootstrap.vue-switcher-color--success.vue-switcher--unchecked div:after {
+      background-color: #80c780; }
+  .vue-switcher-theme--bootstrap.vue-switcher-color--info div {
+    background-color: #85d0e7; }
+    .vue-switcher-theme--bootstrap.vue-switcher-color--info div:after {
+      background-color: #5bc0de; }
+  .vue-switcher-theme--bootstrap.vue-switcher-color--info.vue-switcher--unchecked div {
+    background-color: #daf1f8; }
+    .vue-switcher-theme--bootstrap.vue-switcher-color--info.vue-switcher--unchecked div:after {
+      background-color: #85d0e7; }
+  .vue-switcher-theme--bootstrap.vue-switcher-color--warning div {
+    background-color: #f4c37d; }
+    .vue-switcher-theme--bootstrap.vue-switcher-color--warning div:after {
+      background-color: #f0ad4e; }
+  .vue-switcher-theme--bootstrap.vue-switcher-color--warning.vue-switcher--unchecked div {
+    background-color: #fceedb; }
+    .vue-switcher-theme--bootstrap.vue-switcher-color--warning.vue-switcher--unchecked div:after {
+      background-color: #f4c37d; }
+  .vue-switcher-theme--bootstrap.vue-switcher-color--danger div {
+    background-color: #d9534f; }
+    .vue-switcher-theme--bootstrap.vue-switcher-color--danger div:after {
+      background-color: #c9302c; }
+  .vue-switcher-theme--bootstrap.vue-switcher-color--danger.vue-switcher--unchecked div {
+    background-color: #eba5a3; }
+    .vue-switcher-theme--bootstrap.vue-switcher-color--danger.vue-switcher--unchecked div:after {
+      background-color: #d9534f; }
+`, "",{"version":3,"sources":["webpack://./node_modules/vue-switches/dist/switches.css"],"names":[],"mappings":"AAAA;;EAEE;AACF;;EAEE;AACF;;EAEE;AACF;EACE,kBAAkB;EAClB,qBAAqB,EAAE;EACvB;IACE,cAAc;IACd,eAAe;IACf,kBAAkB,EAAE;EACtB;IACE,UAAU;IACV,WAAW;IACX,YAAY;IACZ,kBAAkB;IAClB,UAAU;IACV,eAAe,EAAE;EACnB;IACE,YAAY;IACZ,WAAW;IACX,kBAAkB;IAClB,mBAAmB;IACnB,qBAAqB;IACrB,iBAAiB;IACjB,aAAa;IACb,mBAAmB;IACnB,2BAA2B;IAC3B,eAAe;IACf,mDAAmD,EAAE;IACrD;MACE,WAAW;MACX,YAAY;MACZ,WAAW;MACX,oBAAoB;MACpB,cAAc;MACd,qDAAqD;MACrD,kBAAkB;MAClB,UAAU;MACV,kBAAkB;MAClB,eAAe;MACf,SAAS;MACT,0CAA0C,EAAE;EAChD;IACE,yBAAyB,EAAE;IAC3B;MACE,UAAU,EAAE;EAChB;IACE,WAAW,EAAE;EACf;IACE,mBAAmB,EAAE;EACvB;IACE,SAAS;IACT,YAAY;IACZ,WAAW,EAAE;IACb;MACE,kBAAkB;MAClB,QAAQ,EAAE;EACd;IACE,UAAU,EAAE;EACd;IACE,mBAAmB;IACnB,qBAAqB,EAAE;EACzB;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,sBAAsB,EAAE;IACxB;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,2BAA2B,EAAE;IAC7B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,4BAA4B,EAAE;IAC9B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE;EAC/B;IACE,yBAAyB,EAAE;IAC3B;MACE,yBAAyB,EAAE","sourcesContent":["/**\n * Default\n */\n/**\n * Bulma\n */\n/**\n * Bootstrap\n */\n.vue-switcher {\n  position: relative;\n  display: inline-block; }\n  .vue-switcher__label {\n    display: block;\n    font-size: 10px;\n    margin-bottom: 5px; }\n  .vue-switcher input {\n    opacity: 0;\n    width: 100%;\n    height: 100%;\n    position: absolute;\n    z-index: 1;\n    cursor: pointer; }\n  .vue-switcher div {\n    height: 15px;\n    width: 36px;\n    position: relative;\n    border-radius: 30px;\n    display: -webkit-flex;\n    display: -ms-flex;\n    display: flex;\n    align-items: center;\n    justify-content: flex-start;\n    cursor: pointer;\n    transition: linear .2s, background-color linear .2s; }\n    .vue-switcher div:after {\n      content: '';\n      height: 20px;\n      width: 20px;\n      border-radius: 100px;\n      display: block;\n      transition: linear .15s, background-color linear .15s;\n      position: absolute;\n      left: 100%;\n      margin-left: -18px;\n      cursor: pointer;\n      top: -3px;\n      box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.1); }\n  .vue-switcher--unchecked div {\n    justify-content: flex-end; }\n    .vue-switcher--unchecked div:after {\n      left: 15px; }\n  .vue-switcher--disabled div {\n    opacity: .3; }\n  .vue-switcher--disabled input {\n    cursor: not-allowed; }\n  .vue-switcher--bold div {\n    top: -8px;\n    height: 26px;\n    width: 51px; }\n    .vue-switcher--bold div:after {\n      margin-left: -24px;\n      top: 3px; }\n  .vue-switcher--bold--unchecked div:after {\n    left: 28px; }\n  .vue-switcher--bold .vue-switcher__label span {\n    padding-bottom: 7px;\n    display: inline-block; }\n  .vue-switcher-theme--default.vue-switcher-color--default div {\n    background-color: #b7b7b7; }\n    .vue-switcher-theme--default.vue-switcher-color--default div:after {\n      background-color: #9d9d9d; }\n  .vue-switcher-theme--default.vue-switcher-color--default.vue-switcher--unchecked div {\n    background-color: #aaa; }\n    .vue-switcher-theme--default.vue-switcher-color--default.vue-switcher--unchecked div:after {\n      background-color: #c4c4c4; }\n  .vue-switcher-theme--default.vue-switcher-color--blue div {\n    background-color: #77b0c8; }\n    .vue-switcher-theme--default.vue-switcher-color--blue div:after {\n      background-color: #539bb9; }\n  .vue-switcher-theme--default.vue-switcher-color--blue.vue-switcher--unchecked div {\n    background-color: #c0dae5; }\n    .vue-switcher-theme--default.vue-switcher-color--blue.vue-switcher--unchecked div:after {\n      background-color: #77b0c8; }\n  .vue-switcher-theme--default.vue-switcher-color--red div {\n    background-color: #c87777; }\n    .vue-switcher-theme--default.vue-switcher-color--red div:after {\n      background-color: #b95353; }\n  .vue-switcher-theme--default.vue-switcher-color--red.vue-switcher--unchecked div {\n    background-color: #e5c0c0; }\n    .vue-switcher-theme--default.vue-switcher-color--red.vue-switcher--unchecked div:after {\n      background-color: #c87777; }\n  .vue-switcher-theme--default.vue-switcher-color--yellow div {\n    background-color: #c9c377; }\n    .vue-switcher-theme--default.vue-switcher-color--yellow div:after {\n      background-color: #bab353; }\n  .vue-switcher-theme--default.vue-switcher-color--yellow.vue-switcher--unchecked div {\n    background-color: #e6e3c0; }\n    .vue-switcher-theme--default.vue-switcher-color--yellow.vue-switcher--unchecked div:after {\n      background-color: #c9c377; }\n  .vue-switcher-theme--default.vue-switcher-color--orange div {\n    background-color: #c89577; }\n    .vue-switcher-theme--default.vue-switcher-color--orange div:after {\n      background-color: #b97953; }\n  .vue-switcher-theme--default.vue-switcher-color--orange.vue-switcher--unchecked div {\n    background-color: #e5cec0; }\n    .vue-switcher-theme--default.vue-switcher-color--orange.vue-switcher--unchecked div:after {\n      background-color: #c89577; }\n  .vue-switcher-theme--default.vue-switcher-color--green div {\n    background-color: #77c88d; }\n    .vue-switcher-theme--default.vue-switcher-color--green div:after {\n      background-color: #53b96e; }\n  .vue-switcher-theme--default.vue-switcher-color--green.vue-switcher--unchecked div {\n    background-color: #c0e5ca; }\n    .vue-switcher-theme--default.vue-switcher-color--green.vue-switcher--unchecked div:after {\n      background-color: #77c88d; }\n  .vue-switcher-theme--bulma.vue-switcher-color--default div {\n    background-color: gainsboro; }\n    .vue-switcher-theme--bulma.vue-switcher-color--default div:after {\n      background-color: #f5f5f5; }\n  .vue-switcher-theme--bulma.vue-switcher-color--default.vue-switcher--unchecked div {\n    background-color: #e8e8e8; }\n    .vue-switcher-theme--bulma.vue-switcher-color--default.vue-switcher--unchecked div:after {\n      background-color: #f5f5f5; }\n  .vue-switcher-theme--bulma.vue-switcher-color--primary div {\n    background-color: #05ffda; }\n    .vue-switcher-theme--bulma.vue-switcher-color--primary div:after {\n      background-color: #00d1b2; }\n  .vue-switcher-theme--bulma.vue-switcher-color--primary.vue-switcher--unchecked div {\n    background-color: #6bffe9; }\n    .vue-switcher-theme--bulma.vue-switcher-color--primary.vue-switcher--unchecked div:after {\n      background-color: #05ffda; }\n  .vue-switcher-theme--bulma.vue-switcher-color--blue div {\n    background-color: #5e91e3; }\n    .vue-switcher-theme--bulma.vue-switcher-color--blue div:after {\n      background-color: #3273dc; }\n  .vue-switcher-theme--bulma.vue-switcher-color--blue.vue-switcher--unchecked div {\n    background-color: #b5ccf2; }\n    .vue-switcher-theme--bulma.vue-switcher-color--blue.vue-switcher--unchecked div:after {\n      background-color: #5e91e3; }\n  .vue-switcher-theme--bulma.vue-switcher-color--red div {\n    background-color: #ff6b89; }\n    .vue-switcher-theme--bulma.vue-switcher-color--red div:after {\n      background-color: #ff3860; }\n  .vue-switcher-theme--bulma.vue-switcher-color--red.vue-switcher--unchecked div {\n    background-color: #ffd1da; }\n    .vue-switcher-theme--bulma.vue-switcher-color--red.vue-switcher--unchecked div:after {\n      background-color: #ff6b89; }\n  .vue-switcher-theme--bulma.vue-switcher-color--yellow div {\n    background-color: #ffe78a; }\n    .vue-switcher-theme--bulma.vue-switcher-color--yellow div:after {\n      background-color: #ffdd57; }\n  .vue-switcher-theme--bulma.vue-switcher-color--yellow.vue-switcher--unchecked div {\n    background-color: #fffcf0; }\n    .vue-switcher-theme--bulma.vue-switcher-color--yellow.vue-switcher--unchecked div:after {\n      background-color: #ffe78a; }\n  .vue-switcher-theme--bulma.vue-switcher-color--green div {\n    background-color: #3dde75; }\n    .vue-switcher-theme--bulma.vue-switcher-color--green div:after {\n      background-color: #22c65b; }\n  .vue-switcher-theme--bulma.vue-switcher-color--green.vue-switcher--unchecked div {\n    background-color: #94edb3; }\n    .vue-switcher-theme--bulma.vue-switcher-color--green.vue-switcher--unchecked div:after {\n      background-color: #3dde75; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--default div {\n    background-color: #e6e6e6; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--default div:after {\n      background-color: #f0f0f0; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--default.vue-switcher--unchecked div {\n    background-color: whitesmoke; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--default.vue-switcher--unchecked div:after {\n      background-color: #f0f0f0; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--primary div {\n    background-color: #4f93ce; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--primary div:after {\n      background-color: #337ab7; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--primary.vue-switcher--unchecked div {\n    background-color: #9fc4e4; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--primary.vue-switcher--unchecked div:after {\n      background-color: #4f93ce; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--success div {\n    background-color: #80c780; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--success div:after {\n      background-color: #5cb85c; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--success.vue-switcher--unchecked div {\n    background-color: #c7e6c7; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--success.vue-switcher--unchecked div:after {\n      background-color: #80c780; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--info div {\n    background-color: #85d0e7; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--info div:after {\n      background-color: #5bc0de; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--info.vue-switcher--unchecked div {\n    background-color: #daf1f8; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--info.vue-switcher--unchecked div:after {\n      background-color: #85d0e7; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--warning div {\n    background-color: #f4c37d; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--warning div:after {\n      background-color: #f0ad4e; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--warning.vue-switcher--unchecked div {\n    background-color: #fceedb; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--warning.vue-switcher--unchecked div:after {\n      background-color: #f4c37d; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--danger div {\n    background-color: #d9534f; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--danger div:after {\n      background-color: #c9302c; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--danger.vue-switcher--unchecked div {\n    background-color: #eba5a3; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--danger.vue-switcher--unchecked div:after {\n      background-color: #d9534f; }\n"],"sourceRoot":""}]);
+// Exports
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
+
+/* harmony export */ __webpack_require__.d(__webpack_exports__, [
+/* harmony export */   "default", 0, /* export default binding */ __WEBPACK_DEFAULT_EXPORT__
+/* harmony export */ ]);
+
+
+/***/ },
+
+/***/ 937
+(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(354);
+/* harmony import */ var _css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(314);
+/* harmony import */ var _css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+// Imports
+
+
+var ___CSS_LOADER_EXPORT___ = _css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+// Module
+___CSS_LOADER_EXPORT___.push([module.id, `/* component style */
+.vue-slider-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* rail style */
+.vue-slider-rail {
+  background-color: #ccc;
+  border-radius: 15px;
+}
+
+/* process style */
+.vue-slider-process {
+  background-color: #3498db;
+  border-radius: 15px;
+}
+
+/* mark style */
+.vue-slider-mark {
+  z-index: 4;
+}
+.vue-slider-mark:first-child .vue-slider-mark-step, .vue-slider-mark:last-child .vue-slider-mark-step {
+  display: none;
+}
+.vue-slider-mark-step {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.16);
+}
+.vue-slider-mark-label {
+  font-size: 14px;
+  white-space: nowrap;
+}
+/* dot style */
+.vue-slider-dot-handle {
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: #fff;
+  box-sizing: border-box;
+  box-shadow: 0.5px 0.5px 2px 1px rgba(0, 0, 0, 0.32);
+}
+.vue-slider-dot-handle-focus {
+  box-shadow: 0px 0px 1px 2px rgba(52, 152, 219, 0.36);
+}
+
+.vue-slider-dot-handle-disabled {
+  cursor: not-allowed;
+  background-color: #ccc;
+}
+
+.vue-slider-dot-tooltip-inner {
+  font-size: 14px;
+  white-space: nowrap;
+  padding: 2px 5px;
+  min-width: 20px;
+  text-align: center;
+  color: #fff;
+  border-radius: 5px;
+  border-color: #3498db;
+  background-color: #3498db;
+  box-sizing: content-box;
+}
+.vue-slider-dot-tooltip-inner::after {
+  content: "";
+  position: absolute;
+}
+.vue-slider-dot-tooltip-inner-top::after {
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  height: 0;
+  width: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px;
+  border-top-color: inherit;
+}
+.vue-slider-dot-tooltip-inner-bottom::after {
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  height: 0;
+  width: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px;
+  border-bottom-color: inherit;
+}
+.vue-slider-dot-tooltip-inner-left::after {
+  left: 100%;
+  top: 50%;
+  transform: translate(0, -50%);
+  height: 0;
+  width: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px;
+  border-left-color: inherit;
+}
+.vue-slider-dot-tooltip-inner-right::after {
+  right: 100%;
+  top: 50%;
+  transform: translate(0, -50%);
+  height: 0;
+  width: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px;
+  border-right-color: inherit;
+}
+
+.vue-slider-dot-tooltip-wrapper {
+  opacity: 0;
+  transition: all 0.3s;
+}
+.vue-slider-dot-tooltip-wrapper-show {
+  opacity: 1;
+}
+
+/*# sourceMappingURL=default.css.map */
+`, "",{"version":3,"sources":["webpack://./node_modules/vue-slider-component/lib/theme/default.scss","webpack://./node_modules/vue-slider-component/theme/default.css","webpack://./node_modules/vue-slider-component/lib/styles/_triangle.scss"],"names":[],"mappings":"AA2BA,oBAAA;AACA;EACE,YA1BgB;EA2BhB,mBAAA;AC1BF;;AD6BA,eAAA;AACA;EACE,sBA9BQ;EA+BR,mBA9BiB;ACInB;;AD6BA,kBAAA;AACA;EACE,yBAvCW;EAwCX,mBApCiB;ACUnB;;AD6BA,eAAA;AACA;EACE,UAAA;AC1BF;AD8BI;EACE,aAAA;AC5BN;ADgCW;EACP,WAAA;EACA,YAAA;EACA,kBArCe;EAsCf,qCArCU;ACOd;ADoCW;EACP,eA1CY;EA2CZ,mBAAA;AClCJ;ADyCA,cAAA;AAEW;EACP,eAAA;EACA,WAAA;EACA,YAAA;EACA,kBArEc;EAsEd,sBAxES;EAyET,sBAAA;EACA,mDA5EQ;ACoCZ;AD0Ca;EACP,oDA9EW;ACsCjB;;AD0Ca;EACP,mBAAA;EACA,sBAhFc;ACyCpB;;AD4Ca;EACP,eA7EY;EA8EZ,mBAAA;EACA,gBAlFW;EAmFX,eAlFY;EAmFZ,kBAAA;EACA,WAvFS;EAwFT,kBAvFgB;EAwFhB,qBAtGO;EAuGP,yBAvGO;EAwGP,uBAAA;ACzCN;AC7CE;EACE,WAAA;EACA,kBAAA;AD+CJ;AC3CI;EACE,SAAA;EACA,SAAA;EACA,6BAAA;EA5BJ,SAAA;EACA,QAAA;EAEE,yBAAA;EACA,mBAAA;EACA,iBFaW;EEPT,yBF+F8B;AC3BpC;AC7CI;EACE,YAAA;EACA,SAAA;EACA,6BAAA;EArCJ,SAAA;EACA,QAAA;EAEE,yBAAA;EACA,mBAAA;EACA,iBFaW;EEXT,4BFmG8B;AChBpC;AC/CI;EACE,UAAA;EACA,QAAA;EACA,6BAAA;EA9CJ,SAAA;EACA,QAAA;EAEE,yBAAA;EACA,mBAAA;EACA,iBFaW;EETT,0BFiG8B;ACLpC;ACjDI;EACE,WAAA;EACA,QAAA;EACA,6BAAA;EAvDJ,SAAA;EACA,QAAA;EAEE,yBAAA;EACA,mBAAA;EACA,iBFaW;EELT,2BF6F8B;ACMpC;;ADFW;EACP,UAAA;EACA,oBAAA;ACKJ;ADJa;EACP,UAAA;ACMN;;AAEA,sCAAsC","sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -188,19 +574,65 @@ module.exports = function (item) {
 
 /***/ },
 
-/***/ 282
+/***/ 378
+(module, __unused_webpack_exports, __webpack_require__) {
+
+(function(t,e){ true?module.exports=e(__webpack_require__(398)):0})("undefined"!==typeof self?self:this,(function(t){return function(){var e={388:function(t,e){var r,n,i;(function(o,a){n=[],r=a,i="function"===typeof r?r.apply(e,n):r,void 0===i||(t.exports=i)})("undefined"!==typeof self&&self,(function(){function t(){var e=Object.getOwnPropertyDescriptor(document,"currentScript");if(!e&&"currentScript"in document&&document.currentScript)return document.currentScript;if(e&&e.get!==t&&document.currentScript)return document.currentScript;try{throw new Error}catch(f){var r,n,i,o=/.*at [^(]*\((.*):(.+):(.+)\)$/gi,a=/@([^@]*):(\d+):(\d+)\s*$/gi,s=o.exec(f.stack)||a.exec(f.stack),l=s&&s[1]||!1,u=s&&s[2]||!1,c=document.location.href.replace(document.location.hash,""),d=document.getElementsByTagName("script");l===c&&(r=document.documentElement.outerHTML,n=new RegExp("(?:[^\\n]+?\\n){0,"+(u-2)+"}[^<]*<script>([\\d\\D]*?)<\\/script>[\\d\\D]*","i"),i=r.replace(n,"$1").trim());for(var h=0;h<d.length;h++){if("interactive"===d[h].readyState)return d[h];if(d[h].src===l)return d[h];if(l===c&&d[h].innerHTML&&d[h].innerHTML.trim()===i)return d[h]}return null}}return t}))},905:function(t,e,r){"use strict";r.r(e);var n=r(117),i=r.n(n),o=r(488),a=r.n(o),s=a()(i());s.push([t.id,".vue-slider-dot{position:absolute;-webkit-transition:all 0s;transition:all 0s;z-index:5}.vue-slider-dot:focus{outline:none}.vue-slider-dot-tooltip{position:absolute;visibility:hidden}.vue-slider-dot-hover:hover .vue-slider-dot-tooltip,.vue-slider-dot-tooltip-show{visibility:visible}.vue-slider-dot-tooltip-top{top:-10px;left:50%;-webkit-transform:translate(-50%,-100%);transform:translate(-50%,-100%)}.vue-slider-dot-tooltip-bottom{bottom:-10px;left:50%;-webkit-transform:translate(-50%,100%);transform:translate(-50%,100%)}.vue-slider-dot-tooltip-left{left:-10px;top:50%;-webkit-transform:translate(-100%,-50%);transform:translate(-100%,-50%)}.vue-slider-dot-tooltip-right{right:-10px;top:50%;-webkit-transform:translate(100%,-50%);transform:translate(100%,-50%)}",""]),e["default"]=s},121:function(t,e,r){"use strict";r.r(e);var n=r(117),i=r.n(n),o=r(488),a=r.n(o),s=a()(i());s.push([t.id,".vue-slider-marks{position:relative;width:100%;height:100%}.vue-slider-mark{position:absolute;z-index:1}.vue-slider-ltr .vue-slider-mark,.vue-slider-rtl .vue-slider-mark{width:0;height:100%;top:50%}.vue-slider-ltr .vue-slider-mark-step,.vue-slider-rtl .vue-slider-mark-step{top:0}.vue-slider-ltr .vue-slider-mark-label,.vue-slider-rtl .vue-slider-mark-label{top:100%;margin-top:10px}.vue-slider-ltr .vue-slider-mark{-webkit-transform:translate(-50%,-50%);transform:translate(-50%,-50%)}.vue-slider-ltr .vue-slider-mark-step{left:0}.vue-slider-ltr .vue-slider-mark-label{left:50%;-webkit-transform:translateX(-50%);transform:translateX(-50%)}.vue-slider-rtl .vue-slider-mark{-webkit-transform:translate(50%,-50%);transform:translate(50%,-50%)}.vue-slider-rtl .vue-slider-mark-step{right:0}.vue-slider-rtl .vue-slider-mark-label{right:50%;-webkit-transform:translateX(50%);transform:translateX(50%)}.vue-slider-btt .vue-slider-mark,.vue-slider-ttb .vue-slider-mark{width:100%;height:0;left:50%}.vue-slider-btt .vue-slider-mark-step,.vue-slider-ttb .vue-slider-mark-step{left:0}.vue-slider-btt .vue-slider-mark-label,.vue-slider-ttb .vue-slider-mark-label{left:100%;margin-left:10px}.vue-slider-btt .vue-slider-mark{-webkit-transform:translate(-50%,50%);transform:translate(-50%,50%)}.vue-slider-btt .vue-slider-mark-step{top:0}.vue-slider-btt .vue-slider-mark-label{top:50%;-webkit-transform:translateY(-50%);transform:translateY(-50%)}.vue-slider-ttb .vue-slider-mark{-webkit-transform:translate(-50%,-50%);transform:translate(-50%,-50%)}.vue-slider-ttb .vue-slider-mark-step{bottom:0}.vue-slider-ttb .vue-slider-mark-label{bottom:50%;-webkit-transform:translateY(50%);transform:translateY(50%)}.vue-slider-mark-label,.vue-slider-mark-step{position:absolute}",""]),e["default"]=s},207:function(t,e,r){"use strict";r.r(e);var n=r(117),i=r.n(n),o=r(488),a=r.n(o),s=a()(i());s.push([t.id,".vue-slider{position:relative;-webkit-box-sizing:content-box;box-sizing:content-box;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;display:block;-webkit-tap-highlight-color:rgba(0,0,0,0)}.vue-slider-rail{position:relative;width:100%;height:100%;-webkit-transition-property:width,height,left,right,top,bottom;transition-property:width,height,left,right,top,bottom}.vue-slider-process{position:absolute;z-index:1}",""]),e["default"]=s},488:function(t){"use strict";t.exports=function(t){var e=[];return e.toString=function(){return this.map((function(e){var r="",n="undefined"!==typeof e[5];return e[4]&&(r+="@supports (".concat(e[4],") {")),e[2]&&(r+="@media ".concat(e[2]," {")),n&&(r+="@layer".concat(e[5].length>0?" ".concat(e[5]):""," {")),r+=t(e),n&&(r+="}"),e[2]&&(r+="}"),e[4]&&(r+="}"),r})).join("")},e.i=function(t,r,n,i,o){"string"===typeof t&&(t=[[null,t,void 0]]);var a={};if(n)for(var s=0;s<this.length;s++){var l=this[s][0];null!=l&&(a[l]=!0)}for(var u=0;u<t.length;u++){var c=[].concat(t[u]);n&&a[c[0]]||("undefined"!==typeof o&&("undefined"===typeof c[5]||(c[1]="@layer".concat(c[5].length>0?" ".concat(c[5]):""," {").concat(c[1],"}")),c[5]=o),r&&(c[2]?(c[1]="@media ".concat(c[2]," {").concat(c[1],"}"),c[2]=r):c[2]=r),i&&(c[4]?(c[1]="@supports (".concat(c[4],") {").concat(c[1],"}"),c[4]=i):c[4]="".concat(i)),e.push(c))}},e}},117:function(t){"use strict";t.exports=function(t){return t[1]}},831:function(t,e){"use strict";e.Z=(t,e)=>{const r=t.__vccOpts||t;for(const[n,i]of e)r[n]=i;return r}},466:function(t,e,r){var n=r(905);n.__esModule&&(n=n.default),"string"===typeof n&&(n=[[t.id,n,""]]),n.locals&&(t.exports=n.locals);var i=r(959).Z;i("50bc1720",n,!0,{sourceMap:!1,shadowMode:!1})},18:function(t,e,r){var n=r(121);n.__esModule&&(n=n.default),"string"===typeof n&&(n=[[t.id,n,""]]),n.locals&&(t.exports=n.locals);var i=r(959).Z;i("10aa5f36",n,!0,{sourceMap:!1,shadowMode:!1})},631:function(t,e,r){var n=r(207);n.__esModule&&(n=n.default),"string"===typeof n&&(n=[[t.id,n,""]]),n.locals&&(t.exports=n.locals);var i=r(959).Z;i("1772934e",n,!0,{sourceMap:!1,shadowMode:!1})},959:function(t,e,r){"use strict";function n(t,e){for(var r=[],n={},i=0;i<e.length;i++){var o=e[i],a=o[0],s=o[1],l=o[2],u=o[3],c={id:t+":"+i,css:s,media:l,sourceMap:u};n[a]?n[a].parts.push(c):r.push(n[a]={id:a,parts:[c]})}return r}r.d(e,{Z:function(){return p}});var i="undefined"!==typeof document;if("undefined"!==typeof DEBUG&&DEBUG&&!i)throw new Error("vue-style-loader cannot be used in a non-browser environment. Use { target: 'node' } in your Webpack config to indicate a server-rendering environment.");var o={},a=i&&(document.head||document.getElementsByTagName("head")[0]),s=null,l=0,u=!1,c=function(){},d=null,h="data-vue-ssr-id",f="undefined"!==typeof navigator&&/msie [6-9]\b/.test(navigator.userAgent.toLowerCase());function p(t,e,r,i){u=r,d=i||{};var a=n(t,e);return m(a),function(e){for(var r=[],i=0;i<a.length;i++){var s=a[i],l=o[s.id];l.refs--,r.push(l)}e?(a=n(t,e),m(a)):a=[];for(i=0;i<r.length;i++){l=r[i];if(0===l.refs){for(var u=0;u<l.parts.length;u++)l.parts[u]();delete o[l.id]}}}}function m(t){for(var e=0;e<t.length;e++){var r=t[e],n=o[r.id];if(n){n.refs++;for(var i=0;i<n.parts.length;i++)n.parts[i](r.parts[i]);for(;i<r.parts.length;i++)n.parts.push(y(r.parts[i]));n.parts.length>r.parts.length&&(n.parts.length=r.parts.length)}else{var a=[];for(i=0;i<r.parts.length;i++)a.push(y(r.parts[i]));o[r.id]={id:r.id,refs:1,parts:a}}}}function v(){var t=document.createElement("style");return t.type="text/css",a.appendChild(t),t}function y(t){var e,r,n=document.querySelector("style["+h+'~="'+t.id+'"]');if(n){if(u)return c;n.parentNode.removeChild(n)}if(f){var i=l++;n=s||(s=v()),e=g.bind(null,n,i,!1),r=g.bind(null,n,i,!0)}else n=v(),e=k.bind(null,n),r=function(){n.parentNode.removeChild(n)};return e(t),function(n){if(n){if(n.css===t.css&&n.media===t.media&&n.sourceMap===t.sourceMap)return;e(t=n)}else r()}}var b=function(){var t=[];return function(e,r){return t[e]=r,t.filter(Boolean).join("\n")}}();function g(t,e,r,n){var i=r?"":n.css;if(t.styleSheet)t.styleSheet.cssText=b(e,i);else{var o=document.createTextNode(i),a=t.childNodes;a[e]&&t.removeChild(a[e]),a.length?t.insertBefore(o,a[e]):t.appendChild(o)}}function k(t,e){var r=e.css,n=e.media,i=e.sourceMap;if(n&&t.setAttribute("media",n),d.ssrId&&t.setAttribute(h,e.id),i&&(r+="\n/*# sourceURL="+i.sources[0]+" */",r+="\n/*# sourceMappingURL=data:application/json;base64,"+btoa(unescape(encodeURIComponent(JSON.stringify(i))))+" */"),t.styleSheet)t.styleSheet.cssText=r;else{while(t.firstChild)t.removeChild(t.firstChild);t.appendChild(document.createTextNode(r))}}},927:function(e){"use strict";e.exports=t}},r={};function n(t){var i=r[t];if(void 0!==i)return i.exports;var o=r[t]={id:t,exports:{}};return e[t].call(o.exports,o,o.exports,n),o.exports}!function(){n.n=function(t){var e=t&&t.__esModule?function(){return t["default"]}:function(){return t};return n.d(e,{a:e}),e}}(),function(){n.d=function(t,e){for(var r in e)n.o(e,r)&&!n.o(t,r)&&Object.defineProperty(t,r,{enumerable:!0,get:e[r]})}}(),function(){n.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)}}(),function(){n.r=function(t){"undefined"!==typeof Symbol&&Symbol.toStringTag&&Object.defineProperty(t,Symbol.toStringTag,{value:"Module"}),Object.defineProperty(t,"__esModule",{value:!0})}}(),function(){n.p=""}();var i={};return function(){"use strict";if(n.d(i,{default:function(){return St}}),"undefined"!==typeof window){var t=window.document.currentScript,e=n(388);t=e(),"currentScript"in document||Object.defineProperty(document,"currentScript",{get:e});var r=t&&t.src.match(/(.+\/)[^/]+\.js(\?.*)?$/);r&&(n.p=r[1])}var o=n(927);function a(t,e,r){return e in t?Object.defineProperty(t,e,{value:r,enumerable:!0,configurable:!0,writable:!0}):t[e]=r,t}var s={key:0,class:"vue-slider-marks"};function l(t,e,r,n,i,l){var u=(0,o.resolveComponent)("vue-slider-mark"),c=(0,o.resolveComponent)("vue-slider-dot");return(0,o.openBlock)(),(0,o.createElementBlock)("div",(0,o.mergeProps)({ref:"container",class:t.containerClasses,style:t.containerStyles,onClick:e[2]||(e[2]=function(){return t.clickHandle&&t.clickHandle.apply(t,arguments)}),onTouchstartPassive:e[3]||(e[3]=function(){return t.dragStartOnProcess&&t.dragStartOnProcess.apply(t,arguments)}),onMousedownPassive:e[4]||(e[4]=function(){return t.dragStartOnProcess&&t.dragStartOnProcess.apply(t,arguments)})},t.$attrs),[(0,o.createElementVNode)("div",{class:"vue-slider-rail",style:(0,o.normalizeStyle)(t.railStyle)},[((0,o.openBlock)(!0),(0,o.createElementBlock)(o.Fragment,null,(0,o.renderList)(t.processArray,(function(e,r){return(0,o.renderSlot)(t.$slots,"process",(0,o.normalizeProps)((0,o.guardReactiveProps)(e)),(function(){return[((0,o.openBlock)(),(0,o.createElementBlock)("div",{class:"vue-slider-process",key:"process-".concat(r),style:(0,o.normalizeStyle)(e.style)},null,4))]}))})),256)),t.sliderMarks&&t.control?((0,o.openBlock)(),(0,o.createElementBlock)("div",s,[((0,o.openBlock)(!0),(0,o.createElementBlock)(o.Fragment,null,(0,o.renderList)(t.control.markList,(function(r,n){return(0,o.renderSlot)(t.$slots,"mark",(0,o.normalizeProps)((0,o.guardReactiveProps)(r)),(function(){var i;return[((0,o.openBlock)(),(0,o.createBlock)(u,{key:"mark-".concat(n),mark:r,hideLabel:t.hideLabel,style:(0,o.normalizeStyle)((i={},a(i,t.isHorizontal?"height":"width","100%"),a(i,t.isHorizontal?"width":"height",t.tailSize),a(i,t.mainDirection,"".concat(r.pos,"%")),i)),stepStyle:t.stepStyle,stepActiveStyle:t.stepActiveStyle,labelStyle:t.labelStyle,labelActiveStyle:t.labelActiveStyle,onPressLabel:e[0]||(e[0]=function(e){return t.clickable&&t.setValueByPos(e)})},{step:(0,o.withCtx)((function(){return[(0,o.renderSlot)(t.$slots,"step",(0,o.normalizeProps)((0,o.guardReactiveProps)(r)))]})),label:(0,o.withCtx)((function(){return[(0,o.renderSlot)(t.$slots,"label",(0,o.normalizeProps)((0,o.guardReactiveProps)(r)))]})),_:2},1032,["mark","hideLabel","style","stepStyle","stepActiveStyle","labelStyle","labelActiveStyle"]))]}))})),256))])):(0,o.createCommentVNode)("",!0),((0,o.openBlock)(!0),(0,o.createElementBlock)(o.Fragment,null,(0,o.renderList)(t.dots,(function(r,n){var i;return(0,o.openBlock)(),(0,o.createBlock)(c,(0,o.mergeProps)({ref_for:!0,ref:"dot-".concat(n),key:"dot-".concat(n),value:r.value,disabled:r.disabled,focus:r.focus,"dot-style":[r.style,r.disabled?r.disabledStyle:null,r.focus?r.focusStyle:null],tooltip:r.tooltip||t.tooltip,"tooltip-style":[t.tooltipStyle,r.tooltipStyle,r.disabled?r.tooltipDisabledStyle:null,r.focus?r.tooltipFocusStyle:null],"tooltip-formatter":Array.isArray(t.sliderTooltipFormatter)?t.sliderTooltipFormatter[n]:t.sliderTooltipFormatter,"tooltip-placement":t.tooltipDirections[n],style:[t.dotBaseStyle,(i={},a(i,t.mainDirection,"".concat(r.pos,"%")),a(i,"transition","".concat(t.mainDirection," ").concat(t.animateTime,"s")),i)],onDragStart:function(){return t.dragStart(n)},role:"slider","aria-valuenow":r.value,"aria-valuemin":t.min,"aria-valuemax":t.max,"aria-orientation":t.isHorizontal?"horizontal":"vertical",tabindex:"0",onFocus:function(){return t.focus(r,n)},onBlur:e[1]||(e[1]=function(){return t.blur()})},t.dotAttrs),{dot:(0,o.withCtx)((function(){return[(0,o.renderSlot)(t.$slots,"dot",(0,o.normalizeProps)((0,o.guardReactiveProps)(r)))]})),tooltip:(0,o.withCtx)((function(){return[(0,o.renderSlot)(t.$slots,"tooltip",(0,o.normalizeProps)((0,o.guardReactiveProps)(r)))]})),_:2},1040,["value","disabled","focus","dot-style","tooltip","tooltip-style","tooltip-formatter","tooltip-placement","style","onDragStart","aria-valuenow","aria-valuemin","aria-valuemax","aria-orientation","onFocus"])})),128))],4),(0,o.renderSlot)(t.$slots,"default",{value:t.getValue()})],16)}var u=["aria-valuetext"],c={class:"vue-slider-dot-tooltip-text"};function d(t,e,r,n,i,a){var s;return(0,o.openBlock)(),(0,o.createElementBlock)("div",{ref:"dot",class:(0,o.normalizeClass)(t.dotClasses),"aria-valuetext":null===(s=t.tooltipValue)||void 0===s?void 0:s.toString(),onMousedownPassive:e[0]||(e[0]=function(){return t.dragStart&&t.dragStart.apply(t,arguments)}),onTouchstartPassive:e[1]||(e[1]=function(){return t.dragStart&&t.dragStart.apply(t,arguments)})},[(0,o.renderSlot)(t.$slots,"dot",{},(function(){return[(0,o.createElementVNode)("div",{class:(0,o.normalizeClass)(t.handleClasses),style:(0,o.normalizeStyle)(t.dotStyle)},null,6)]})),"none"!==t.tooltip?((0,o.openBlock)(),(0,o.createElementBlock)("div",{key:0,class:(0,o.normalizeClass)(t.tooltipClasses)},[(0,o.renderSlot)(t.$slots,"tooltip",{},(function(){return[(0,o.createElementVNode)("div",{class:(0,o.normalizeClass)(t.tooltipInnerClasses),style:(0,o.normalizeStyle)(t.tooltipStyle)},[(0,o.createElementVNode)("span",c,(0,o.toDisplayString)(t.tooltipValue),1)],6)]}))],2)):(0,o.createCommentVNode)("",!0)],42,u)}n(466);var h=(0,o.defineComponent)({name:"VueSliderDot",emits:["drag-start"],props:{value:{type:[String,Number],default:0},tooltip:{type:String,required:!0},tooltipPlacement:{type:String,validator:function(t){return["top","right","bottom","left"].indexOf(t)>-1},required:!0},tooltipFormatter:{type:[String,Function]},focus:{type:Boolean,default:!1},disabled:{type:Boolean,default:!1},dotStyle:{type:Object},tooltipStyle:{type:Object}},computed:{dotClasses:function(){return["vue-slider-dot",{"vue-slider-dot-hover":"hover"===this.tooltip||"active"===this.tooltip,"vue-slider-dot-disabled":this.disabled,"vue-slider-dot-focus":this.focus}]},handleClasses:function(){return["vue-slider-dot-handle",{"vue-slider-dot-handle-disabled":this.disabled,"vue-slider-dot-handle-focus":this.focus}]},tooltipClasses:function(){return["vue-slider-dot-tooltip",["vue-slider-dot-tooltip-".concat(this.tooltipPlacement)],{"vue-slider-dot-tooltip-show":this.showTooltip}]},tooltipInnerClasses:function(){return["vue-slider-dot-tooltip-inner",["vue-slider-dot-tooltip-inner-".concat(this.tooltipPlacement)],{"vue-slider-dot-tooltip-inner-disabled":this.disabled,"vue-slider-dot-tooltip-inner-focus":this.focus}]},showTooltip:function(){switch(this.tooltip){case"always":return!0;case"none":return!1;case"focus":case"active":return!!this.focus;default:return!1}},tooltipValue:function(){return this.tooltipFormatter?"string"===typeof this.tooltipFormatter?this.tooltipFormatter.replace(/\{value\}/,String(this.value)):this.tooltipFormatter(this.value):this.value}},methods:{dragStart:function(){if(this.disabled)return!1;this.$emit("drag-start")}}}),f=n(831);const p=(0,f.Z)(h,[["render",d]]);var m=p;function v(t,e,r,n,i,a){return(0,o.openBlock)(),(0,o.createElementBlock)("div",{class:(0,o.normalizeClass)(t.marksClasses)},[(0,o.renderSlot)(t.$slots,"step",{},(function(){return[(0,o.createElementVNode)("div",{class:(0,o.normalizeClass)(t.stepClasses),style:(0,o.normalizeStyle)([t.stepStyle,t.mark.style||{},t.mark.active&&t.stepActiveStyle?t.stepActiveStyle:{},t.mark.active&&t.mark.activeStyle?t.mark.activeStyle:{}])},null,6)]})),t.hideLabel?(0,o.createCommentVNode)("",!0):(0,o.renderSlot)(t.$slots,"label",{key:0},(function(){return[(0,o.createElementVNode)("div",{class:(0,o.normalizeClass)(t.labelClasses),style:(0,o.normalizeStyle)([t.labelStyle,t.mark.labelStyle||{},t.mark.active&&t.labelActiveStyle?t.labelActiveStyle:{},t.mark.active&&t.mark.labelActiveStyle?t.mark.labelActiveStyle:{}]),onClick:e[0]||(e[0]=function(){return t.labelClickHandle&&t.labelClickHandle.apply(t,arguments)})},(0,o.toDisplayString)(t.mark.label),7)]}))],2)}n(18);var y=(0,o.defineComponent)({name:"VueSliderMark",emits:["press-label"],props:{mark:{type:Object,required:!0},hideLabel:{type:Boolean},stepStyle:{type:Object,default:function(){return{}}},stepActiveStyle:{type:Object,default:function(){return{}}},labelStyle:{type:Object,default:function(){return{}}},labelActiveStyle:{type:Object,default:function(){return{}}}},computed:{marksClasses:function(){return["vue-slider-mark",{"vue-slider-mark-active":this.mark.active}]},stepClasses:function(){return["vue-slider-mark-step",{"vue-slider-mark-step-active":this.mark.active}]},labelClasses:function(){return["vue-slider-mark-label",{"vue-slider-mark-label-active":this.mark.active}]}},methods:{labelClickHandle:function(t){t.stopPropagation(),this.$emit("press-label",this.mark.pos)}}});const b=(0,f.Z)(y,[["render",v]]);var g,k=b,S=function(t){return"number"===typeof t?"".concat(t,"px"):t},x=function(t){var e=document.documentElement,r=document.body,n=t.getBoundingClientRect(),i={y:n.top+(window.pageYOffset||e.scrollTop)-(e.clientTop||r.clientTop||0),x:n.left+(window.pageXOffset||e.scrollLeft)-(e.clientLeft||r.clientLeft||0)};return i},P=function(t,e,r){var n=arguments.length>3&&void 0!==arguments[3]?arguments[3]:1,i="targetTouches"in t?t.targetTouches[0]:t,o=x(e),a={x:i.pageX-o.x,y:i.pageY-o.y};return{x:r?e.offsetWidth*n-a.x:a.x,y:r?e.offsetHeight*n-a.y:a.y}};(function(t){t[t["PAGE_UP"]=33]="PAGE_UP",t[t["PAGE_DOWN"]=34]="PAGE_DOWN",t[t["END"]=35]="END",t[t["HOME"]=36]="HOME",t[t["LEFT"]=37]="LEFT",t[t["UP"]=38]="UP",t[t["RIGHT"]=39]="RIGHT",t[t["DOWN"]=40]="DOWN"})(g||(g={}));var w=function(t,e){if(e.hook){var r=e.hook(t);if("function"===typeof r)return r;if(!r)return null}switch(t.keyCode){case g.UP:return function(t){return"ttb"===e.direction?t-1:t+1};case g.RIGHT:return function(t){return"rtl"===e.direction?t-1:t+1};case g.DOWN:return function(t){return"ttb"===e.direction?t+1:t-1};case g.LEFT:return function(t){return"rtl"===e.direction?t+1:t-1};case g.END:return function(){return e.max};case g.HOME:return function(){return e.min};case g.PAGE_UP:return function(t){return t+10};case g.PAGE_DOWN:return function(t){return t-10};default:return null}};function O(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}function D(t,e){for(var r=0;r<e.length;r++){var n=e[r];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(t,n.key,n)}}function E(t,e,r){return e&&D(t.prototype,e),r&&D(t,r),Object.defineProperty(t,"prototype",{writable:!1}),t}function R(t,e,r){return e in t?Object.defineProperty(t,e,{value:r,enumerable:!0,configurable:!0,writable:!0}):t[e]=r,t}var A,V,j=function(){function t(e){O(this,t),R(this,"num",void 0),this.num=e}return E(t,[{key:"decimal",value:function(t,e){var r=this.num,n=this.getDecimalLen(r),i=this.getDecimalLen(t),o=0;switch(e){case"+":o=this.getExponent(n,i),this.num=(this.safeRoundUp(r,o)+this.safeRoundUp(t,o))/o;break;case"-":o=this.getExponent(n,i),this.num=(this.safeRoundUp(r,o)-this.safeRoundUp(t,o))/o;break;case"*":this.num=this.safeRoundUp(this.safeRoundUp(r,this.getExponent(n)),this.safeRoundUp(t,this.getExponent(i)))/this.getExponent(n+i);break;case"/":o=this.getExponent(n,i),this.num=this.safeRoundUp(r,o)/this.safeRoundUp(t,o);break;case"%":o=this.getExponent(n,i),this.num=this.safeRoundUp(r,o)%this.safeRoundUp(t,o)/o;break}return this}},{key:"plus",value:function(t){return this.decimal(t,"+")}},{key:"minus",value:function(t){return this.decimal(t,"-")}},{key:"multiply",value:function(t){return this.decimal(t,"*")}},{key:"divide",value:function(t){return this.decimal(t,"/")}},{key:"remainder",value:function(t){return this.decimal(t,"%")}},{key:"toNumber",value:function(){return this.num}},{key:"getDecimalLen",value:function(t){var e="".concat(t).split("e");return("".concat(e[0]).split(".")[1]||"").length-(e[1]?+e[1]:0)}},{key:"getExponent",value:function(t,e){return Math.pow(10,void 0!==e?Math.max(t,e):t)}},{key:"safeRoundUp",value:function(t,e){return Math.round(t*e)}}]),t}();function C(t,e){return L(t)||M(t,e)||H(t,e)||B()}function B(){throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}function M(t,e){var r=null==t?null:"undefined"!==typeof Symbol&&t[Symbol.iterator]||t["@@iterator"];if(null!=r){var n,i,o=[],a=!0,s=!1;try{for(r=r.call(t);!(a=(n=r.next()).done);a=!0)if(o.push(n.value),e&&o.length===e)break}catch(l){s=!0,i=l}finally{try{a||null==r["return"]||r["return"]()}finally{if(s)throw i}}return o}}function L(t){if(Array.isArray(t))return t}function N(t,e){var r=Object.keys(t);if(Object.getOwnPropertySymbols){var n=Object.getOwnPropertySymbols(t);e&&(n=n.filter((function(e){return Object.getOwnPropertyDescriptor(t,e).enumerable}))),r.push.apply(r,n)}return r}function z(t){for(var e=1;e<arguments.length;e++){var r=null!=arguments[e]?arguments[e]:{};e%2?N(Object(r),!0).forEach((function(e){X(t,e,r[e])})):Object.getOwnPropertyDescriptors?Object.defineProperties(t,Object.getOwnPropertyDescriptors(r)):N(Object(r)).forEach((function(e){Object.defineProperty(t,e,Object.getOwnPropertyDescriptor(r,e))}))}return t}function I(t){return $(t)||F(t)||H(t)||T()}function T(){throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}function H(t,e){if(t){if("string"===typeof t)return U(t,e);var r=Object.prototype.toString.call(t).slice(8,-1);return"Object"===r&&t.constructor&&(r=t.constructor.name),"Map"===r||"Set"===r?Array.from(t):"Arguments"===r||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(r)?U(t,e):void 0}}function F(t){if("undefined"!==typeof Symbol&&null!=t[Symbol.iterator]||null!=t["@@iterator"])return Array.from(t)}function $(t){if(Array.isArray(t))return U(t)}function U(t,e){(null==e||e>t.length)&&(e=t.length);for(var r=0,n=new Array(e);r<e;r++)n[r]=t[r];return n}function _(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}function W(t,e){for(var r=0;r<e.length;r++){var n=e[r];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(t,n.key,n)}}function G(t,e,r){return e&&W(t.prototype,e),r&&W(t,r),Object.defineProperty(t,"prototype",{writable:!1}),t}function X(t,e,r){return e in t?Object.defineProperty(t,e,{value:r,enumerable:!0,configurable:!0,writable:!0}):t[e]=r,t}(function(t){t[t["VALUE"]=1]="VALUE",t[t["INTERVAL"]=2]="INTERVAL",t[t["MIN"]=3]="MIN",t[t["MAX"]=4]="MAX",t[t["ORDER"]=5]="ORDER"})(V||(V={}));var q=(A={},X(A,V.VALUE,'The type of the "value" is illegal'),X(A,V.INTERVAL,'The prop "interval" is invalid, "(max - min)" must be divisible by "interval"'),X(A,V.MIN,'The "value" must be greater than or equal to the "min".'),X(A,V.MAX,'The "value" must be less than or equal to the "max".'),X(A,V.ORDER,'When "order" is false, the parameters "minRange", "maxRange", "fixed", "enabled" are invalid.'),A),Z=function(){function t(e){_(this,t),X(this,"dotsPos",[]),X(this,"dotsValue",[]),X(this,"data",void 0),X(this,"enableCross",void 0),X(this,"fixed",void 0),X(this,"max",void 0),X(this,"min",void 0),X(this,"interval",void 0),X(this,"minRange",void 0),X(this,"maxRange",void 0),X(this,"order",void 0),X(this,"marks",void 0),X(this,"included",void 0),X(this,"process",void 0),X(this,"adsorb",void 0),X(this,"dotOptions",void 0),X(this,"onError",void 0),X(this,"cacheRangeDir",{}),this.data=e.data,this.max=e.max,this.min=e.min,this.interval=e.interval,this.order=e.order,this.marks=e.marks,this.included=e.included,this.process=e.process,this.adsorb=e.adsorb,this.dotOptions=e.dotOptions,this.onError=e.onError,this.order?(this.minRange=e.minRange||0,this.maxRange=e.maxRange||0,this.enableCross=e.enableCross,this.fixed=e.fixed):((e.minRange||e.maxRange||!e.enableCross||e.fixed)&&this.emitError(V.ORDER),this.minRange=0,this.maxRange=0,this.enableCross=!0,this.fixed=!1),this.setValue(e.value)}return G(t,[{key:"setValue",value:function(t){this.setDotsValue(Array.isArray(t)?I(t):[t],!0)}},{key:"setDotsValue",value:function(t,e){this.dotsValue=t,e&&this.syncDotsPos()}},{key:"setDotsPos",value:function(t){var e=this,r=this.order?I(t).sort((function(t,e){return t-e})):t;this.dotsPos=r,this.setDotsValue(r.map((function(t){return e.getValueByPos(t)})),this.adsorb)}},{key:"getValueByPos",value:function(t){var e=this.parsePos(t);if(this.included){var r=100;this.markList.forEach((function(n){var i=Math.abs(n.pos-t);i<r&&(r=i,e=n.value)}))}return e}},{key:"syncDotsPos",value:function(){var t=this;this.dotsPos=this.dotsValue.map((function(e){return t.parseValue(e)}))}},{key:"markList",get:function(){var t=this;if(!this.marks)return[];var e=function(e,r){var n=t.parseValue(e);return z({pos:n,value:e,label:e,active:t.isActiveByPos(n)},r)};return!0===this.marks?this.getValues().map((function(t){return e(t)})):"[object Object]"===Object.prototype.toString.call(this.marks)?Object.keys(this.marks).sort((function(t,e){return+t-+e})).map((function(r){var n=t.marks[r];return e(r,"string"!==typeof n?n:{label:n})})):Array.isArray(this.marks)?this.marks.map((function(t){return e(t)})):"function"===typeof this.marks?this.getValues().map((function(e){return{value:e,result:t.marks(e)}})).filter((function(t){var e=t.result;return!!e})).map((function(t){var r=t.value,n=t.result;return e(r,n)})):[]}},{key:"getRecentDot",value:function(t){var e=this.dotsPos.map((function(e){return Math.abs(e-t)}));return e.indexOf(Math.min.apply(Math,I(e)))}},{key:"getIndexByValue",value:function(t){return this.data?this.data.indexOf(t):new j(+t).minus(this.min).divide(this.interval).toNumber()}},{key:"getValueByIndex",value:function(t){return t<0?t=0:t>this.total&&(t=this.total),this.data?this.data[t]:new j(t).multiply(this.interval).plus(this.min).toNumber()}},{key:"setDotPos",value:function(t,e){t=this.getValidPos(t,e).pos;var r=t-this.dotsPos[e];if(r){var n=new Array(this.dotsPos.length);this.fixed?n=this.getFixedChangePosArr(r,e):this.minRange||this.maxRange?n=this.getLimitRangeChangePosArr(t,r,e):n[e]=r,this.setDotsPos(this.dotsPos.map((function(t,e){return t+(n[e]||0)})))}}},{key:"getFixedChangePosArr",value:function(t,e){var r=this;return this.dotsPos.forEach((function(n,i){if(i!==e){var o=r.getValidPos(n+t,i),a=o.pos,s=o.inRange;s||(t=Math.min(Math.abs(a-n),Math.abs(t))*(t<0?-1:1))}})),this.dotsPos.map((function(e){return t}))}},{key:"getLimitRangeChangePosArr",value:function(t,e,r){var n=this,i=[{index:r,changePos:e}],o=e;return[this.minRange,this.maxRange].forEach((function(a,s){if(!a)return!1;var l=0===s,u=e>0,c=0;c=l?u?1:-1:u?-1:1;var d=function(t,e){var r=Math.abs(t-e);return l?r<n.minRangeDir:r>n.maxRangeDir},h=r+c,f=n.dotsPos[h],p=t;while(n.isPos(f)&&d(f,p)){var m=n.getValidPos(f+o,h),v=m.pos;i.push({index:h,changePos:v-f}),h+=c,p=v,f=n.dotsPos[h]}})),this.dotsPos.map((function(t,e){var r=i.filter((function(t){return t.index===e}));return r.length?r[0].changePos:0}))}},{key:"isPos",value:function(t){return"number"===typeof t}},{key:"getValidPos",value:function(t,e){var r=this.valuePosRange[e],n=!0;return t<r[0]?(t=r[0],n=!1):t>r[1]&&(t=r[1],n=!1),{pos:t,inRange:n}}},{key:"parseValue",value:function(t){if(this.data)t=this.data.indexOf(t);else if("number"===typeof t||"string"===typeof t){if(t=+t,t<this.min)return this.emitError(V.MIN),0;if(t>this.max)return this.emitError(V.MAX),0;if("number"!==typeof t||t!==t)return this.emitError(V.VALUE),0;t=new j(t).minus(this.min).divide(this.interval).toNumber()}var e=new j(t).multiply(this.gap).toNumber();return e<0?0:e>100?100:e}},{key:"parsePos",value:function(t){var e=Math.round(t/this.gap);return this.getValueByIndex(e)}},{key:"isActiveByPos",value:function(t){return this.processArray.some((function(e){var r=C(e,2),n=r[0],i=r[1];return t>=n&&t<=i}))}},{key:"getValues",value:function(){if(this.data)return this.data;for(var t=[],e=0;e<=this.total;e++)t.push(new j(e).multiply(this.interval).plus(this.min).toNumber());return t}},{key:"getRangeDir",value:function(t){return t?new j(t).divide(new j(this.data?this.data.length-1:this.max).minus(this.data?0:this.min).toNumber()).multiply(100).toNumber():100}},{key:"emitError",value:function(t){this.onError&&this.onError(t,q[t])}},{key:"processArray",get:function(){if(this.process){if("function"===typeof this.process)return this.process(this.dotsPos);if(1===this.dotsPos.length)return[[0,this.dotsPos[0]]];if(this.dotsPos.length>1)return[[Math.min.apply(Math,I(this.dotsPos)),Math.max.apply(Math,I(this.dotsPos))]]}return[]}},{key:"total",get:function(){var t=0;return t=this.data?this.data.length-1:new j(this.max).minus(this.min).divide(this.interval).toNumber(),t-Math.floor(t)!==0?(this.emitError(V.INTERVAL),0):t}},{key:"gap",get:function(){return 100/this.total}},{key:"minRangeDir",get:function(){return this.cacheRangeDir[this.minRange]?this.cacheRangeDir[this.minRange]:this.cacheRangeDir[this.minRange]=this.getRangeDir(this.minRange)}},{key:"maxRangeDir",get:function(){return this.cacheRangeDir[this.maxRange]?this.cacheRangeDir[this.maxRange]:this.cacheRangeDir[this.maxRange]=this.getRangeDir(this.maxRange)}},{key:"getDotRange",value:function(t,e,r){if(!this.dotOptions)return r;var n=Array.isArray(this.dotOptions)?this.dotOptions[t]:this.dotOptions;return n&&void 0!==n[e]?this.parseValue(n[e]):r}},{key:"valuePosRange",get:function(){var t=this,e=this.dotsPos,r=[];return e.forEach((function(n,i){r.push([Math.max(t.minRange?t.minRangeDir*i:0,t.enableCross?0:e[i-1]||0,t.getDotRange(i,"min",0)),Math.min(t.minRange?100-t.minRangeDir*(e.length-1-i):100,t.enableCross?100:e[i+1]||100,t.getDotRange(i,"max",100))])})),r}},{key:"dotsIndex",get:function(){var t=this;return this.dotsValue.map((function(e){return t.getIndexByValue(e)}))}}]),t}();function Y(t,e){if(!(t instanceof e))throw new TypeError("Cannot call a class as a function")}function K(t,e){for(var r=0;r<e.length;r++){var n=e[r];n.enumerable=n.enumerable||!1,n.configurable=!0,"value"in n&&(n.writable=!0),Object.defineProperty(t,n.key,n)}}function J(t,e,r){return e&&K(t.prototype,e),r&&K(t,r),Object.defineProperty(t,"prototype",{writable:!1}),t}function Q(t,e,r){return e in t?Object.defineProperty(t,e,{value:r,enumerable:!0,configurable:!0,writable:!0}):t[e]=r,t}var tt=function(){function t(e){Y(this,t),Q(this,"map",void 0),Q(this,"states",0),this.map=e}return J(t,[{key:"add",value:function(t){this.states|=t}},{key:"delete",value:function(t){this.states&=~t}},{key:"toggle",value:function(t){this.has(t)?this.delete(t):this.add(t)}},{key:"has",value:function(t){return!!(this.states&t)}}]),t}();n(631);function et(t){return it(t)||nt(t)||dt(t)||rt()}function rt(){throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}function nt(t){if("undefined"!==typeof Symbol&&null!=t[Symbol.iterator]||null!=t["@@iterator"])return Array.from(t)}function it(t){if(Array.isArray(t))return ht(t)}function ot(t){return ot="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(t){return typeof t}:function(t){return t&&"function"==typeof Symbol&&t.constructor===Symbol&&t!==Symbol.prototype?"symbol":typeof t},ot(t)}function at(t,e){var r=Object.keys(t);if(Object.getOwnPropertySymbols){var n=Object.getOwnPropertySymbols(t);e&&(n=n.filter((function(e){return Object.getOwnPropertyDescriptor(t,e).enumerable}))),r.push.apply(r,n)}return r}function st(t){for(var e=1;e<arguments.length;e++){var r=null!=arguments[e]?arguments[e]:{};e%2?at(Object(r),!0).forEach((function(e){lt(t,e,r[e])})):Object.getOwnPropertyDescriptors?Object.defineProperties(t,Object.getOwnPropertyDescriptors(r)):at(Object(r)).forEach((function(e){Object.defineProperty(t,e,Object.getOwnPropertyDescriptor(r,e))}))}return t}function lt(t,e,r){return e in t?Object.defineProperty(t,e,{value:r,enumerable:!0,configurable:!0,writable:!0}):t[e]=r,t}function ut(t,e){return pt(t)||ft(t,e)||dt(t,e)||ct()}function ct(){throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}function dt(t,e){if(t){if("string"===typeof t)return ht(t,e);var r=Object.prototype.toString.call(t).slice(8,-1);return"Object"===r&&t.constructor&&(r=t.constructor.name),"Map"===r||"Set"===r?Array.from(t):"Arguments"===r||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(r)?ht(t,e):void 0}}function ht(t,e){(null==e||e>t.length)&&(e=t.length);for(var r=0,n=new Array(e);r<e;r++)n[r]=t[r];return n}function ft(t,e){var r=null==t?null:"undefined"!==typeof Symbol&&t[Symbol.iterator]||t["@@iterator"];if(null!=r){var n,i,o=[],a=!0,s=!1;try{for(r=r.call(t);!(a=(n=r.next()).done);a=!0)if(o.push(n.value),e&&o.length===e)break}catch(l){s=!0,i=l}finally{try{a||null==r["return"]||r["return"]()}finally{if(s)throw i}}return o}}function pt(t){if(Array.isArray(t))return t}var mt={None:0,Drag:2,Focus:4},vt=4,yt=(0,o.defineComponent)({name:"VueSlider",components:{VueSliderDot:m,VueSliderMark:k},emits:["change","drag-start","dragging","drag-end","error","update:modelValue"],data:function(){return{control:null,states:new tt(mt),scale:1,focusDotIndex:0}},props:{modelValue:{type:[Number,String,Array],default:0},silent:{type:Boolean,default:!1},direction:{type:String,default:"ltr",validator:function(t){return["ltr","rtl","ttb","btt"].indexOf(t)>-1}},width:{type:[Number,String]},height:{type:[Number,String]},dotSize:{type:[Number,Array],default:14},contained:{type:Boolean,default:!1},min:{type:Number,default:0},max:{type:Number,default:100},interval:{type:Number,default:1},disabled:{type:Boolean,default:!1},clickable:{type:Boolean,default:!0},dragOnClick:{type:Boolean,default:!1},duration:{type:Number,default:.5},data:{type:[Object,Array]},dataValue:{type:String,default:"value"},dataLabel:{type:String,default:"label"},lazy:{type:Boolean,default:!1},tooltip:{type:String,default:"active",validator:function(t){return["none","always","focus","hover","active"].indexOf(t)>-1}},tooltipPlacement:{type:[String,Array],validator:function(t){return(Array.isArray(t)?t:[t]).every((function(t){return["top","right","bottom","left"].indexOf(t)>-1}))}},tooltipFormatter:{type:[String,Array,Function]},useKeyboard:{type:Boolean,default:!0},keydownHook:{type:Function},enableCross:{type:Boolean,default:!0},fixed:{type:Boolean,default:!1},order:{type:Boolean,default:!0},minRange:{type:Number},maxRange:{type:Number},marks:{type:[Boolean,Object,Array,Function],default:!1},process:{type:[Boolean,Function],default:!0},zoom:{type:Number},included:{type:Boolean},adsorb:{type:Boolean},hideLabel:{type:Boolean},dotOptions:{type:[Object,Array]},dotAttrs:{type:Object},railStyle:{type:Object},processStyle:{type:Object},dotStyle:{type:Object},tooltipStyle:{type:Object},stepStyle:{type:Object},stepActiveStyle:{type:Object},labelStyle:{type:Object},labelActiveStyle:{type:Object}},computed:{isHorizontal:function(){return"ltr"===this.direction||"rtl"===this.direction},isReverse:function(){return"rtl"===this.direction||"btt"===this.direction},tailSize:function(){return S((this.isHorizontal?this.height:this.width)||vt)},containerClasses:function(){return["vue-slider",["vue-slider-".concat(this.direction)],{"vue-slider-disabled":this.disabled}]},containerStyles:function(){var t=Array.isArray(this.dotSize)?this.dotSize:[this.dotSize,this.dotSize],e=ut(t,2),r=e[0],n=e[1],i=this.width?S(this.width):this.isHorizontal?"auto":S(vt),o=this.height?S(this.height):this.isHorizontal?S(vt):"auto";return{padding:this.contained?"".concat(n/2,"px ").concat(r/2,"px"):this.isHorizontal?"".concat(n/2,"px 0"):"0 ".concat(r/2,"px"),width:i,height:o}},processArray:function(){var t=this;return this.control.processArray.map((function(e,r){var n,i=ut(e,3),o=i[0],a=i[1],s=i[2];if(o>a){var l=[a,o];o=l[0],a=l[1]}var u=t.isHorizontal?"width":"height";return{start:o,end:a,index:r,style:st(st((n={},lt(n,t.isHorizontal?"height":"width","100%"),lt(n,t.isHorizontal?"top":"left",0),lt(n,t.mainDirection,"".concat(o,"%")),lt(n,u,"".concat(a-o,"%")),lt(n,"transitionProperty","".concat(u,",").concat(t.mainDirection)),lt(n,"transitionDuration","".concat(t.animateTime,"s")),n),t.processStyle),s)}}))},dotBaseStyle:function(){var t,e=Array.isArray(this.dotSize)?this.dotSize:[this.dotSize,this.dotSize],r=ut(e,2),n=r[0],i=r[1];return t=this.isHorizontal?lt({transform:"translate(".concat(this.isReverse?"50%":"-50%",", -50%)"),WebkitTransform:"translate(".concat(this.isReverse?"50%":"-50%",", -50%)"),top:"50%"},"ltr"===this.direction?"left":"right","0"):lt({transform:"translate(-50%, ".concat(this.isReverse?"50%":"-50%",")"),WebkitTransform:"translate(-50%, ".concat(this.isReverse?"50%":"-50%",")"),left:"50%"},"btt"===this.direction?"bottom":"top","0"),st({width:"".concat(n,"px"),height:"".concat(i,"px")},t)},mainDirection:function(){switch(this.direction){case"ltr":return"left";case"rtl":return"right";case"btt":return"bottom";case"ttb":return"top";default:return"left"}},tooltipDirections:function(){var t=this.tooltipPlacement||(this.isHorizontal?"top":"left");return Array.isArray(t)?t:this.dots.map((function(){return t}))},dots:function(){var t=this;return this.control.dotsPos.map((function(e,r){return st({pos:e,index:r,value:t.control.dotsValue[r],focus:t.states.has(mt.Focus)&&t.focusDotIndex===r,disabled:t.disabled,style:t.dotStyle},(Array.isArray(t.dotOptions)?t.dotOptions[r]:t.dotOptions)||{})}))},animateTime:function(){return this.states.has(mt.Drag)?0:this.duration},canSort:function(){return this.order&&!this.minRange&&!this.maxRange&&!this.fixed&&this.enableCross},sliderData:function(){var t=this;return this.isObjectArrayData(this.data)?this.data.map((function(e){return e[t.dataValue]})):this.isObjectData(this.data)?Object.keys(this.data):this.data},sliderMarks:function(){var t=this;return this.marks?this.marks:this.isObjectArrayData(this.data)?function(e){var r={label:e};return t.data.some((function(n){return n[t.dataValue]===e&&(r.label=n[t.dataLabel],!0)})),r}:this.isObjectData(this.data)?this.data:void 0},sliderTooltipFormatter:function(){var t=this;if(this.tooltipFormatter)return this.tooltipFormatter;if(this.isObjectArrayData(this.data))return function(e){var r=""+e;return t.data.some((function(n){return n[t.dataValue]===e&&(r=n[t.dataLabel],!0)})),r};if(this.isObjectData(this.data)){var e=this.data;return function(t){return e[t]}}},isNotSync:function(){var t=this.control.dotsValue;return Array.isArray(this.modelValue)?this.modelValue.length!==t.length||this.modelValue.some((function(e,r){return e!==t[r]})):this.modelValue!==t[0]},dragRange:function(){var t=this.dots[this.focusDotIndex-1],e=this.dots[this.focusDotIndex+1];return[t?t.pos:-1/0,e?e.pos:1/0]}},watch:{modelValue:function(){this.control&&!this.states.has(mt.Drag)&&this.isNotSync&&this.control.setValue(this.modelValue)}},methods:{isObjectData:function(t){return!!t&&"[object Object]"===Object.prototype.toString.call(t)},isObjectArrayData:function(t){return!!t&&Array.isArray(t)&&t.length>0&&"object"===ot(t[0])},bindEvent:function(){document.addEventListener("touchmove",this.dragMove,{passive:!1}),document.addEventListener("touchend",this.dragEnd,{passive:!1}),document.addEventListener("mousedown",this.blurHandle),document.addEventListener("mousemove",this.dragMove),document.addEventListener("mouseup",this.dragEnd),document.addEventListener("mouseleave",this.dragEnd),document.addEventListener("keydown",this.keydownHandle)},unbindEvent:function(){document.removeEventListener("touchmove",this.dragMove),document.removeEventListener("touchend",this.dragEnd),document.removeEventListener("mousedown",this.blurHandle),document.removeEventListener("mousemove",this.dragMove),document.removeEventListener("mouseup",this.dragEnd),document.removeEventListener("mouseleave",this.dragEnd),document.removeEventListener("keydown",this.keydownHandle)},setScale:function(){this.scale=new j(Math.floor(this.isHorizontal?this.$el.offsetWidth:this.$el.offsetHeight)).multiply(this.zoom||1).divide(100).toNumber()},initControl:function(){var t=this;this.control=new Z({value:this.modelValue,data:this.sliderData,enableCross:this.enableCross,fixed:this.fixed,max:this.max,min:this.min,interval:this.interval,minRange:this.minRange,maxRange:this.maxRange,order:this.order,marks:this.sliderMarks,included:this.included,process:this.process,adsorb:this.adsorb,dotOptions:this.dotOptions,onError:this.emitError}),["data","enableCross","fixed","max","min","interval","minRange","maxRange","order","marks","process","adsorb","included","dotOptions"].forEach((function(e){t.$watch(e,(function(r){if("data"===e&&Array.isArray(t.control.data)&&Array.isArray(r)&&t.control.data.length===r.length&&r.every((function(e,r){return e===t.control.data[r]})))return!1;switch(e){case"data":case"dataLabel":case"dataValue":t.control.data=t.sliderData;break;case"mark":t.control.marks=t.sliderMarks;break;default:t.control[e]=r}["data","max","min","interval"].indexOf(e)>-1&&t.control.syncDotsPos()}))}))},syncValueByPos:function(){var t=this.control.dotsValue;if(this.isDiff(t,Array.isArray(this.modelValue)?this.modelValue:[this.modelValue])){var e=1===t.length?t[0]:et(t);this.$emit("change",e,this.focusDotIndex),this.$emit("update:modelValue",e)}},isDiff:function(t,e){return t.length!==e.length||t.some((function(t,r){return t!==e[r]}))},emitError:function(t,e){this.silent||console.error("[VueSlider error]: ".concat(e)),this.$emit("error",t,e)},dragStartOnProcess:function(t){if(this.dragOnClick){this.setScale();var e=this.getPosByEvent(t),r=this.control.getRecentDot(e);if(this.dots[r].disabled)return;this.dragStart(r),this.control.setDotPos(e,this.focusDotIndex),this.lazy||this.syncValueByPos()}},dragStart:function(t){this.focusDotIndex=t,this.setScale(),this.states.add(mt.Drag),this.states.add(mt.Focus),this.$emit("drag-start",this.focusDotIndex)},dragMove:function(t){if(!this.states.has(mt.Drag))return!1;t.preventDefault();var e=this.getPosByEvent(t);this.isCrossDot(e),this.control.setDotPos(e,this.focusDotIndex),this.lazy||this.syncValueByPos();var r=this.control.dotsValue;this.$emit("dragging",1===r.length?r[0]:et(r),this.focusDotIndex)},isCrossDot:function(t){if(this.canSort){var e=this.focusDotIndex,r=t;if(r>this.dragRange[1]?(r=this.dragRange[1],this.focusDotIndex++):r<this.dragRange[0]&&(r=this.dragRange[0],this.focusDotIndex--),e!==this.focusDotIndex){var n=this.$refs["dot-".concat(this.focusDotIndex)];n&&n.$el&&n.$el.focus(),this.control.setDotPos(r,e)}}},dragEnd:function(t){var e=this;if(!this.states.has(mt.Drag))return!1;setTimeout((function(){e.lazy&&e.syncValueByPos(),e.included&&e.isNotSync?e.control.setValue(e.modelValue):e.control.syncDotsPos(),e.states.delete(mt.Drag),e.useKeyboard&&!("targetTouches"in t)||e.states.delete(mt.Focus),e.$emit("drag-end",e.focusDotIndex)}))},blurHandle:function(t){if(!this.states.has(mt.Focus)||!this.$refs.container||this.$refs.container.contains(t.target))return!1;this.states.delete(mt.Focus)},clickHandle:function(t){if(!this.clickable||this.disabled)return!1;if(!this.states.has(mt.Drag)){this.setScale();var e=this.getPosByEvent(t);this.setValueByPos(e)}},focus:function(t){var e=arguments.length>1&&void 0!==arguments[1]?arguments[1]:0;t.disabled||(this.states.add(mt.Focus),this.focusDotIndex=e)},blur:function(){this.states.delete(mt.Focus)},getValue:function(){var t=this.control.dotsValue;return 1===t.length?t[0]:t},getIndex:function(){var t=this.control.dotsIndex;return 1===t.length?t[0]:t},setValue:function(t){this.control.setValue(Array.isArray(t)?et(t):[t]),this.syncValueByPos()},setIndex:function(t){var e=this,r=Array.isArray(t)?t.map((function(t){return e.control.getValueByIndex(t)})):this.control.getValueByIndex(t);this.setValue(r)},setValueByPos:function(t){var e=this,r=this.control.getRecentDot(t);if(this.disabled||this.dots[r].disabled)return!1;this.focusDotIndex=r,this.control.setDotPos(t,r),this.syncValueByPos(),this.useKeyboard&&this.states.add(mt.Focus),setTimeout((function(){e.included&&e.isNotSync?e.control.setValue(e.modelValue):e.control.syncDotsPos()}))},keydownHandle:function(t){var e=this;if(!this.useKeyboard||!this.states.has(mt.Focus))return!1;var r=this.included&&this.marks,n=w(t,{direction:this.direction,max:r?this.control.markList.length-1:this.control.total,min:0,hook:this.keydownHook});if(n){t.preventDefault();var i=-1,o=0;r?(this.control.markList.some((function(t,r){return t.value===e.control.dotsValue[e.focusDotIndex]&&(i=n(r),!0)})),i<0?i=0:i>this.control.markList.length-1&&(i=this.control.markList.length-1),o=this.control.markList[i].pos):(i=n(this.control.getIndexByValue(this.control.dotsValue[this.focusDotIndex])),o=this.control.parseValue(this.control.getValueByIndex(i))),this.isCrossDot(o),this.control.setDotPos(o,this.focusDotIndex),this.syncValueByPos()}},getPosByEvent:function(t){return P(t,this.$el,this.isReverse,this.zoom)[this.isHorizontal?"x":"y"]/this.scale},renderSlot:function(t,e,r){var n=this.$slots[t];return n?n(e):r}},created:function(){this.initControl()},mounted:function(){this.bindEvent()},beforeUnmount:function(){this.unbindEvent()}});const bt=(0,f.Z)(yt,[["render",l]]);var gt=bt;gt.VueSliderMark=k,gt.VueSliderDot=m;var kt=gt,St=kt}(),i=i["default"],i}()}));
+//# sourceMappingURL=vue-slider-component.umd.min.js.map
+
+/***/ },
+
+/***/ 920
 (module, __unused_webpack_exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(931);
+var content = __webpack_require__(341);
 if(content.__esModule) content = content.default;
 if(typeof content === 'string') content = [[module.id, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
 var add = (__webpack_require__(534)/* ["default"] */ .A)
-var update = add("b5a84f7a", content, false, {});
+var update = add("2a1a1747", content, false, {});
+// Hot Module Replacement
+if(false) // removed by dead control flow
+{}
+
+/***/ },
+
+/***/ 304
+(module, __unused_webpack_exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(917);
+if(content.__esModule) content = content.default;
+if(typeof content === 'string') content = [[module.id, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var add = (__webpack_require__(534)/* ["default"] */ .A)
+var update = add("208a412a", content, false, {});
+// Hot Module Replacement
+if(false) // removed by dead control flow
+{}
+
+/***/ },
+
+/***/ 670
+(module, __unused_webpack_exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(937);
+if(content.__esModule) content = content.default;
+if(typeof content === 'string') content = [[module.id, content, '']];
+if(content.locals) module.exports = content.locals;
+// add the styles to the DOM
+var add = (__webpack_require__(534)/* ["default"] */ .A)
+var update = add("6c84a470", content, false, {});
 // Hot Module Replacement
 if(false) // removed by dead control flow
 {}
@@ -471,6 +903,14 @@ function applyToTag (styleElement, obj) {
 }
 
 
+/***/ },
+
+/***/ 398
+(module) {
+
+"use strict";
+module.exports = require("Vue");
+
 /***/ }
 
 /******/ 	});
@@ -590,10 +1030,10 @@ __webpack_require__.d(__webpack_exports__, {
 
 // UNUSED EXPORTS: mergeDeep, mergeDeepReactive, notEqualDeep
 
-;// external "Vue"
-const external_Vue_namespaceObject = require("Vue");
-var external_Vue_default = /*#__PURE__*/__webpack_require__.n(external_Vue_namespaceObject);
-;// ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./src/GanttElastic.vue?vue&type=template&id=9cd0d0ec
+// EXTERNAL MODULE: external "Vue"
+var external_Vue_ = __webpack_require__(398);
+var external_Vue_default = /*#__PURE__*/__webpack_require__.n(external_Vue_);
+;// ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./src/GanttElastic.vue?vue&type=template&id=b90f8362
 
 
 const _hoisted_1 = {
@@ -602,15 +1042,19 @@ const _hoisted_1 = {
 }
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  const _component_main_view = (0,external_Vue_namespaceObject.resolveComponent)("main-view")
+  const _component_gantt_header = (0,external_Vue_.resolveComponent)("gantt-header")
+  const _component_main_view = (0,external_Vue_.resolveComponent)("main-view")
 
-  return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("div", _hoisted_1, [
-    (0,external_Vue_namespaceObject.renderSlot)(_ctx.$slots, "header"),
-    (0,external_Vue_namespaceObject.createVNode)(_component_main_view, { ref: "mainView" }, null, 512 /* NEED_PATCH */),
-    (0,external_Vue_namespaceObject.renderSlot)(_ctx.$slots, "footer")
+  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", _hoisted_1, [
+    (0,external_Vue_.renderSlot)(_ctx.$slots, "header", {}, () => [
+      (0,external_Vue_.createCommentVNode)(" default header when the consumer does not provide one (Vue 3 port: the old\n           external gantt-elastic-header UMD is Vue 2 only, so the local Header ships in) "),
+      (0,external_Vue_.createVNode)(_component_gantt_header)
+    ]),
+    (0,external_Vue_.createVNode)(_component_main_view, { ref: "mainView" }, null, 512 /* NEED_PATCH */),
+    (0,external_Vue_.renderSlot)(_ctx.$slots, "footer")
   ]))
 }
-;// ./src/GanttElastic.vue?vue&type=template&id=9cd0d0ec
+;// ./src/GanttElastic.vue?vue&type=template&id=b90f8362
 
 // EXTERNAL MODULE: ./node_modules/dayjs/dayjs.min.js
 var dayjs_min = __webpack_require__(353);
@@ -623,64 +1067,64 @@ var dayjs_min_default = /*#__PURE__*/__webpack_require__.n(dayjs_min);
 
 
 function MainViewvue_type_template_id_7ac81826_render(_ctx, _cache, $props, $setup, $data, $options) {
-  const _component_task_list = (0,external_Vue_namespaceObject.resolveComponent)("task-list")
-  const _component_chart = (0,external_Vue_namespaceObject.resolveComponent)("chart")
+  const _component_task_list = (0,external_Vue_.resolveComponent)("task-list")
+  const _component_chart = (0,external_Vue_.resolveComponent)("chart")
 
-  return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("div", {
+  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
     class: "gantt-elastic__main-view",
-    style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['main-view'] })
+    style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['main-view'] })
   }, [
-    (0,external_Vue_namespaceObject.createElementVNode)("div", {
+    (0,external_Vue_.createElementVNode)("div", {
       class: "gantt-elastic__main-container-wrapper",
-      style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['main-container-wrapper'], height: $options.root.state.options.height + 'px' })
+      style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['main-container-wrapper'], height: $options.root.state.options.height + 'px' })
     }, [
-      (0,external_Vue_namespaceObject.createElementVNode)("div", {
+      (0,external_Vue_.createElementVNode)("div", {
         class: "gantt-elastic__main-container",
-        style: (0,external_Vue_namespaceObject.normalizeStyle)({
+        style: (0,external_Vue_.normalizeStyle)({
           ...$options.root.style['main-container'],
           width: $options.root.state.options.clientWidth + 'px',
           height: $options.root.state.options.height + 'px'
         }),
         ref: "mainView"
       }, [
-        (0,external_Vue_namespaceObject.createElementVNode)("div", {
+        (0,external_Vue_.createElementVNode)("div", {
           class: "gantt-elastic__container",
-          style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['container'] }),
+          style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['container'] }),
           onMousemove: _cache[7] || (_cache[7] = (...args) => ($options.mouseMove && $options.mouseMove(...args))),
           onMouseup: _cache[8] || (_cache[8] = (...args) => ($options.mouseUp && $options.mouseUp(...args)))
         }, [
-          (0,external_Vue_namespaceObject.withDirectives)((0,external_Vue_namespaceObject.createElementVNode)("div", {
+          (0,external_Vue_.withDirectives)((0,external_Vue_.createElementVNode)("div", {
             ref: "taskList",
             class: "gantt-elastic__task-list-container",
-            style: (0,external_Vue_namespaceObject.normalizeStyle)({
+            style: (0,external_Vue_.normalizeStyle)({
               ...$options.root.style['task-list-container'],
               width: $options.root.state.options.taskList.finalWidth + 'px',
               height: $options.root.state.options.height + 'px'
             })
           }, [
-            (0,external_Vue_namespaceObject.createVNode)(_component_task_list)
+            (0,external_Vue_.createVNode)(_component_task_list)
           ], 4 /* STYLE */), [
-            [external_Vue_namespaceObject.vShow, $options.root.state.options.taskList.display]
+            [external_Vue_.vShow, $options.root.state.options.taskList.display]
           ]),
-          (0,external_Vue_namespaceObject.createElementVNode)("div", {
+          (0,external_Vue_.createElementVNode)("div", {
             class: "gantt-elastic__main-view-container",
-            style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['main-view-container'] }),
+            style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['main-view-container'] }),
             ref: "chartContainer",
             onMousedown: _cache[0] || (_cache[0] = (...args) => ($options.chartMouseDown && $options.chartMouseDown(...args))),
             onTouchstart: _cache[1] || (_cache[1] = (...args) => ($options.chartMouseDown && $options.chartMouseDown(...args))),
             onMouseup: _cache[2] || (_cache[2] = (...args) => ($options.chartMouseUp && $options.chartMouseUp(...args))),
             onTouchend: _cache[3] || (_cache[3] = (...args) => ($options.chartMouseUp && $options.chartMouseUp(...args))),
-            onMousemove: _cache[4] || (_cache[4] = (0,external_Vue_namespaceObject.withModifiers)((...args) => ($options.chartMouseMove && $options.chartMouseMove(...args)), ["prevent"])),
-            onTouchmove: _cache[5] || (_cache[5] = (0,external_Vue_namespaceObject.withModifiers)((...args) => ($options.chartMouseMove && $options.chartMouseMove(...args)), ["prevent"])),
-            onWheel: _cache[6] || (_cache[6] = (0,external_Vue_namespaceObject.withModifiers)((...args) => ($options.chartWheel && $options.chartWheel(...args)), ["prevent"]))
+            onMousemove: _cache[4] || (_cache[4] = (0,external_Vue_.withModifiers)((...args) => ($options.chartMouseMove && $options.chartMouseMove(...args)), ["prevent"])),
+            onTouchmove: _cache[5] || (_cache[5] = (0,external_Vue_.withModifiers)((...args) => ($options.chartMouseMove && $options.chartMouseMove(...args)), ["prevent"])),
+            onWheel: _cache[6] || (_cache[6] = (0,external_Vue_.withModifiers)((...args) => ($options.chartWheel && $options.chartWheel(...args)), ["prevent"]))
           }, [
-            (0,external_Vue_namespaceObject.createVNode)(_component_chart)
+            (0,external_Vue_.createVNode)(_component_chart)
           ], 36 /* STYLE, NEED_HYDRATION */)
         ], 36 /* STYLE, NEED_HYDRATION */)
       ], 4 /* STYLE */),
-      (0,external_Vue_namespaceObject.createElementVNode)("div", {
+      (0,external_Vue_.createElementVNode)("div", {
         class: "gantt-elastic__chart-scroll-container gantt-elastic__chart-scroll-container--vertical",
-        style: (0,external_Vue_namespaceObject.normalizeStyle)({
+        style: (0,external_Vue_.normalizeStyle)({
           ...$options.root.style['chart-scroll-container'],
           ...$options.root.style['chart-scroll-container--vertical'],
           ...$options.verticalStyle
@@ -688,15 +1132,15 @@ function MainViewvue_type_template_id_7ac81826_render(_ctx, _cache, $props, $set
         ref: "chartScrollContainerVertical",
         onScroll: _cache[9] || (_cache[9] = (...args) => ($options.onVerticalScroll && $options.onVerticalScroll(...args)))
       }, [
-        (0,external_Vue_namespaceObject.createElementVNode)("div", {
+        (0,external_Vue_.createElementVNode)("div", {
           class: "gantt-elastic__chart-scroll--vertical",
-          style: (0,external_Vue_namespaceObject.normalizeStyle)({ width: '1px', height: $options.root.state.options.allVisibleTasksHeight + 'px' })
+          style: (0,external_Vue_.normalizeStyle)({ width: '1px', height: $options.root.state.options.allVisibleTasksHeight + 'px' })
         }, null, 4 /* STYLE */)
       ], 36 /* STYLE, NEED_HYDRATION */)
     ], 4 /* STYLE */),
-    (0,external_Vue_namespaceObject.createElementVNode)("div", {
+    (0,external_Vue_.createElementVNode)("div", {
       class: "gantt-elastic__chart-scroll-container gantt-elastic__chart-scroll-container--horizontal",
-      style: (0,external_Vue_namespaceObject.normalizeStyle)({
+      style: (0,external_Vue_.normalizeStyle)({
         ...$options.root.style['chart-scroll-container'],
         ...$options.root.style['chart-scroll-container--horizontal'],
         marginLeft: $options.getMarginLeft
@@ -704,9 +1148,9 @@ function MainViewvue_type_template_id_7ac81826_render(_ctx, _cache, $props, $set
       onScroll: _cache[10] || (_cache[10] = (...args) => ($options.onHorizontalScroll && $options.onHorizontalScroll(...args))),
       ref: "chartScrollContainerHorizontal"
     }, [
-      (0,external_Vue_namespaceObject.createElementVNode)("div", {
+      (0,external_Vue_.createElementVNode)("div", {
         class: "gantt-elastic__chart-scroll--horizontal",
-        style: (0,external_Vue_namespaceObject.normalizeStyle)({ height: '1px', width: $options.root.state.options.width + 'px' })
+        style: (0,external_Vue_.normalizeStyle)({ height: '1px', width: $options.root.state.options.width + 'px' })
       }, null, 4 /* STYLE */)
     ], 36 /* STYLE, NEED_HYDRATION */)
   ], 4 /* STYLE */))
@@ -717,27 +1161,27 @@ function MainViewvue_type_template_id_7ac81826_render(_ctx, _cache, $props, $set
 
 
 function TaskListvue_type_template_id_0ddd1532_render(_ctx, _cache, $props, $setup, $data, $options) {
-  const _component_task_list_header = (0,external_Vue_namespaceObject.resolveComponent)("task-list-header")
-  const _component_task_list_item = (0,external_Vue_namespaceObject.resolveComponent)("task-list-item")
+  const _component_task_list_header = (0,external_Vue_.resolveComponent)("task-list-header")
+  const _component_task_list_item = (0,external_Vue_.resolveComponent)("task-list-item")
 
-  return (0,external_Vue_namespaceObject.withDirectives)(((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("div", {
+  return (0,external_Vue_.withDirectives)(((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
     class: "gantt-elastic__task-list-wrapper",
     ref: "taskListWrapper",
-    style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['task-list-wrapper'], width: '100%', height: '100%' })
+    style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['task-list-wrapper'], width: '100%', height: '100%' })
   }, [
-    (0,external_Vue_namespaceObject.createElementVNode)("div", {
+    (0,external_Vue_.createElementVNode)("div", {
       class: "gantt-elastic__task-list",
-      style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['task-list'] }),
+      style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['task-list'] }),
       ref: "taskList"
     }, [
-      (0,external_Vue_namespaceObject.createVNode)(_component_task_list_header),
-      (0,external_Vue_namespaceObject.createElementVNode)("div", {
+      (0,external_Vue_.createVNode)(_component_task_list_header),
+      (0,external_Vue_.createElementVNode)("div", {
         class: "gantt-elastic__task-list-items",
         ref: "taskListItems",
-        style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['task-list-items'], height: $options.root.state.options.rowsHeight + 'px' })
+        style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['task-list-items'], height: $options.root.state.options.rowsHeight + 'px' })
       }, [
-        ((0,external_Vue_namespaceObject.openBlock)(true), (0,external_Vue_namespaceObject.createElementBlock)(external_Vue_namespaceObject.Fragment, null, (0,external_Vue_namespaceObject.renderList)($options.root.visibleTasks, (task) => {
-          return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createBlock)(_component_task_list_item, {
+        ((0,external_Vue_.openBlock)(true), (0,external_Vue_.createElementBlock)(external_Vue_.Fragment, null, (0,external_Vue_.renderList)($options.root.visibleTasks, (task) => {
+          return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createBlock)(_component_task_list_item, {
             key: task.id,
             task: task
           }, null, 8 /* PROPS */, ["task"]))
@@ -745,7 +1189,7 @@ function TaskListvue_type_template_id_0ddd1532_render(_ctx, _cache, $props, $set
       ], 4 /* STYLE */)
     ], 4 /* STYLE */)
   ], 4 /* STYLE */)), [
-    [external_Vue_namespaceObject.vShow, $options.root.state.options.taskList.display]
+    [external_Vue_.vShow, $options.root.state.options.taskList.display]
   ])
 }
 ;// ./src/components/TaskList/TaskList.vue?vue&type=template&id=0ddd1532
@@ -757,20 +1201,20 @@ const TaskListHeadervue_type_template_id_42b30fa2_hoisted_1 = ["column"]
 const _hoisted_2 = ["column", "onMousedown"]
 
 function TaskListHeadervue_type_template_id_42b30fa2_render(_ctx, _cache, $props, $setup, $data, $options) {
-  const _component_task_list_expander = (0,external_Vue_namespaceObject.resolveComponent)("task-list-expander")
+  const _component_task_list_expander = (0,external_Vue_.resolveComponent)("task-list-expander")
 
-  return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("div", {
+  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
     class: "gantt-elastic__task-list-header",
-    style: (0,external_Vue_namespaceObject.normalizeStyle)({
+    style: (0,external_Vue_.normalizeStyle)({
       ...$options.root.style['task-list-header'],
       height: `${$options.root.state.options.calendar.height}px`,
       'margin-bottom': `${$options.root.state.options.calendar.gap}px`
     })
   }, [
-    ((0,external_Vue_namespaceObject.openBlock)(true), (0,external_Vue_namespaceObject.createElementBlock)(external_Vue_namespaceObject.Fragment, null, (0,external_Vue_namespaceObject.renderList)($options.root.getTaskListColumns, (column) => {
-      return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("div", {
+    ((0,external_Vue_.openBlock)(true), (0,external_Vue_.createElementBlock)(external_Vue_.Fragment, null, (0,external_Vue_.renderList)($options.root.getTaskListColumns, (column) => {
+      return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
         class: "gantt-elastic__task-list-header-column",
-        style: (0,external_Vue_namespaceObject.normalizeStyle)({
+        style: (0,external_Vue_.normalizeStyle)({
         ...$options.root.style['task-list-header-column'],
         ...column.style['task-list-header-column'],
         ...$options.getStyle(column)
@@ -778,42 +1222,42 @@ function TaskListHeadervue_type_template_id_42b30fa2_render(_ctx, _cache, $props
         key: column._id
       }, [
         (column.expander)
-          ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createBlock)(_component_task_list_expander, {
+          ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createBlock)(_component_task_list_expander, {
               key: 0,
               tasks: $options.collapsible,
               options: $options.root.state.options.taskList.expander
             }, null, 8 /* PROPS */, ["tasks", "options"]))
-          : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true),
-        (0,external_Vue_namespaceObject.createElementVNode)("div", {
+          : (0,external_Vue_.createCommentVNode)("v-if", true),
+        (0,external_Vue_.createElementVNode)("div", {
           class: "gantt-elastic__task-list-header-label",
-          style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['task-list-header-label'], ...column.style['task-list-header-label'] }),
+          style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['task-list-header-label'], ...column.style['task-list-header-label'] }),
           column: column,
           onMouseup: _cache[0] || (_cache[0] = (...args) => ($options.resizerMouseUp && $options.resizerMouseUp(...args)))
-        }, (0,external_Vue_namespaceObject.toDisplayString)(column.label), 45 /* TEXT, STYLE, PROPS, NEED_HYDRATION */, TaskListHeadervue_type_template_id_42b30fa2_hoisted_1),
-        (0,external_Vue_namespaceObject.createElementVNode)("div", {
+        }, (0,external_Vue_.toDisplayString)(column.label), 45 /* TEXT, STYLE, PROPS, NEED_HYDRATION */, TaskListHeadervue_type_template_id_42b30fa2_hoisted_1),
+        (0,external_Vue_.createElementVNode)("div", {
           class: "gantt-elastic__task-list-header-resizer-wrapper",
-          style: (0,external_Vue_namespaceObject.normalizeStyle)({
+          style: (0,external_Vue_.normalizeStyle)({
           ...$options.root.style['task-list-header-resizer-wrapper'],
           ...column.style['task-list-header-resizer-wrapper']
         }),
           column: column,
           onMousedown: $event => ($options.resizerMouseDown($event, column))
         }, [
-          (0,external_Vue_namespaceObject.createElementVNode)("div", {
+          (0,external_Vue_.createElementVNode)("div", {
             class: "gantt-elastic__task-list-header-resizer",
-            style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['task-list-header-resizer'], ...column.style['task-list-header-resizer'] })
+            style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['task-list-header-resizer'], ...column.style['task-list-header-resizer'] })
           }, [
-            (0,external_Vue_namespaceObject.createElementVNode)("div", {
+            (0,external_Vue_.createElementVNode)("div", {
               class: "gantt-elastic__task-list-header-resizer-dot",
-              style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['task-list-header-resizer-dot'], ...column.style['task-list-header-resizer-dot'] })
+              style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['task-list-header-resizer-dot'], ...column.style['task-list-header-resizer-dot'] })
             }, null, 4 /* STYLE */),
-            (0,external_Vue_namespaceObject.createElementVNode)("div", {
+            (0,external_Vue_.createElementVNode)("div", {
               class: "gantt-elastic__task-list-header-resizer-dot",
-              style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['task-list-header-resizer-dot'], ...column.style['task-list-header-resizer-dot'] })
+              style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['task-list-header-resizer-dot'], ...column.style['task-list-header-resizer-dot'] })
             }, null, 4 /* STYLE */),
-            (0,external_Vue_namespaceObject.createElementVNode)("div", {
+            (0,external_Vue_.createElementVNode)("div", {
               class: "gantt-elastic__task-list-header-resizer-dot",
-              style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['task-list-header-resizer-dot'], ...column.style['task-list-header-resizer-dot'] })
+              style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['task-list-header-resizer-dot'], ...column.style['task-list-header-resizer-dot'] })
             }, null, 4 /* STYLE */)
           ], 4 /* STYLE */)
         ], 44 /* STYLE, PROPS, NEED_HYDRATION */, _hoisted_2)
@@ -832,22 +1276,22 @@ const _hoisted_3 = ["x1", "y1", "x2", "y2"]
 const _hoisted_4 = ["x1", "y1", "x2", "y2"]
 
 function Expandervue_type_template_id_09ed5944_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("div", {
-    class: (0,external_Vue_namespaceObject.normalizeClass)($options.getClassPrefix() + '-wrapper'),
-    style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style[$options.getClassPrefix(false) + '-wrapper'], ...$options.style })
+  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
+    class: (0,external_Vue_.normalizeClass)($options.getClassPrefix() + '-wrapper'),
+    style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style[$options.getClassPrefix(false) + '-wrapper'], ...$options.style })
   }, [
     ($options.allChildren.length)
-      ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("svg", {
+      ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("svg", {
           key: 0,
-          class: (0,external_Vue_namespaceObject.normalizeClass)($options.getClassPrefix() + '-content'),
-          style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style[$options.getClassPrefix(false) + '-content'] }),
+          class: (0,external_Vue_.normalizeClass)($options.getClassPrefix() + '-content'),
+          style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style[$options.getClassPrefix(false) + '-content'] }),
           width: $props.options.size,
           height: $props.options.size,
           onClick: _cache[0] || (_cache[0] = (...args) => ($options.toggle && $options.toggle(...args)))
         }, [
-          (0,external_Vue_namespaceObject.createElementVNode)("rect", {
-            class: (0,external_Vue_namespaceObject.normalizeClass)($options.getClassPrefix() + '-border'),
-            style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style[$options.getClassPrefix(false) + '-border'], ...$data.borderStyle }),
+          (0,external_Vue_.createElementVNode)("rect", {
+            class: (0,external_Vue_.normalizeClass)($options.getClassPrefix() + '-border'),
+            style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style[$options.getClassPrefix(false) + '-border'], ...$data.borderStyle }),
             x: $data.border,
             y: $data.border,
             width: $props.options.size - $data.border * 2,
@@ -856,29 +1300,29 @@ function Expandervue_type_template_id_09ed5944_render(_ctx, _cache, $props, $set
             ry: "2"
           }, null, 14 /* CLASS, STYLE, PROPS */, Expandervue_type_template_id_09ed5944_hoisted_2),
           ($options.allChildren.length)
-            ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("line", {
+            ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("line", {
                 key: 0,
-                class: (0,external_Vue_namespaceObject.normalizeClass)($options.getClassPrefix() + '-line'),
-                style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style[$options.getClassPrefix(false) + '-line'] }),
+                class: (0,external_Vue_.normalizeClass)($options.getClassPrefix() + '-line'),
+                style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style[$options.getClassPrefix(false) + '-line'] }),
                 x1: $data.lineOffset,
                 y1: $props.options.size / 2,
                 x2: $props.options.size - $data.lineOffset,
                 y2: $props.options.size / 2
               }, null, 14 /* CLASS, STYLE, PROPS */, _hoisted_3))
-            : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true),
+            : (0,external_Vue_.createCommentVNode)("v-if", true),
           ($options.collapsed)
-            ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("line", {
+            ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("line", {
                 key: 1,
-                class: (0,external_Vue_namespaceObject.normalizeClass)($options.getClassPrefix() + '-line'),
-                style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style[$options.getClassPrefix(false) + '-line'] }),
+                class: (0,external_Vue_.normalizeClass)($options.getClassPrefix() + '-line'),
+                style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style[$options.getClassPrefix(false) + '-line'] }),
                 x1: $props.options.size / 2,
                 y1: $data.lineOffset,
                 x2: $props.options.size / 2,
                 y2: $props.options.size - $data.lineOffset
               }, null, 14 /* CLASS, STYLE, PROPS */, _hoisted_4))
-            : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true)
+            : (0,external_Vue_.createCommentVNode)("v-if", true)
         ], 14 /* CLASS, STYLE, PROPS */, Expandervue_type_template_id_09ed5944_hoisted_1))
-      : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true)
+      : (0,external_Vue_.createCommentVNode)("v-if", true)
   ], 6 /* CLASS, STYLE */))
 }
 ;// ./src/components/Expander.vue?vue&type=template&id=09ed5944
@@ -1113,28 +1557,28 @@ const TaskListHeader_exports_ = /*#__PURE__*/(0,exportHelper_namespaceObject.A)(
 
 
 function TaskListItemvue_type_template_id_9ddbf498_render(_ctx, _cache, $props, $setup, $data, $options) {
-  const _component_task_list_expander = (0,external_Vue_namespaceObject.resolveComponent)("task-list-expander")
-  const _component_item_column = (0,external_Vue_namespaceObject.resolveComponent)("item-column")
+  const _component_task_list_expander = (0,external_Vue_.resolveComponent)("task-list-expander")
+  const _component_item_column = (0,external_Vue_.resolveComponent)("item-column")
 
-  return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("div", {
+  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
     class: "gantt-elastic__task-list-item",
-    style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['task-list-item'] })
+    style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['task-list-item'] })
   }, [
-    ((0,external_Vue_namespaceObject.openBlock)(true), (0,external_Vue_namespaceObject.createElementBlock)(external_Vue_namespaceObject.Fragment, null, (0,external_Vue_namespaceObject.renderList)($options.columns, (column) => {
-      return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createBlock)(_component_item_column, {
+    ((0,external_Vue_.openBlock)(true), (0,external_Vue_.createElementBlock)(external_Vue_.Fragment, null, (0,external_Vue_.renderList)($options.columns, (column) => {
+      return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createBlock)(_component_item_column, {
         key: column._id,
         column: column,
         task: $props.task
       }, {
-        default: (0,external_Vue_namespaceObject.withCtx)(() => [
+        default: (0,external_Vue_.withCtx)(() => [
           (column.expander)
-            ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createBlock)(_component_task_list_expander, {
+            ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createBlock)(_component_task_list_expander, {
                 key: 0,
                 tasks: [$props.task],
                 options: $options.root.state.options.taskList.expander,
                 type: "taskList"
               }, null, 8 /* PROPS */, ["tasks", "options"]))
-            : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true)
+            : (0,external_Vue_.createCommentVNode)("v-if", true)
         ]),
         _: 2 /* DYNAMIC */
       }, 1032 /* PROPS, DYNAMIC_SLOTS */, ["column", "task"]))
@@ -1143,30 +1587,30 @@ function TaskListItemvue_type_template_id_9ddbf498_render(_ctx, _cache, $props, 
 }
 ;// ./src/components/TaskList/TaskListItem.vue?vue&type=template&id=9ddbf498
 
-;// ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./src/components/TaskList/ItemColumn.vue?vue&type=template&id=0c93a03c
+;// ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./src/components/TaskList/ItemColumn.vue?vue&type=template&id=32eab676
 
 
-const ItemColumnvue_type_template_id_0c93a03c_hoisted_1 = ["innerHTML"]
+const ItemColumnvue_type_template_id_32eab676_hoisted_1 = ["innerHTML"]
 
-function ItemColumnvue_type_template_id_0c93a03c_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("div", {
+function ItemColumnvue_type_template_id_32eab676_render(_ctx, _cache, $props, $setup, $data, $options) {
+  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
     class: "gantt-elastic__task-list-item-column",
-    style: (0,external_Vue_namespaceObject.normalizeStyle)($options.itemColumnStyle)
+    style: (0,external_Vue_.normalizeStyle)($options.itemColumnStyle)
   }, [
-    (0,external_Vue_namespaceObject.createElementVNode)("div", {
+    (0,external_Vue_.createElementVNode)("div", {
       class: "gantt-elastic__task-list-item-value-wrapper",
-      style: (0,external_Vue_namespaceObject.normalizeStyle)($options.wrapperStyle)
+      style: (0,external_Vue_.normalizeStyle)($options.wrapperStyle)
     }, [
-      (0,external_Vue_namespaceObject.renderSlot)(_ctx.$slots, "default"),
-      (0,external_Vue_namespaceObject.createElementVNode)("div", {
+      (0,external_Vue_.renderSlot)(_ctx.$slots, "default"),
+      (0,external_Vue_.createElementVNode)("div", {
         class: "gantt-elastic__task-list-item-value-container",
-        style: (0,external_Vue_namespaceObject.normalizeStyle)($options.containerStyle)
+        style: (0,external_Vue_.normalizeStyle)($options.containerStyle)
       }, [
         (!$options.html)
-          ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("div", {
+          ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
               key: 0,
               class: "gantt-elastic__task-list-item-value",
-              style: (0,external_Vue_namespaceObject.normalizeStyle)($options.valueStyle),
+              style: (0,external_Vue_.normalizeStyle)($options.valueStyle),
               onClick: _cache[0] || (_cache[0] = $event => ($options.emitEvent('click', $event))),
               onMouseenter: _cache[1] || (_cache[1] = $event => ($options.emitEvent('mouseenter', $event))),
               onMouseover: _cache[2] || (_cache[2] = $event => ($options.emitEvent('mouseover', $event))),
@@ -1178,11 +1622,11 @@ function ItemColumnvue_type_template_id_0c93a03c_render(_ctx, _cache, $props, $s
               onTouchstart: _cache[8] || (_cache[8] = $event => ($options.emitEvent('touchstart', $event))),
               onTouchmove: _cache[9] || (_cache[9] = $event => ($options.emitEvent('touchmove', $event))),
               onTouchend: _cache[10] || (_cache[10] = $event => ($options.emitEvent('touchend', $event)))
-            }, (0,external_Vue_namespaceObject.toDisplayString)($options.value), 37 /* TEXT, STYLE, NEED_HYDRATION */))
-          : ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("div", {
+            }, (0,external_Vue_.toDisplayString)($options.value), 37 /* TEXT, STYLE, NEED_HYDRATION */))
+          : ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
               key: 1,
               class: "gantt-elastic__task-list-item-value",
-              style: (0,external_Vue_namespaceObject.normalizeStyle)($options.valueStyle),
+              style: (0,external_Vue_.normalizeStyle)($options.valueStyle),
               onClick: _cache[11] || (_cache[11] = $event => ($options.emitEvent('click', $event))),
               onMouseenter: _cache[12] || (_cache[12] = $event => ($options.emitEvent('mouseenter', $event))),
               onMouseover: _cache[13] || (_cache[13] = $event => ($options.emitEvent('mouseover', $event))),
@@ -1195,12 +1639,12 @@ function ItemColumnvue_type_template_id_0c93a03c_render(_ctx, _cache, $props, $s
               onTouchmove: _cache[20] || (_cache[20] = $event => ($options.emitEvent('touchmove', $event))),
               onTouchend: _cache[21] || (_cache[21] = $event => ($options.emitEvent('touchend', $event))),
               innerHTML: $options.value
-            }, null, 44 /* STYLE, PROPS, NEED_HYDRATION */, ItemColumnvue_type_template_id_0c93a03c_hoisted_1))
+            }, null, 44 /* STYLE, PROPS, NEED_HYDRATION */, ItemColumnvue_type_template_id_32eab676_hoisted_1))
       ], 4 /* STYLE */)
     ], 4 /* STYLE */)
   ], 4 /* STYLE */))
 }
-;// ./src/components/TaskList/ItemColumn.vue?vue&type=template&id=0c93a03c
+;// ./src/components/TaskList/ItemColumn.vue?vue&type=template&id=32eab676
 
 ;// ./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./src/components/TaskList/ItemColumn.vue?vue&type=script&lang=js
 
@@ -1226,6 +1670,17 @@ function ItemColumnvue_type_template_id_0c93a03c_render(_ctx, _cache, $props, $s
     }
   },
   computed: {
+    /**
+     * Column style; can be a function with a 'task' param,
+     * so users can render different column styles depending on task attributes
+     *
+     * @returns {object}
+     */
+    columnStyle() {
+      const style = typeof this.column.style === 'function' ? this.column.style(this.task) : this.column.style;
+      return style || {};
+    },
+
     /**
      * Should we display html or just text?
      *
@@ -1253,7 +1708,7 @@ function ItemColumnvue_type_template_id_0c93a03c_render(_ctx, _cache, $props, $s
     itemColumnStyle() {
       return {
         ...this.root.style['task-list-item-column'],
-        ...this.column.style['task-list-item-column'],
+        ...this.columnStyle['task-list-item-column'],
         width: this.column.finalWidth + 'px',
         height: this.column.height + 'px'
       };
@@ -1262,19 +1717,19 @@ function ItemColumnvue_type_template_id_0c93a03c_render(_ctx, _cache, $props, $s
     wrapperStyle() {
       return {
         ...this.root.style['task-list-item-value-wrapper'],
-        ...this.column.style['task-list-item-value-wrapper']
+        ...this.columnStyle['task-list-item-value-wrapper']
       };
     },
 
     containerStyle() {
       return {
         ...this.root.style['task-list-item-value-container'],
-        ...this.column.style['task-list-item-value-container']
+        ...this.columnStyle['task-list-item-value-container']
       };
     },
 
     valueStyle() {
-      return { ...this.root.style['task-list-item-value'], ...this.column.style['task-list-item-value'] };
+      return { ...this.root.style['task-list-item-value'], ...this.columnStyle['task-list-item-value'] };
     }
   }
 });
@@ -1285,7 +1740,7 @@ function ItemColumnvue_type_template_id_0c93a03c_render(_ctx, _cache, $props, $s
 
 
 ;
-const ItemColumn_exports_ = /*#__PURE__*/(0,exportHelper_namespaceObject.A)(ItemColumnvue_type_script_lang_js, [['render',ItemColumnvue_type_template_id_0c93a03c_render]])
+const ItemColumn_exports_ = /*#__PURE__*/(0,exportHelper_namespaceObject.A)(ItemColumnvue_type_script_lang_js, [['render',ItemColumnvue_type_template_id_32eab676_render]])
 
 /* harmony default export */ const ItemColumn = (ItemColumn_exports_);
 ;// ./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./src/components/TaskList/TaskListItem.vue?vue&type=script&lang=js
@@ -1365,50 +1820,50 @@ const Chartvue_type_template_id_491a2e0a_hoisted_1 = ["width", "height"]
 const Chartvue_type_template_id_491a2e0a_hoisted_2 = ["task"]
 
 function Chartvue_type_template_id_491a2e0a_render(_ctx, _cache, $props, $setup, $data, $options) {
-  const _component_calendar = (0,external_Vue_namespaceObject.resolveComponent)("calendar")
-  const _component_days_highlight = (0,external_Vue_namespaceObject.resolveComponent)("days-highlight")
-  const _component_grid = (0,external_Vue_namespaceObject.resolveComponent)("grid")
-  const _component_dependency_lines = (0,external_Vue_namespaceObject.resolveComponent)("dependency-lines")
+  const _component_calendar = (0,external_Vue_.resolveComponent)("calendar")
+  const _component_days_highlight = (0,external_Vue_.resolveComponent)("days-highlight")
+  const _component_grid = (0,external_Vue_.resolveComponent)("grid")
+  const _component_dependency_lines = (0,external_Vue_.resolveComponent)("dependency-lines")
 
-  return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("div", {
+  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
     class: "gantt-elastic__chart",
-    style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['chart'] }),
+    style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['chart'] }),
     ref: "chart"
   }, [
-    (0,external_Vue_namespaceObject.createElementVNode)("div", {
+    (0,external_Vue_.createElementVNode)("div", {
       class: "gantt-elastic__chart-calendar-container",
       ref: "chartCalendarContainer",
-      style: (0,external_Vue_namespaceObject.normalizeStyle)({
+      style: (0,external_Vue_.normalizeStyle)({
         ...$options.root.style['chart-calendar-container'],
         height: $options.root.state.options.calendar.height + 'px',
         'margin-bottom': $options.root.state.options.calendar.gap + 'px'
       })
     }, [
-      (0,external_Vue_namespaceObject.createVNode)(_component_calendar)
+      (0,external_Vue_.createVNode)(_component_calendar)
     ], 4 /* STYLE */),
-    (0,external_Vue_namespaceObject.createElementVNode)("div", {
+    (0,external_Vue_.createElementVNode)("div", {
       class: "gantt-elastic__chart-graph-container",
       ref: "chartGraphContainer",
-      style: (0,external_Vue_namespaceObject.normalizeStyle)({
+      style: (0,external_Vue_.normalizeStyle)({
         ...$options.root.style['chart-graph-container'],
         height: $options.root.state.options.height - $options.root.state.options.calendar.height + 'px'
       })
     }, [
-      (0,external_Vue_namespaceObject.createElementVNode)("div", {
-        style: (0,external_Vue_namespaceObject.normalizeStyle)({
+      (0,external_Vue_.createElementVNode)("div", {
+        style: (0,external_Vue_.normalizeStyle)({
           ...$options.root.style['chart-area'],
           width: $options.root.state.options.width + 'px',
           height: $options.root.state.options.rowsHeight + 'px'
         })
       }, [
-        (0,external_Vue_namespaceObject.createElementVNode)("div", {
+        (0,external_Vue_.createElementVNode)("div", {
           class: "gantt-elastic__chart-graph",
           ref: "chartGraph",
-          style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['chart-graph'], height: '100%' })
+          style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['chart-graph'], height: '100%' })
         }, [
-          ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("svg", {
+          ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("svg", {
             class: "gantt-elastic__chart-graph-svg",
-            style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['chart-graph-svg'] }),
+            style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['chart-graph-svg'] }),
             ref: "chartGraphSvg",
             x: "0",
             y: "0",
@@ -1416,19 +1871,19 @@ function Chartvue_type_template_id_491a2e0a_render(_ctx, _cache, $props, $setup,
             height: $options.root.state.options.allVisibleTasksHeight + 'px',
             xmlns: "http://www.w3.org/2000/svg"
           }, [
-            (0,external_Vue_namespaceObject.createVNode)(_component_days_highlight),
-            (0,external_Vue_namespaceObject.createVNode)(_component_grid),
-            (0,external_Vue_namespaceObject.createVNode)(_component_dependency_lines, {
+            (0,external_Vue_.createVNode)(_component_days_highlight),
+            (0,external_Vue_.createVNode)(_component_grid),
+            (0,external_Vue_.createVNode)(_component_dependency_lines, {
               tasks: $options.root.visibleTasks
             }, null, 8 /* PROPS */, ["tasks"]),
-            ((0,external_Vue_namespaceObject.openBlock)(true), (0,external_Vue_namespaceObject.createElementBlock)(external_Vue_namespaceObject.Fragment, null, (0,external_Vue_namespaceObject.renderList)($options.root.visibleTasks, (task) => {
-              return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("g", {
+            ((0,external_Vue_.openBlock)(true), (0,external_Vue_.createElementBlock)(external_Vue_.Fragment, null, (0,external_Vue_.renderList)($options.root.visibleTasks, (task) => {
+              return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("g", {
                 class: "gantt-elastic__chart-row-wrapper",
-                style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['chart-row-wrapper'] }),
+                style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['chart-row-wrapper'] }),
                 task: task,
                 key: task.id
               }, [
-                ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createBlock)((0,external_Vue_namespaceObject.resolveDynamicComponent)(task.type), { task: task }, null, 8 /* PROPS */, ["task"]))
+                ((0,external_Vue_.openBlock)(), (0,external_Vue_.createBlock)((0,external_Vue_.resolveDynamicComponent)(task.type), { task: task }, null, 8 /* PROPS */, ["task"]))
               ], 12 /* STYLE, PROPS */, Chartvue_type_template_id_491a2e0a_hoisted_2))
             }), 128 /* KEYED_FRAGMENT */))
           ], 12 /* STYLE, PROPS */, Chartvue_type_template_id_491a2e0a_hoisted_1))
@@ -1448,9 +1903,9 @@ const Gridvue_type_template_id_ee756b32_hoisted_3 = ["x1", "y1", "x2", "y2"]
 const Gridvue_type_template_id_ee756b32_hoisted_4 = ["x1", "y1", "x2", "y2"]
 
 function Gridvue_type_template_id_ee756b32_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("svg", {
+  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("svg", {
     class: "gantt-elastic__grid-lines-wrapper",
-    style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['grid-lines-wrapper'] }),
+    style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['grid-lines-wrapper'] }),
     ref: "chart",
     x: "0",
     y: "0",
@@ -1458,14 +1913,14 @@ function Gridvue_type_template_id_ee756b32_render(_ctx, _cache, $props, $setup, 
     height: $options.root.state.options.allVisibleTasksHeight,
     xmlns: "http://www.w3.org/2000/svg"
   }, [
-    (0,external_Vue_namespaceObject.createElementVNode)("g", {
+    (0,external_Vue_.createElementVNode)("g", {
       class: "gantt-elastic__grid-lines",
-      style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['grid-lines'] })
+      style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['grid-lines'] })
     }, [
-      ((0,external_Vue_namespaceObject.openBlock)(true), (0,external_Vue_namespaceObject.createElementBlock)(external_Vue_namespaceObject.Fragment, null, (0,external_Vue_namespaceObject.renderList)($options.horizontalLines, (line) => {
-        return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("line", {
+      ((0,external_Vue_.openBlock)(true), (0,external_Vue_.createElementBlock)(external_Vue_.Fragment, null, (0,external_Vue_.renderList)($options.horizontalLines, (line) => {
+        return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("line", {
           class: "gantt-elastic__grid-line-horizontal",
-          style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['grid-line-horizontal'] }),
+          style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['grid-line-horizontal'] }),
           key: line.key,
           x1: line.x1,
           y1: line.y1,
@@ -1473,10 +1928,10 @@ function Gridvue_type_template_id_ee756b32_render(_ctx, _cache, $props, $setup, 
           y2: line.y2
         }, null, 12 /* STYLE, PROPS */, Gridvue_type_template_id_ee756b32_hoisted_2))
       }), 128 /* KEYED_FRAGMENT */)),
-      ((0,external_Vue_namespaceObject.openBlock)(true), (0,external_Vue_namespaceObject.createElementBlock)(external_Vue_namespaceObject.Fragment, null, (0,external_Vue_namespaceObject.renderList)($options.verticalLines, (line) => {
-        return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("line", {
+      ((0,external_Vue_.openBlock)(true), (0,external_Vue_.createElementBlock)(external_Vue_.Fragment, null, (0,external_Vue_.renderList)($options.verticalLines, (line) => {
+        return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("line", {
           class: "gantt-elastic__grid-line-vertical",
-          style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['grid-line-vertical'] }),
+          style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['grid-line-vertical'] }),
           key: line.key,
           x1: line.x1,
           y1: line.y1,
@@ -1484,9 +1939,9 @@ function Gridvue_type_template_id_ee756b32_render(_ctx, _cache, $props, $setup, 
           y2: line.y2
         }, null, 12 /* STYLE, PROPS */, Gridvue_type_template_id_ee756b32_hoisted_3))
       }), 128 /* KEYED_FRAGMENT */)),
-      (0,external_Vue_namespaceObject.createElementVNode)("line", {
+      (0,external_Vue_.createElementVNode)("line", {
         class: "gantt-elastic__grid-line-time",
-        style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['grid-line-time'] }),
+        style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['grid-line-time'] }),
         x1: $options.timeLinePosition.x,
         y1: $options.timeLinePosition.y1,
         x2: $options.timeLinePosition.x,
@@ -1640,24 +2095,24 @@ const DaysHighlightvue_type_template_id_61bd1087_hoisted_1 = ["x", "width"]
 
 function DaysHighlightvue_type_template_id_61bd1087_render(_ctx, _cache, $props, $setup, $data, $options) {
   return ($options.showWorkingDays)
-    ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("g", {
+    ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("g", {
         key: 0,
         class: "gantt-elastic__chart-days-highlight-container",
-        style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['chart-days-highlight-container'] })
+        style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['chart-days-highlight-container'] })
       }, [
-        ((0,external_Vue_namespaceObject.openBlock)(true), (0,external_Vue_namespaceObject.createElementBlock)(external_Vue_namespaceObject.Fragment, null, (0,external_Vue_namespaceObject.renderList)($options.workingDays, (day) => {
-          return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("rect", {
+        ((0,external_Vue_.openBlock)(true), (0,external_Vue_.createElementBlock)(external_Vue_.Fragment, null, (0,external_Vue_.renderList)($options.workingDays, (day) => {
+          return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("rect", {
             class: "gantt-elastic__chart-days-highlight-rect",
             key: $options.getKey(day),
             x: day.offset.px,
             y: "0",
             width: day.width.px,
             height: "100%",
-            style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['chart-days-highlight-rect'] })
+            style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['chart-days-highlight-rect'] })
           }, null, 12 /* STYLE, PROPS */, DaysHighlightvue_type_template_id_61bd1087_hoisted_1))
         }), 128 /* KEYED_FRAGMENT */))
       ], 4 /* STYLE */))
-    : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true)
+    : (0,external_Vue_.createCommentVNode)("v-if", true)
 }
 ;// ./src/components/Chart/DaysHighlight.vue?vue&type=template&id=61bd1087
 
@@ -1727,37 +2182,37 @@ const DaysHighlight_exports_ = /*#__PURE__*/(0,exportHelper_namespaceObject.A)(D
 
 
 function Calendarvue_type_template_id_d6b41f74_render(_ctx, _cache, $props, $setup, $data, $options) {
-  const _component_calendar_row = (0,external_Vue_namespaceObject.resolveComponent)("calendar-row")
+  const _component_calendar_row = (0,external_Vue_.resolveComponent)("calendar-row")
 
-  return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("div", {
+  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
     class: "gantt-elastic__calendar-wrapper",
-    style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['calendar-wrapper'], width: $options.root.state.options.width + 'px' })
+    style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['calendar-wrapper'], width: $options.root.state.options.width + 'px' })
   }, [
-    (0,external_Vue_namespaceObject.createElementVNode)("div", {
+    (0,external_Vue_.createElementVNode)("div", {
       class: "gantt-elastic__calendar",
-      style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['calendar'], width: $options.root.state.options.width + 'px' })
+      style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['calendar'], width: $options.root.state.options.width + 'px' })
     }, [
       ($options.root.state.options.calendar.month.display)
-        ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createBlock)(_component_calendar_row, {
+        ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createBlock)(_component_calendar_row, {
             key: 0,
             items: $options.dates.months,
             which: "month"
           }, null, 8 /* PROPS */, ["items"]))
-        : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true),
+        : (0,external_Vue_.createCommentVNode)("v-if", true),
       ($options.root.state.options.calendar.day.display)
-        ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createBlock)(_component_calendar_row, {
+        ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createBlock)(_component_calendar_row, {
             key: 1,
             items: $options.dates.days,
             which: "day"
           }, null, 8 /* PROPS */, ["items"]))
-        : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true),
+        : (0,external_Vue_.createCommentVNode)("v-if", true),
       ($options.root.state.options.calendar.hour.display)
-        ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createBlock)(_component_calendar_row, {
+        ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createBlock)(_component_calendar_row, {
             key: 2,
             items: $options.dates.hours,
             which: "hour"
           }, null, 8 /* PROPS */, ["items"]))
-        : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true)
+        : (0,external_Vue_.createCommentVNode)("v-if", true)
     ], 4 /* STYLE */)
   ], 4 /* STYLE */))
 }
@@ -1767,26 +2222,26 @@ function Calendarvue_type_template_id_d6b41f74_render(_ctx, _cache, $props, $set
 
 
 function CalendarRowvue_type_template_id_14d015ce_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("div", {
-    class: (0,external_Vue_namespaceObject.normalizeClass)('gantt-elastic__calendar-row gantt-elastic__calendar-row--' + $props.which),
-    style: (0,external_Vue_namespaceObject.normalizeStyle)($options.rowStyle)
+  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
+    class: (0,external_Vue_.normalizeClass)('gantt-elastic__calendar-row gantt-elastic__calendar-row--' + $props.which),
+    style: (0,external_Vue_.normalizeStyle)($options.rowStyle)
   }, [
-    ((0,external_Vue_namespaceObject.openBlock)(true), (0,external_Vue_namespaceObject.createElementBlock)(external_Vue_namespaceObject.Fragment, null, (0,external_Vue_namespaceObject.renderList)($props.items, (item, itemIndex) => {
-      return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("div", {
+    ((0,external_Vue_.openBlock)(true), (0,external_Vue_.createElementBlock)(external_Vue_.Fragment, null, (0,external_Vue_.renderList)($props.items, (item, itemIndex) => {
+      return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
         key: item.key,
-        class: (0,external_Vue_namespaceObject.normalizeClass)('gantt-elastic__calendar-row-rect gantt-elastic__calendar-row-rect--' + $props.which),
-        style: (0,external_Vue_namespaceObject.normalizeStyle)($options.rectStyle)
+        class: (0,external_Vue_.normalizeClass)('gantt-elastic__calendar-row-rect gantt-elastic__calendar-row-rect--' + $props.which),
+        style: (0,external_Vue_.normalizeStyle)($options.rectStyle)
       }, [
-        ((0,external_Vue_namespaceObject.openBlock)(true), (0,external_Vue_namespaceObject.createElementBlock)(external_Vue_namespaceObject.Fragment, null, (0,external_Vue_namespaceObject.renderList)(item.children, (child, childIndex) => {
-          return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("div", {
-            class: (0,external_Vue_namespaceObject.normalizeClass)('gantt-elastic__calendar-row-rect-child gantt-elastic__calendar-row-rect-child--' + $props.which),
+        ((0,external_Vue_.openBlock)(true), (0,external_Vue_.createElementBlock)(external_Vue_.Fragment, null, (0,external_Vue_.renderList)(item.children, (child, childIndex) => {
+          return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
+            class: (0,external_Vue_.normalizeClass)('gantt-elastic__calendar-row-rect-child gantt-elastic__calendar-row-rect-child--' + $props.which),
             key: child.key,
-            style: (0,external_Vue_namespaceObject.normalizeStyle)($options.rectChildStyle[itemIndex][childIndex])
+            style: (0,external_Vue_.normalizeStyle)($options.rectChildStyle[itemIndex][childIndex])
           }, [
-            (0,external_Vue_namespaceObject.createElementVNode)("div", {
-              class: (0,external_Vue_namespaceObject.normalizeClass)('gantt-elastic__calendar-row-text gantt-elastic__calendar-row-text--' + $props.which),
-              style: (0,external_Vue_namespaceObject.normalizeStyle)($options.textStyle(child))
-            }, (0,external_Vue_namespaceObject.toDisplayString)(child.label), 7 /* TEXT, CLASS, STYLE */)
+            (0,external_Vue_.createElementVNode)("div", {
+              class: (0,external_Vue_.normalizeClass)('gantt-elastic__calendar-row-text gantt-elastic__calendar-row-text--' + $props.which),
+              style: (0,external_Vue_.normalizeStyle)($options.textStyle(child))
+            }, (0,external_Vue_.toDisplayString)(child.label), 7 /* TEXT, CLASS, STYLE */)
           ], 6 /* CLASS, STYLE */))
         }), 128 /* KEYED_FRAGMENT */))
       ], 6 /* CLASS, STYLE */))
@@ -2212,23 +2667,23 @@ const DependencyLinesvue_type_template_id_5467c6cc_hoisted_1 = ["task"]
 const DependencyLinesvue_type_template_id_5467c6cc_hoisted_2 = ["task", "d"]
 
 function DependencyLinesvue_type_template_id_5467c6cc_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("svg", {
+  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("svg", {
     x: "0",
     y: "0",
     width: "100%",
     height: "100%",
     class: "gantt-elastic__chart-dependency-lines-container",
-    style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['chart-dependency-lines-container'] })
+    style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['chart-dependency-lines-container'] })
   }, [
-    ((0,external_Vue_namespaceObject.openBlock)(true), (0,external_Vue_namespaceObject.createElementBlock)(external_Vue_namespaceObject.Fragment, null, (0,external_Vue_namespaceObject.renderList)($options.dependencyTasks, (task) => {
-      return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("g", {
+    ((0,external_Vue_.openBlock)(true), (0,external_Vue_.createElementBlock)(external_Vue_.Fragment, null, (0,external_Vue_.renderList)($options.dependencyTasks, (task) => {
+      return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("g", {
         key: task.id,
         task: task
       }, [
-        ((0,external_Vue_namespaceObject.openBlock)(true), (0,external_Vue_namespaceObject.createElementBlock)(external_Vue_namespaceObject.Fragment, null, (0,external_Vue_namespaceObject.renderList)(task.dependencyLines, (dependencyLine) => {
-          return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("path", {
+        ((0,external_Vue_.openBlock)(true), (0,external_Vue_.createElementBlock)(external_Vue_.Fragment, null, (0,external_Vue_.renderList)(task.dependencyLines, (dependencyLine) => {
+          return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("path", {
             class: "gantt-elastic__chart-dependency-lines-path",
-            style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['chart-dependency-lines-path'], ...task.style['chart-dependency-lines-path'], ...task.style['chart-dependency-lines-path-' + dependencyLine.task_id] }),
+            style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['chart-dependency-lines-path'], ...task.style['chart-dependency-lines-path'], ...task.style['chart-dependency-lines-path-' + dependencyLine.task_id] }),
             key: dependencyLine.id,
             task: task,
             d: dependencyLine.points
@@ -2349,23 +2804,23 @@ const Taskvue_type_template_id_4a3c3dc1_hoisted_4 = ["points"]
 const _hoisted_5 = ["points"]
 
 function Taskvue_type_template_id_4a3c3dc1_render(_ctx, _cache, $props, $setup, $data, $options) {
-  const _component_expander = (0,external_Vue_namespaceObject.resolveComponent)("expander")
-  const _component_progress_bar = (0,external_Vue_namespaceObject.resolveComponent)("progress-bar")
-  const _component_chart_text = (0,external_Vue_namespaceObject.resolveComponent)("chart-text")
+  const _component_expander = (0,external_Vue_.resolveComponent)("expander")
+  const _component_progress_bar = (0,external_Vue_.resolveComponent)("progress-bar")
+  const _component_chart_text = (0,external_Vue_.resolveComponent)("chart-text")
 
-  return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("g", {
+  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("g", {
     class: "gantt-elastic__chart-row-bar-wrapper gantt-elastic__chart-row-task-wrapper",
-    style: (0,external_Vue_namespaceObject.normalizeStyle)({
+    style: (0,external_Vue_.normalizeStyle)({
       ...$options.root.style['chart-row-bar-wrapper'],
       ...$options.root.style['chart-row-task-wrapper'],
       ...$props.task.style['chart-row-bar-wrapper']
     })
   }, [
     (_ctx.displayExpander)
-      ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("foreignObject", {
+      ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("foreignObject", {
           key: 0,
           class: "gantt-elastic__chart-expander gantt-elastic__chart-expander--task",
-          style: (0,external_Vue_namespaceObject.normalizeStyle)({
+          style: (0,external_Vue_.normalizeStyle)({
         ...$options.root.style['chart-expander'],
         ...$options.root.style['chart-expander--task'],
         ...$props.task.style['chart-expander']
@@ -2375,16 +2830,16 @@ function Taskvue_type_template_id_4a3c3dc1_render(_ctx, _cache, $props, $setup, 
           width: $options.root.state.options.chart.expander.size,
           height: $options.root.state.options.chart.expander.size
         }, [
-          (0,external_Vue_namespaceObject.createVNode)(_component_expander, {
+          (0,external_Vue_.createVNode)(_component_expander, {
             tasks: [$props.task],
             options: $options.root.state.options.chart.expander,
             type: "chart"
           }, null, 8 /* PROPS */, ["tasks", "options"])
         ], 12 /* STYLE, PROPS */, Taskvue_type_template_id_4a3c3dc1_hoisted_1))
-      : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true),
-    ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("svg", {
+      : (0,external_Vue_.createCommentVNode)("v-if", true),
+    ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("svg", {
       class: "gantt-elastic__chart-row-bar gantt-elastic__chart-row-task",
-      style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['chart-row-bar'], ...$options.root.style['chart-row-task'], ...$props.task.style['chart-row-bar'] }),
+      style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['chart-row-bar'], ...$options.root.style['chart-row-task'], ...$props.task.style['chart-row-bar'] }),
       x: $props.task.x,
       y: $props.task.y,
       width: $props.task.width,
@@ -2403,14 +2858,14 @@ function Taskvue_type_template_id_4a3c3dc1_render(_ctx, _cache, $props, $setup, 
       onTouchend: _cache[10] || (_cache[10] = $event => (_ctx.emitEvent('touchend', $event))),
       xmlns: "http://www.w3.org/2000/svg"
     }, [
-      (0,external_Vue_namespaceObject.createElementVNode)("defs", null, [
-        (0,external_Vue_namespaceObject.createElementVNode)("clipPath", { id: $options.clipPathId }, [
-          (0,external_Vue_namespaceObject.createElementVNode)("polygon", { points: $options.getPoints }, null, 8 /* PROPS */, Taskvue_type_template_id_4a3c3dc1_hoisted_4)
+      (0,external_Vue_.createElementVNode)("defs", null, [
+        (0,external_Vue_.createElementVNode)("clipPath", { id: $options.clipPathId }, [
+          (0,external_Vue_.createElementVNode)("polygon", { points: $options.getPoints }, null, 8 /* PROPS */, Taskvue_type_template_id_4a3c3dc1_hoisted_4)
         ], 8 /* PROPS */, Taskvue_type_template_id_4a3c3dc1_hoisted_3)
       ]),
-      (0,external_Vue_namespaceObject.createElementVNode)("polygon", {
+      (0,external_Vue_.createElementVNode)("polygon", {
         class: "gantt-elastic__chart-row-bar-polygon gantt-elastic__chart-row-task-polygon",
-        style: (0,external_Vue_namespaceObject.normalizeStyle)({
+        style: (0,external_Vue_.normalizeStyle)({
           ...$options.root.style['chart-row-bar-polygon'],
           ...$options.root.style['chart-row-task-polygon'],
           ...$props.task.style['base'],
@@ -2418,17 +2873,17 @@ function Taskvue_type_template_id_4a3c3dc1_render(_ctx, _cache, $props, $setup, 
         }),
         points: $options.getPoints
       }, null, 12 /* STYLE, PROPS */, _hoisted_5),
-      (0,external_Vue_namespaceObject.createVNode)(_component_progress_bar, {
+      (0,external_Vue_.createVNode)(_component_progress_bar, {
         task: $props.task,
         "clip-path": 'url(#' + $options.clipPathId + ')'
       }, null, 8 /* PROPS */, ["task", "clip-path"])
     ], 44 /* STYLE, PROPS, NEED_HYDRATION */, Taskvue_type_template_id_4a3c3dc1_hoisted_2)),
     ($options.root.state.options.chart.text.display)
-      ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createBlock)(_component_chart_text, {
+      ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createBlock)(_component_chart_text, {
           key: 1,
           task: $props.task
         }, null, 8 /* PROPS */, ["task"]))
-      : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true)
+      : (0,external_Vue_.createCommentVNode)("v-if", true)
   ], 4 /* STYLE */))
 }
 ;// ./src/components/Chart/Row/Task.vue?vue&type=template&id=4a3c3dc1
@@ -2441,50 +2896,50 @@ const Textvue_type_template_id_dfc2b57a_hoisted_2 = ["height"]
 const Textvue_type_template_id_dfc2b57a_hoisted_3 = ["innerHTML"]
 
 function Textvue_type_template_id_dfc2b57a_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("svg", {
+  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("svg", {
     class: "gantt-elastic__chart-row-text-wrapper",
-    style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['chart-row-text-wrapper'] }),
+    style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['chart-row-text-wrapper'] }),
     x: $props.task.x + $props.task.width + $options.root.state.options.chart.text.offset,
     y: $props.task.y - $options.root.state.options.chart.grid.horizontal.gap,
     width: $options.getWidth,
     height: $options.getHeight
   }, [
-    ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("foreignObject", {
+    ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("foreignObject", {
       x: "0",
       y: "0",
       width: "100%",
       height: $options.getHeight
     }, [
-      (0,external_Vue_namespaceObject.createElementVNode)("div", {
+      (0,external_Vue_.createElementVNode)("div", {
         xmlns: "http://www.w3.org/1999/xhtml",
         class: "gantt-elastic__chart-row-text",
-        style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['chart-row-text'] })
+        style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['chart-row-text'] })
       }, [
         (!$options.html)
-          ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("div", {
+          ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
               key: 0,
               class: "gantt-elastic__chart-row-text-content gantt-elastic__chart-row-text-content--text",
-              style: (0,external_Vue_namespaceObject.normalizeStyle)({
+              style: (0,external_Vue_.normalizeStyle)({
             ...$options.root.style['chart-row-text-content'],
             ...$options.root.style['chart-row-text-content--text'],
             ...$options.contentStyle
           })
             }, [
-              (0,external_Vue_namespaceObject.createElementVNode)("div", null, (0,external_Vue_namespaceObject.toDisplayString)($props.task.label), 1 /* TEXT */)
+              (0,external_Vue_.createElementVNode)("div", null, (0,external_Vue_.toDisplayString)($props.task.label), 1 /* TEXT */)
             ], 4 /* STYLE */))
-          : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true),
+          : (0,external_Vue_.createCommentVNode)("v-if", true),
         ($options.html)
-          ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("div", {
+          ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
               key: 1,
               class: "gantt-elastic__chart-row-text-content gantt-elastic__chart-row-text-content--html",
-              style: (0,external_Vue_namespaceObject.normalizeStyle)({
+              style: (0,external_Vue_.normalizeStyle)({
             ...$options.root.style['chart-row-text-content'],
             ...$options.root.style['chart-row-text-content--html'],
             ...$options.contentStyle
           }),
               innerHTML: $props.task.label
             }, null, 12 /* STYLE, PROPS */, Textvue_type_template_id_dfc2b57a_hoisted_3))
-          : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true)
+          : (0,external_Vue_.createCommentVNode)("v-if", true)
       ], 4 /* STYLE */)
     ], 8 /* PROPS */, Textvue_type_template_id_dfc2b57a_hoisted_2))
   ], 12 /* STYLE, PROPS */, Textvue_type_template_id_dfc2b57a_hoisted_1))
@@ -2569,21 +3024,21 @@ const ProgressBarvue_type_template_id_6e839ac8_hoisted_5 = ["x", "width"]
 const _hoisted_6 = ["d"]
 
 function ProgressBarvue_type_template_id_6e839ac8_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("g", {
+  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("g", {
     class: "gantt-elastic__chart-row-progress-bar-wrapper",
-    style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['chart-row-progress-bar-wrapper'], ...$props.task.style['chart-row-progress-bar-wrapper'] })
+    style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['chart-row-progress-bar-wrapper'], ...$props.task.style['chart-row-progress-bar-wrapper'] })
   }, [
-    (0,external_Vue_namespaceObject.createElementVNode)("defs", null, [
-      (0,external_Vue_namespaceObject.createElementVNode)("pattern", {
+    (0,external_Vue_.createElementVNode)("defs", null, [
+      (0,external_Vue_.createElementVNode)("pattern", {
         id: "diagonalHatch",
         width: $options.root.state.options.chart.progress.width,
         height: $options.root.state.options.chart.progress.width,
         patternTransform: "rotate(45 0 0)",
         patternUnits: "userSpaceOnUse"
       }, [
-        (0,external_Vue_namespaceObject.createElementVNode)("line", {
+        (0,external_Vue_.createElementVNode)("line", {
           class: "chart-row-progress-bar-line",
-          style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['chart-row-progress-bar-line'], ...$props.task.style['chart-row-progress-bar-line'] }),
+          style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['chart-row-progress-bar-line'], ...$props.task.style['chart-row-progress-bar-line'] }),
           x1: "0",
           y1: "0",
           x2: "0",
@@ -2592,28 +3047,28 @@ function ProgressBarvue_type_template_id_6e839ac8_render(_ctx, _cache, $props, $
       ], 8 /* PROPS */, ProgressBarvue_type_template_id_6e839ac8_hoisted_1)
     ]),
     ($options.root.state.options.chart.progress.bar)
-      ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("rect", {
+      ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("rect", {
           key: 0,
           class: "gantt-elastic__chart-row-progress-bar-solid",
-          style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['chart-row-progress-bar-solid'], ...$props.task.style['chart-row-progress-bar-solid'] }),
+          style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['chart-row-progress-bar-solid'], ...$props.task.style['chart-row-progress-bar-solid'] }),
           x: "0",
           y: "0",
           width: $options.getProgressWidth
         }, null, 12 /* STYLE, PROPS */, ProgressBarvue_type_template_id_6e839ac8_hoisted_3))
-      : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true),
+      : (0,external_Vue_.createCommentVNode)("v-if", true),
     ($options.root.state.options.chart.progress.pattern)
-      ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("g", ProgressBarvue_type_template_id_6e839ac8_hoisted_4, [
-          (0,external_Vue_namespaceObject.createElementVNode)("rect", {
+      ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("g", ProgressBarvue_type_template_id_6e839ac8_hoisted_4, [
+          (0,external_Vue_.createElementVNode)("rect", {
             class: "gantt-elastic__chart-row-progress-bar-pattern",
-            style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['chart-row-progress-bar-pattern'], ...$props.task.style['chart-row-progress-bar-pattern'] }),
+            style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['chart-row-progress-bar-pattern'], ...$props.task.style['chart-row-progress-bar-pattern'] }),
             x: $options.getProgressWidth,
             y: "0",
             width: 100 - $props.task.progress + '%',
             height: "100%"
           }, null, 12 /* STYLE, PROPS */, ProgressBarvue_type_template_id_6e839ac8_hoisted_5),
-          (0,external_Vue_namespaceObject.createElementVNode)("path", {
+          (0,external_Vue_.createElementVNode)("path", {
             class: "gantt-elastic__chart-row-progress-bar-outline",
-            style: (0,external_Vue_namespaceObject.normalizeStyle)({
+            style: (0,external_Vue_.normalizeStyle)({
           ...$options.root.style['chart-row-progress-bar-outline'],
           ...$props.task.style['base'],
           ...$props.task.style['chart-row-progress-bar-outline']
@@ -2621,7 +3076,7 @@ function ProgressBarvue_type_template_id_6e839ac8_render(_ctx, _cache, $props, $
             d: $options.getLinePoints
           }, null, 12 /* STYLE, PROPS */, _hoisted_6)
         ]))
-      : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true)
+      : (0,external_Vue_.createCommentVNode)("v-if", true)
   ], 4 /* STYLE */))
 }
 ;// ./src/components/Chart/ProgressBar.vue?vue&type=template&id=6e839ac8
@@ -2808,23 +3263,23 @@ const Milestonevue_type_template_id_6d69cd05_hoisted_4 = ["points"]
 const Milestonevue_type_template_id_6d69cd05_hoisted_5 = ["points"]
 
 function Milestonevue_type_template_id_6d69cd05_render(_ctx, _cache, $props, $setup, $data, $options) {
-  const _component_expander = (0,external_Vue_namespaceObject.resolveComponent)("expander")
-  const _component_progress_bar = (0,external_Vue_namespaceObject.resolveComponent)("progress-bar")
-  const _component_chart_text = (0,external_Vue_namespaceObject.resolveComponent)("chart-text")
+  const _component_expander = (0,external_Vue_.resolveComponent)("expander")
+  const _component_progress_bar = (0,external_Vue_.resolveComponent)("progress-bar")
+  const _component_chart_text = (0,external_Vue_.resolveComponent)("chart-text")
 
-  return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("g", {
+  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("g", {
     class: "gantt-elastic__chart-row-bar-wrapper gantt-elastic__chart-row-milestone-wrapper",
-    style: (0,external_Vue_namespaceObject.normalizeStyle)({
+    style: (0,external_Vue_.normalizeStyle)({
       ...$options.root.style['chart-row-bar-wrapper'],
       ...$options.root.style['chart-row-milestone-wrapper'],
       ...$props.task.style['chart-row-bar-wrapper']
     })
   }, [
     (_ctx.displayExpander)
-      ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("foreignObject", {
+      ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("foreignObject", {
           key: 0,
           class: "gantt-elastic__chart-expander gantt-elastic__chart-expander--milestone",
-          style: (0,external_Vue_namespaceObject.normalizeStyle)({
+          style: (0,external_Vue_.normalizeStyle)({
         ...$options.root.style['chart-expander'],
         ...$options.root.style['chart-expander--milestone'],
         ...$props.task.style['chart-expander']
@@ -2834,16 +3289,16 @@ function Milestonevue_type_template_id_6d69cd05_render(_ctx, _cache, $props, $se
           width: $options.root.state.options.chart.expander.size,
           height: $options.root.state.options.chart.expander.size
         }, [
-          (0,external_Vue_namespaceObject.createVNode)(_component_expander, {
+          (0,external_Vue_.createVNode)(_component_expander, {
             tasks: [$props.task],
             options: $options.root.state.options.chart.expander,
             type: "chart"
           }, null, 8 /* PROPS */, ["tasks", "options"])
         ], 12 /* STYLE, PROPS */, Milestonevue_type_template_id_6d69cd05_hoisted_1))
-      : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true),
-    ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("svg", {
+      : (0,external_Vue_.createCommentVNode)("v-if", true),
+    ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("svg", {
       class: "gantt-elastic__chart-row-bar gantt-elastic__chart-row-milestone",
-      style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['chart-row-bar'], ...$options.root.style['chart-row-milestone'], ...$props.task.style['chart-row-bar'] }),
+      style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['chart-row-bar'], ...$options.root.style['chart-row-milestone'], ...$props.task.style['chart-row-bar'] }),
       x: $props.task.x,
       y: $props.task.y,
       width: $props.task.width,
@@ -2862,14 +3317,14 @@ function Milestonevue_type_template_id_6d69cd05_render(_ctx, _cache, $props, $se
       onTouchend: _cache[10] || (_cache[10] = $event => (_ctx.emitEvent('touchend', $event))),
       xmlns: "http://www.w3.org/2000/svg"
     }, [
-      (0,external_Vue_namespaceObject.createElementVNode)("defs", null, [
-        (0,external_Vue_namespaceObject.createElementVNode)("clipPath", { id: $options.clipPathId }, [
-          (0,external_Vue_namespaceObject.createElementVNode)("polygon", { points: $options.getPoints }, null, 8 /* PROPS */, Milestonevue_type_template_id_6d69cd05_hoisted_4)
+      (0,external_Vue_.createElementVNode)("defs", null, [
+        (0,external_Vue_.createElementVNode)("clipPath", { id: $options.clipPathId }, [
+          (0,external_Vue_.createElementVNode)("polygon", { points: $options.getPoints }, null, 8 /* PROPS */, Milestonevue_type_template_id_6d69cd05_hoisted_4)
         ], 8 /* PROPS */, Milestonevue_type_template_id_6d69cd05_hoisted_3)
       ]),
-      (0,external_Vue_namespaceObject.createElementVNode)("polygon", {
+      (0,external_Vue_.createElementVNode)("polygon", {
         class: "gantt-elastic__chart-row-bar-polygon gantt-elastic__chart-row-milestone-polygon",
-        style: (0,external_Vue_namespaceObject.normalizeStyle)({
+        style: (0,external_Vue_.normalizeStyle)({
           ...$options.root.style['chart-row-bar-polygon'],
           ...$options.root.style['chart-row-milestone-polygon'],
           ...$props.task.style['base'],
@@ -2877,17 +3332,17 @@ function Milestonevue_type_template_id_6d69cd05_render(_ctx, _cache, $props, $se
         }),
         points: $options.getPoints
       }, null, 12 /* STYLE, PROPS */, Milestonevue_type_template_id_6d69cd05_hoisted_5),
-      (0,external_Vue_namespaceObject.createVNode)(_component_progress_bar, {
+      (0,external_Vue_.createVNode)(_component_progress_bar, {
         task: $props.task,
         "clip-path": 'url(#' + $options.clipPathId + ')'
       }, null, 8 /* PROPS */, ["task", "clip-path"])
     ], 44 /* STYLE, PROPS, NEED_HYDRATION */, Milestonevue_type_template_id_6d69cd05_hoisted_2)),
     ($options.root.state.options.chart.text.display)
-      ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createBlock)(_component_chart_text, {
+      ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createBlock)(_component_chart_text, {
           key: 1,
           task: $props.task
         }, null, 8 /* PROPS */, ["task"]))
-      : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true)
+      : (0,external_Vue_.createCommentVNode)("v-if", true)
   ], 4 /* STYLE */))
 }
 ;// ./src/components/Chart/Row/Milestone.vue?vue&type=template&id=6d69cd05
@@ -2964,23 +3419,23 @@ const Projectvue_type_template_id_5a17b514_hoisted_4 = ["d"]
 const Projectvue_type_template_id_5a17b514_hoisted_5 = ["d"]
 
 function Projectvue_type_template_id_5a17b514_render(_ctx, _cache, $props, $setup, $data, $options) {
-  const _component_expander = (0,external_Vue_namespaceObject.resolveComponent)("expander")
-  const _component_progress_bar = (0,external_Vue_namespaceObject.resolveComponent)("progress-bar")
-  const _component_chart_text = (0,external_Vue_namespaceObject.resolveComponent)("chart-text")
+  const _component_expander = (0,external_Vue_.resolveComponent)("expander")
+  const _component_progress_bar = (0,external_Vue_.resolveComponent)("progress-bar")
+  const _component_chart_text = (0,external_Vue_.resolveComponent)("chart-text")
 
-  return ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("g", {
+  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("g", {
     class: "gantt-elastic__chart-row-bar-wrapper gantt-elastic__chart-row-project-wrapper",
-    style: (0,external_Vue_namespaceObject.normalizeStyle)({
+    style: (0,external_Vue_.normalizeStyle)({
       ...$options.root.style['chart-row-bar-wrapper'],
       ...$options.root.style['chart-row-project-wrapper'],
       ...$props.task.style['chart-row-bar-wrapper']
     })
   }, [
     ($options.displayExpander)
-      ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("foreignObject", {
+      ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("foreignObject", {
           key: 0,
           class: "gantt-elastic__chart-expander gantt-elastic__chart-expander--project",
-          style: (0,external_Vue_namespaceObject.normalizeStyle)({
+          style: (0,external_Vue_.normalizeStyle)({
         ...$options.root.style['chart-expander'],
         ...$options.root.style['chart-expander--project'],
         ...$props.task.style['chart-expander']
@@ -2990,16 +3445,16 @@ function Projectvue_type_template_id_5a17b514_render(_ctx, _cache, $props, $setu
           width: $options.root.state.options.chart.expander.size,
           height: $options.root.state.options.chart.expander.size
         }, [
-          (0,external_Vue_namespaceObject.createVNode)(_component_expander, {
+          (0,external_Vue_.createVNode)(_component_expander, {
             tasks: [$props.task],
             options: $options.root.state.options.chart.expander,
             type: "chart"
           }, null, 8 /* PROPS */, ["tasks", "options"])
         ], 12 /* STYLE, PROPS */, Projectvue_type_template_id_5a17b514_hoisted_1))
-      : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true),
-    ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createElementBlock)("svg", {
+      : (0,external_Vue_.createCommentVNode)("v-if", true),
+    ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("svg", {
       class: "gantt-elastic__chart-row-bar gantt-elastic__chart-row-project",
-      style: (0,external_Vue_namespaceObject.normalizeStyle)({ ...$options.root.style['chart-row-bar'], ...$options.root.style['chart-row-project'], ...$props.task.style['chart-row-bar'] }),
+      style: (0,external_Vue_.normalizeStyle)({ ...$options.root.style['chart-row-bar'], ...$options.root.style['chart-row-project'], ...$props.task.style['chart-row-bar'] }),
       x: $props.task.x,
       y: $props.task.y,
       width: $props.task.width,
@@ -3018,14 +3473,14 @@ function Projectvue_type_template_id_5a17b514_render(_ctx, _cache, $props, $setu
       onTouchend: _cache[10] || (_cache[10] = $event => (_ctx.emitEvent('touchend', $event))),
       xmlns: "http://www.w3.org/2000/svg"
     }, [
-      (0,external_Vue_namespaceObject.createElementVNode)("defs", null, [
-        (0,external_Vue_namespaceObject.createElementVNode)("clipPath", { id: $options.clipPathId }, [
-          (0,external_Vue_namespaceObject.createElementVNode)("path", { d: $options.getPoints }, null, 8 /* PROPS */, Projectvue_type_template_id_5a17b514_hoisted_4)
+      (0,external_Vue_.createElementVNode)("defs", null, [
+        (0,external_Vue_.createElementVNode)("clipPath", { id: $options.clipPathId }, [
+          (0,external_Vue_.createElementVNode)("path", { d: $options.getPoints }, null, 8 /* PROPS */, Projectvue_type_template_id_5a17b514_hoisted_4)
         ], 8 /* PROPS */, Projectvue_type_template_id_5a17b514_hoisted_3)
       ]),
-      (0,external_Vue_namespaceObject.createElementVNode)("path", {
+      (0,external_Vue_.createElementVNode)("path", {
         class: "gantt-elastic__chart-row-bar-polygon gantt-elastic__chart-row-project-polygon",
-        style: (0,external_Vue_namespaceObject.normalizeStyle)({
+        style: (0,external_Vue_.normalizeStyle)({
           ...$options.root.style['chart-row-bar-polygon'],
           ...$options.root.style['chart-row-project-polygon'],
           ...$props.task.style['base'],
@@ -3033,17 +3488,17 @@ function Projectvue_type_template_id_5a17b514_render(_ctx, _cache, $props, $setu
         }),
         d: $options.getPoints
       }, null, 12 /* STYLE, PROPS */, Projectvue_type_template_id_5a17b514_hoisted_5),
-      (0,external_Vue_namespaceObject.createVNode)(_component_progress_bar, {
+      (0,external_Vue_.createVNode)(_component_progress_bar, {
         task: $props.task,
         "clip-path": 'url(#' + $options.clipPathId + ')'
       }, null, 8 /* PROPS */, ["task", "clip-path"])
     ], 44 /* STYLE, PROPS, NEED_HYDRATION */, Projectvue_type_template_id_5a17b514_hoisted_2)),
     ($options.root.state.options.chart.text.display)
-      ? ((0,external_Vue_namespaceObject.openBlock)(), (0,external_Vue_namespaceObject.createBlock)(_component_chart_text, {
+      ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createBlock)(_component_chart_text, {
           key: 1,
           task: $props.task
         }, null, 8 /* PROPS */, ["task"]))
-      : (0,external_Vue_namespaceObject.createCommentVNode)("v-if", true)
+      : (0,external_Vue_.createCommentVNode)("v-if", true)
   ], 4 /* STYLE */))
 }
 ;// ./src/components/Chart/Row/Project.vue?vue&type=template&id=5a17b514
@@ -3394,6 +3849,524 @@ let ignoreScrollEvents = false;
 const MainView_exports_ = /*#__PURE__*/(0,exportHelper_namespaceObject.A)(MainViewvue_type_script_lang_js, [['render',MainViewvue_type_template_id_7ac81826_render]])
 
 /* harmony default export */ const MainView = (MainView_exports_);
+;// ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./src/components/Header.vue?vue&type=template&id=e33ad0f0
+
+
+const Headervue_type_template_id_e33ad0f0_hoisted_1 = ["innerHTML"]
+
+function Headervue_type_template_id_e33ad0f0_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_vue_slider = (0,external_Vue_.resolveComponent)("vue-slider")
+  const _component_switches = (0,external_Vue_.resolveComponent)("switches")
+
+  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
+    class: "gantt-elastic__header",
+    style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header'] })
+  }, [
+    (0,external_Vue_.createElementVNode)("div", {
+      class: "gantt-elastic__header-title",
+      style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-title'] })
+    }, [
+      (!$data.opts.title.html)
+        ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
+            key: 0,
+            class: "gantt-elastic__header-title--text",
+            style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-title--text'] })
+          }, (0,external_Vue_.toDisplayString)($data.opts.title.label), 5 /* TEXT, STYLE */))
+        : (0,external_Vue_.createCommentVNode)("v-if", true),
+      ($data.opts.title.html)
+        ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
+            key: 1,
+            class: "gantt-elastic__header-title--html",
+            style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-title--html'] }),
+            innerHTML: $data.opts.title.label
+          }, null, 12 /* STYLE, PROPS */, Headervue_type_template_id_e33ad0f0_hoisted_1))
+        : (0,external_Vue_.createCommentVNode)("v-if", true)
+    ], 4 /* STYLE */),
+    (0,external_Vue_.createElementVNode)("div", {
+      class: "gantt-elastic__header-options",
+      style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-options'] })
+    }, [
+      (0,external_Vue_.createElementVNode)("button", {
+        class: "gantt-elastic__header-btn-recenter",
+        style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-btn-recenter'] }),
+        onClick: _cache[0] || (_cache[0] = (0,external_Vue_.withModifiers)((...args) => ($options.recenterPosition && $options.recenterPosition(...args)), ["prevent"]))
+      }, (0,external_Vue_.toDisplayString)($data.opts.locale.Now), 5 /* TEXT, STYLE */),
+      (0,external_Vue_.createElementVNode)("label", {
+        class: "gantt-elastic__header-label",
+        style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-label'] })
+      }, [
+        (0,external_Vue_.createTextVNode)((0,external_Vue_.toDisplayString)($data.opts.locale["X-Scale"]) + " ", 1 /* TEXT */),
+        (0,external_Vue_.createElementVNode)("div", {
+          class: "gantt-elastic__header-slider-wrapper",
+          style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-slider-wrapper'] })
+        }, [
+          (0,external_Vue_.createVNode)(_component_vue_slider, {
+            class: "gantt-elastic__header-slider",
+            tooltip: "none",
+            style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-slider'] }),
+            "process-style": { ...$data.style['header-slider--process'] },
+            "slider-style": { ...$data.style['header-slider--slider'] },
+            modelValue: $options.scale,
+            "onUpdate:modelValue": _cache[1] || (_cache[1] = $event => (($options.scale) = $event)),
+            max: 24,
+            min: 2,
+            width: "100px"
+          }, null, 8 /* PROPS */, ["style", "process-style", "slider-style", "modelValue"])
+        ], 4 /* STYLE */)
+      ], 4 /* STYLE */),
+      (0,external_Vue_.createElementVNode)("label", {
+        class: "gantt-elastic__header-label",
+        style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-label'] })
+      }, [
+        (0,external_Vue_.createTextVNode)((0,external_Vue_.toDisplayString)($data.opts.locale["Y-Scale"]) + " ", 1 /* TEXT */),
+        (0,external_Vue_.createElementVNode)("div", {
+          class: "gantt-elastic__header-slider-wrapper",
+          style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-slider-wrapper'] })
+        }, [
+          (0,external_Vue_.createVNode)(_component_vue_slider, {
+            class: "gantt-elastic__header-slider",
+            tooltip: "none",
+            style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-slider'] }),
+            "process-style": { ...$data.style['header-slider--process'] },
+            "slider-style": { ...$data.style['header-slider--slider'] },
+            modelValue: $options.height,
+            "onUpdate:modelValue": _cache[2] || (_cache[2] = $event => (($options.height) = $event)),
+            max: 100,
+            min: 7,
+            width: "100px"
+          }, null, 8 /* PROPS */, ["style", "process-style", "slider-style", "modelValue"])
+        ], 4 /* STYLE */)
+      ], 4 /* STYLE */),
+      (0,external_Vue_.createElementVNode)("label", {
+        class: "gantt-elastic__header-label",
+        style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-label'] })
+      }, [
+        (0,external_Vue_.createTextVNode)((0,external_Vue_.toDisplayString)($data.opts.locale["Before/After"]) + " ", 1 /* TEXT */),
+        (0,external_Vue_.createElementVNode)("div", {
+          class: "gantt-elastic__header-slider-wrapper",
+          style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-slider-wrapper'] })
+        }, [
+          (0,external_Vue_.createVNode)(_component_vue_slider, {
+            class: "gantt-elastic__header-slider",
+            tooltip: "none",
+            style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-slider'] }),
+            "process-style": { ...$data.style['header-slider--process'] },
+            "slider-style": { ...$data.style['header-slider--slider'] },
+            modelValue: $options.scope,
+            "onUpdate:modelValue": _cache[3] || (_cache[3] = $event => (($options.scope) = $event)),
+            max: 31,
+            min: 0,
+            width: "100px"
+          }, null, 8 /* PROPS */, ["style", "process-style", "slider-style", "modelValue"])
+        ], 4 /* STYLE */)
+      ], 4 /* STYLE */),
+      (0,external_Vue_.createElementVNode)("label", {
+        class: "gantt-elastic__header-label",
+        style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-label'] })
+      }, [
+        (0,external_Vue_.createTextVNode)((0,external_Vue_.toDisplayString)($data.opts.locale["Task list width"]) + " ", 1 /* TEXT */),
+        (0,external_Vue_.createElementVNode)("div", {
+          class: "gantt-elastic__header-slider-wrapper",
+          style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-slider-wrapper'] })
+        }, [
+          (0,external_Vue_.createVNode)(_component_vue_slider, {
+            class: "gantt-elastic__header-slider",
+            tooltip: "none",
+            style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-slider'] }),
+            "process-style": { ...$data.style['header-slider--process'] },
+            "slider-style": { ...$data.style['header-slider--slider'] },
+            modelValue: $options.divider,
+            "onUpdate:modelValue": _cache[4] || (_cache[4] = $event => (($options.divider) = $event)),
+            max: 100,
+            min: 0,
+            width: "100px"
+          }, null, 8 /* PROPS */, ["style", "process-style", "slider-style", "modelValue"])
+        ], 4 /* STYLE */)
+      ], 4 /* STYLE */),
+      (0,external_Vue_.createElementVNode)("label", {
+        class: "gantt-elastic__header-task-list-switch--wrapper",
+        style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-task-list-switch--label'] })
+      }, [
+        (0,external_Vue_.createVNode)(_component_switches, {
+          class: "gantt-elastic__header-task-list-switch",
+          style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-task-list-switch'] }),
+          modelValue: $options.root.state.options.taskList.display,
+          "onUpdate:modelValue": _cache[5] || (_cache[5] = $event => (($options.root.state.options.taskList.display) = $event))
+        }, null, 8 /* PROPS */, ["style", "modelValue"]),
+        (0,external_Vue_.createTextVNode)(" " + (0,external_Vue_.toDisplayString)($data.opts.locale["Display task list"]), 1 /* TEXT */)
+      ], 4 /* STYLE */)
+    ], 4 /* STYLE */)
+  ], 4 /* STYLE */))
+}
+;// ./src/components/Header.vue?vue&type=template&id=e33ad0f0
+
+// EXTERNAL MODULE: ./node_modules/vue-slider-component/dist/vue-slider-component.umd.min.js
+var vue_slider_component_umd_min = __webpack_require__(378);
+var vue_slider_component_umd_min_default = /*#__PURE__*/__webpack_require__.n(vue_slider_component_umd_min);
+// EXTERNAL MODULE: ./node_modules/vue-slider-component/theme/default.css
+var theme_default = __webpack_require__(670);
+;// ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./node_modules/vue-switches/src/switches.vue?vue&type=template&id=8e4870fc
+
+
+const switchesvue_type_template_id_8e4870fc_hoisted_1 = {
+  key: 0,
+  class: "vue-switcher__label"
+}
+const switchesvue_type_template_id_8e4870fc_hoisted_2 = ["textContent"]
+const switchesvue_type_template_id_8e4870fc_hoisted_3 = ["textContent"]
+const switchesvue_type_template_id_8e4870fc_hoisted_4 = ["textContent"]
+const switchesvue_type_template_id_8e4870fc_hoisted_5 = ["disabled", "checked"]
+
+function switchesvue_type_template_id_8e4870fc_render(_ctx, _cache, $props, $setup, $data, $options) {
+  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("label", {
+    class: (0,external_Vue_.normalizeClass)($options.classObject)
+  }, [
+    ($options.shouldShowLabel)
+      ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("span", switchesvue_type_template_id_8e4870fc_hoisted_1, [
+          ($props.label)
+            ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("span", {
+                key: 0,
+                textContent: (0,external_Vue_.toDisplayString)($props.label)
+              }, null, 8 /* PROPS */, switchesvue_type_template_id_8e4870fc_hoisted_2))
+            : (0,external_Vue_.createCommentVNode)("v-if", true),
+          (!$props.label && $props.value)
+            ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("span", {
+                key: 1,
+                textContent: (0,external_Vue_.toDisplayString)($props.textEnabled)
+              }, null, 8 /* PROPS */, switchesvue_type_template_id_8e4870fc_hoisted_3))
+            : (0,external_Vue_.createCommentVNode)("v-if", true),
+          (!$props.label && !$props.value)
+            ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("span", {
+                key: 2,
+                textContent: (0,external_Vue_.toDisplayString)($props.textDisabled)
+              }, null, 8 /* PROPS */, switchesvue_type_template_id_8e4870fc_hoisted_4))
+            : (0,external_Vue_.createCommentVNode)("v-if", true)
+        ]))
+      : (0,external_Vue_.createCommentVNode)("v-if", true),
+    (0,external_Vue_.createElementVNode)("input", {
+      type: "checkbox",
+      disabled: $props.disabled,
+      onChange: _cache[0] || (_cache[0] = (...args) => ($options.trigger && $options.trigger(...args))),
+      checked: $props.value
+    }, null, 40 /* PROPS, NEED_HYDRATION */, switchesvue_type_template_id_8e4870fc_hoisted_5),
+    _cache[1] || (_cache[1] = (0,external_Vue_.createElementVNode)("div", null, null, -1 /* CACHED */))
+  ], 2 /* CLASS */))
+}
+;// ./node_modules/vue-switches/src/switches.vue?vue&type=template&id=8e4870fc
+
+;// ./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./node_modules/vue-switches/src/switches.vue?vue&type=script&lang=js
+
+
+/* harmony default export */ const switchesvue_type_script_lang_js = ({
+    name: 'switches',
+
+    props: {
+        typeBold: {
+            default: false
+        },
+
+        value: {
+            default: false
+        },
+
+        disabled: {
+            default: false
+        },
+
+        label: {
+            default: ''
+        },
+
+        textEnabled: {
+            default: ''
+        },
+
+        textDisabled: {
+            default: ''
+        },
+
+        color: {
+            default: 'default'
+        },
+
+        theme: {
+            default: 'default'
+        },
+
+        emitOnMount: {
+            default: true
+        }
+    },
+
+    mounted () {
+        if(this.emitOnMount) {
+            this.$emit('input', this.value)
+        }
+    },
+
+    methods: {
+        trigger (e) {
+            this.$emit('input', e.target.checked)
+        }
+    },
+
+    computed: {
+        classObject () {
+
+            const { color, value, theme, typeBold, disabled } = this;
+
+            return {
+                'vue-switcher' : true,
+                ['vue-switcher--unchecked'] : !value,
+                ['vue-switcher--disabled'] : disabled,
+                ['vue-switcher--bold']: typeBold,
+                ['vue-switcher--bold--unchecked']: typeBold && !value,
+                [`vue-switcher-theme--${theme}`] : color,
+                [`vue-switcher-color--${color}`] : color,
+            };
+
+        },
+
+        shouldShowLabel () {
+            return this.label !== '' || this.textEnabled !== '' || this.textDisabled !== '';
+        }
+    }
+});
+
+
+// EXTERNAL MODULE: ./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/vue-switches/dist/switches.css?vue&type=style&index=0&lang=css&external
+var switchesvue_type_style_index_0_lang_css_external = __webpack_require__(304);
+;// ./node_modules/vue-switches/dist/switches.css?vue&type=style&index=0&lang=css&external
+
+;// ./node_modules/vue-switches/src/switches.vue
+
+
+
+
+;
+
+
+const switches_exports_ = /*#__PURE__*/(0,exportHelper_namespaceObject.A)(switchesvue_type_script_lang_js, [['render',switchesvue_type_template_id_8e4870fc_render]])
+
+/* harmony default export */ const switches = (switches_exports_);
+;// ./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./src/components/Header.vue?vue&type=script&lang=js
+
+
+
+
+
+const defaultStyle = {
+  header: {
+    margin: "0px auto",
+    background: "#f3f5f747",
+    padding: "10px",
+    overflow: "hidden",
+    clear: "both",
+    display: "flex",
+    "justify-content": "space-between"
+  },
+  "header-title": { float: "left" },
+  "header-options": { float: "right" },
+  "header-title--text": {
+    "font-size": "20px",
+    "vertical-align": "middle",
+    "font-weight": "400",
+    "line-height": "35px",
+    "padding-left": "22px",
+    "letter-spacing": "1px"
+  },
+  "header-title--html": {
+    "font-size": "20px",
+    "vertical-align": "middle",
+    "font-weight": "400",
+    "line-height": "35px",
+    "padding-left": "22px",
+    "letter-spacing": "1px"
+  },
+  "header-btn-recenter": {
+    background: "#95A5A6",
+    border: "none",
+    outline: "none",
+    cursor: "pointer",
+    color: "white",
+    "border-radius": "3px",
+    "margin-right": "27px",
+    "font-size": "16px",
+    padding: "8px 12px"
+  },
+  "header-slider": {
+    "box-sizing": "content-box"
+  },
+  "header-slider-wrapper": {
+    display: "inline-block",
+    "vertical-align": "middle"
+  },
+  "header-slider--slider": { "box-sizing": "content-box" },
+  "header-slider--process": { "box-sizing": "content-box" },
+  "header-task-list-switch--label": { "box-sizing": "content-box" },
+  "header-task-list-switch": {
+    margin: "0px 15px",
+    "vertical-align": "middle"
+  },
+  "header-label": {}
+};
+const defaultOptions = {
+  title: {
+    label: "gantt-elastic",
+    html: false
+  },
+  locale: {
+    Now: "Now",
+    "X-Scale": "Zoom-X",
+    "Y-Scale": "Zoom-Y",
+    "Task list width": "Task list",
+    "Before/After": "Expand",
+    "Display task list": "Show task list"
+  }
+};
+/* harmony default export */ const Headervue_type_script_lang_js = ({
+  name: "GanttHeader",
+  components: {
+    vueSlider: (vue_slider_component_umd_min_default()),
+    Switches: switches
+  },
+  props: ["options", "dynamicStyle"],
+  inject: ["root"],
+  data() {
+    return {
+      scaleTimeoutId: null,
+      firstScale: false,
+      localScale: 0,
+      localHeight: 0,
+      localBefore: 0,
+      localPercent: 0,
+      sliderOptions: {
+        xScale: {
+          value: 0
+        }
+      },
+      style: {},
+      opts: {}
+    };
+  },
+  created() {
+    this.$set = function(obj, key, val) { obj[key] = val; };
+    this.$delete = function(obj, key) { delete obj[key]; };
+
+    this.localScale = this.root.state.options.times.timeZoom;
+    this.localHeight = this.root.state.options.row.height;
+    this.localBefore = this.root.state.options.scope.before;
+    this.localPercent = this.root.state.options.taskList.percent;
+    this.sliderOptions.xScale.value = this.root.state.options.times.timeZoom;
+    this.style = this.root.mergeDeep({}, defaultStyle, this.dynamicStyle);
+    this.opts = this.root.mergeDeep({}, defaultOptions, this.options);
+  },
+  methods: {
+    getImage() {
+      this.root.getImage("image/png").then(imgB64 => {
+        const link = document.createElement("a");
+        link.href = imgB64;
+        link.download = "gantt-elastic.png";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+    },
+    recenterPosition() {
+      this.root.$emitBus.emit("recenterPosition");
+    },
+    setScale(value) {
+      if (this.scaleTimeoutId !== null) {
+        clearTimeout(this.scaleTimeoutId);
+        this.scaleTimeoutId = null;
+      }
+      // debouncing
+      if (this.firstScale) {
+        this.scaleTimeoutId = setTimeout(() => {
+          this.root.$emitBus.emit("times-timeZoom-change", value);
+          this.scaleTimeoutId = null;
+        }, 50);
+      } else {
+        this.root.$emitBus.emit("times-timeZoom-change", value);
+        this.firstScale = true;
+      }
+    }
+  },
+  computed: {
+    /**
+     * If there is a component slot specified for header
+     * @returns {bool}
+     */
+    beforeOptionsIsComponent() {
+      const headerSlot = this.options.slots.header;
+      if (
+        typeof headerSlot.beforeOptions === "object" &&
+        !Array.isArray(headerSlot.beforeOptions)
+      ) {
+        return true;
+      }
+      return false;
+    },
+    /**
+     * If there is a slot with beforeOptions html content
+     * @returns {bool}
+     */
+    beforeOptionsIsHtml() {
+      if (typeof this.options.slots.header.beforeOptions === "string") {
+        return true;
+      }
+      return false;
+    },
+    scale: {
+      get() {
+        return this.localScale;
+      },
+      set(value) {
+        this.localScale = Number(value);
+        this.setScale(this.localScale);
+      }
+    },
+    height: {
+      get() {
+        return this.localHeight;
+      },
+      set(value) {
+        this.localHeight = Number(value);
+        this.root.$emitBus.emit("row-height-change", Number(value));
+      }
+    },
+    scope: {
+      get() {
+        return this.localBefore;
+      },
+      set(value) {
+        this.localBefore = Number(value);
+        this.root.$emitBus.emit("scope-change", Number(value));
+      }
+    },
+    divider: {
+      get() {
+        return this.localPercent;
+      },
+      set(value) {
+        this.localPercent = Number(value);
+        this.root.$emitBus.emit("taskList-width-change", Number(value));
+      }
+    }
+  }
+});
+
+;// ./src/components/Header.vue?vue&type=script&lang=js
+ 
+;// ./src/components/Header.vue
+
+
+
+
+;
+const Header_exports_ = /*#__PURE__*/(0,exportHelper_namespaceObject.A)(Headervue_type_script_lang_js, [['render',Headervue_type_template_id_e33ad0f0_render]])
+
+/* harmony default export */ const Header = (Header_exports_);
 ;// ./src/style.js
 /**
  * @fileoverview Styles for gantt-elastic
@@ -4649,6 +5622,7 @@ var index = (function () {
 
 
 
+
 const ctx = document.createElement('canvas').getContext('2d');
 let VueInst = (external_Vue_default());
 function initVue() {
@@ -5074,7 +6048,8 @@ function notEqualDeep(left, right, cache = [], path = '') {
 const GanttElastic = {
   name: 'GanttElastic',
   components: {
-    MainView: MainView
+    MainView: MainView,
+    GanttHeader: Header
   },
   props: ['tasks', 'options', 'dynamicStyle'],
   provide() {
@@ -5110,6 +6085,8 @@ const GanttElastic = {
         unwatchTasks: null,
         unwatchOptions: null,
         unwatchStyle: null,
+        unwatchVisibleTasksGeometry: null,
+        initialized: false,
         unwatchOutputTasks: null,
         unwatchOutputOptions: null,
         unwatchOutputStyle: null
@@ -5211,27 +6188,34 @@ const GanttElastic = {
      * @param {Object} options
      */
     mapTasks(tasks, options) {
-      for (let [index, task] of tasks.entries()) {
-        tasks[index] = {
-          ...task,
-          id: task[options.taskMapping.id],
-          start: task[options.taskMapping.start],
-          label: task[options.taskMapping.label],
-          duration: task[options.taskMapping.duration],
-          progress: task[options.taskMapping.progress],
-          type: task[options.taskMapping.type],
-          style: task[options.taskMapping.style],
-          collapsed: task[options.taskMapping.collapsed]
-        };
-      }
-      return tasks;
+      // do not mutate the reactive props array - replacing its entries
+      // would re-trigger the deep tasks watcher on every setup (infinite loop in Vue 3)
+      return tasks.map(task => ({
+        ...task,
+        id: task[options.taskMapping.id],
+        start: task[options.taskMapping.start],
+        label: task[options.taskMapping.label],
+        duration: task[options.taskMapping.duration],
+        progress: task[options.taskMapping.progress],
+        type: task[options.taskMapping.type],
+        style: task[options.taskMapping.style],
+        collapsed: task[options.taskMapping.collapsed]
+      }));
     },
 
     /**
      * Initialize component
      */
     initialize(itsUpdate = '') {
+      // on re-initialization (tasks/options prop changed at runtime) user-modified
+      // runtime values must survive: collapsed flags toggled via the expander and
+      // times.timeZoom changed through the header slider or directly on state
+      const reinit = this.state.initialized === true;
+      const prevTasksById = reinit ? this.state.tasksById : null;
       let options = mergeDeep({}, this.state.options, getOptions(this.options), this.options);
+      if (reinit && typeof this.options.times === 'undefined') {
+        options.times.timeZoom = this.state.options.times.timeZoom;
+      }
       let tasks = this.mapTasks(this.tasks, options);
       if (Object.keys(this.state.dynamicStyle).length === 0) {
         this.initializeStyle();
@@ -5256,12 +6240,21 @@ const GanttElastic = {
       });
       this.state.options = options;
       tasks = this.fillTasks(tasks);
+      if (reinit && prevTasksById) {
+        for (let task of tasks) {
+          const prev = prevTasksById[task.id];
+          if (prev && typeof prev.collapsed !== 'undefined') {
+            task.collapsed = prev.collapsed;
+          }
+        }
+      }
       this.state.tasksById = this.resetTaskTree(tasks);
       this.state.taskTree = this.makeTaskTree(this.state.rootTask, tasks);
       this.state.tasks = this.state.taskTree.allChildren.map(childId => this.getTask(childId));
       this.calculateTaskListColumnsDimensions();
       this.state.options.scrollBarHeight = this.getScrollBarHeight();
       this.state.options.outerHeight = this.state.options.height + this.state.options.scrollBarHeight;
+      this.state.initialized = true;
       this.globalOnResize();
     },
 
@@ -6036,32 +7029,9 @@ const GanttElastic = {
      * For example when task is collapsed - children of this task are not visible - we should not render them
      */
     visibleTasks() {
-      const visibleTasks = this.state.tasks.filter(task => this.isTaskVisible(task));
-      const maxRows = visibleTasks.slice(0, this.state.options.maxRows);
-      this.state.options.rowsHeight = this.getTasksHeight(maxRows);
-      let heightCompensation = 0;
-      if (this.state.options.maxHeight && this.state.options.rowsHeight > this.state.options.maxHeight) {
-        heightCompensation = this.state.options.rowsHeight - this.state.options.maxHeight;
-        this.state.options.rowsHeight = this.state.options.maxHeight;
-      }
-      this.state.options.height = this.getHeight(maxRows) - heightCompensation;
-      this.state.options.allVisibleTasksHeight = this.getTasksHeight(visibleTasks);
-      this.state.options.outerHeight = this.getHeight(maxRows, true) - heightCompensation;
-      let len = visibleTasks.length;
-      for (let index = 0; index < len; index++) {
-        let task = visibleTasks[index];
-        task.width =
-          task.duration / this.state.options.times.timePerPixel - this.style['grid-line-vertical']['stroke-width'];
-        if (task.width < 0) {
-          task.width = 0;
-        }
-        task.height = this.state.options.row.height;
-        task.x = this.timeToPixelOffsetX(task.startTime);
-        task.y =
-          (this.state.options.row.height + this.state.options.chart.grid.horizontal.gap * 2) * index +
-          this.state.options.chart.grid.horizontal.gap;
-      }
-      return visibleTasks;
+      // pure computed - the geometry side effects live in the visibleTasks watcher,
+      // a computed that mutates reactive state re-triggers itself endlessly in Vue 3
+      return this.state.tasks.filter(task => this.isTaskVisible(task));
     },
 
     /**
@@ -6072,10 +7042,10 @@ const GanttElastic = {
     },
 
     /**
-     * Get columns and compute dimensions on the fly
+     * Get task list columns; dimensions are calculated in initialize(),
+     * a computed must not mutate reactive state or Vue 3 will re-trigger it endlessly
      */
     getTaskListColumns() {
-      this.calculateTaskListColumnsDimensions();
       return this.state.options.taskList.columns;
     },
 
@@ -6126,7 +7096,7 @@ const GanttElastic = {
     this.state.unwatchStyle = this.$watch(
       'dynamicStyle',
       style => {
-        const notEqual = notEqualDeep(style, this.style());
+        const notEqual = notEqualDeep(style, this.style);
         if (notEqual) {
           this.initializeStyle();
         }
@@ -6154,6 +7124,39 @@ const GanttElastic = {
         this.$emit('dynamic-style-changed', mergeDeep({}, style));
       },
       { deep: true }
+    );
+
+    // apply geometry when the set of visible tasks (or anything it depends on) changes;
+    // this used to be a side effect inside the visibleTasks computed, which loops in Vue 3
+    this.state.unwatchVisibleTasksGeometry = this.$watch(
+      'visibleTasks',
+      visibleTasks => {
+        const maxRows = visibleTasks.slice(0, this.state.options.maxRows);
+        this.state.options.rowsHeight = this.getTasksHeight(maxRows);
+        let heightCompensation = 0;
+        if (this.state.options.maxHeight && this.state.options.rowsHeight > this.state.options.maxHeight) {
+          heightCompensation = this.state.options.rowsHeight - this.state.options.maxHeight;
+          this.state.options.rowsHeight = this.state.options.maxHeight;
+        }
+        this.state.options.height = this.getHeight(maxRows) - heightCompensation;
+        this.state.options.allVisibleTasksHeight = this.getTasksHeight(visibleTasks);
+        this.state.options.outerHeight = this.getHeight(maxRows, true) - heightCompensation;
+        let len = visibleTasks.length;
+        for (let index = 0; index < len; index++) {
+          let task = visibleTasks[index];
+          task.width =
+            task.duration / this.state.options.times.timePerPixel - this.style['grid-line-vertical']['stroke-width'];
+          if (task.width < 0) {
+            task.width = 0;
+          }
+          task.height = this.state.options.row.height;
+          task.x = this.timeToPixelOffsetX(task.startTime);
+          task.y =
+            (this.state.options.row.height + this.state.options.chart.grid.horizontal.gap * 2) * index +
+            this.state.options.chart.grid.horizontal.gap;
+        }
+      },
+      { immediate: true }
     );
 
     this.$emitBus.emit('gantt-elastic-created', this);
@@ -6208,6 +7211,7 @@ const GanttElastic = {
     this.state.unwatchTasks();
     this.state.unwatchOptions();
     this.state.unwatchStyle();
+    this.state.unwatchVisibleTasksGeometry();
     this.state.unwatchOutputTasks();
     this.state.unwatchOutputOptions();
     this.state.unwatchOutputStyle();
@@ -6225,9 +7229,9 @@ const GanttElastic = {
 
 ;// ./src/GanttElastic.vue?vue&type=script&lang=js
  
-// EXTERNAL MODULE: ./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./src/GanttElastic.vue?vue&type=style&index=0&id=9cd0d0ec&lang=css
-var GanttElasticvue_type_style_index_0_id_9cd0d0ec_lang_css = __webpack_require__(282);
-;// ./src/GanttElastic.vue?vue&type=style&index=0&id=9cd0d0ec&lang=css
+// EXTERNAL MODULE: ./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./src/GanttElastic.vue?vue&type=style&index=0&id=b90f8362&lang=css
+var GanttElasticvue_type_style_index_0_id_b90f8362_lang_css = __webpack_require__(920);
+;// ./src/GanttElastic.vue?vue&type=style&index=0&id=b90f8362&lang=css
 
 ;// ./src/GanttElastic.vue
 
