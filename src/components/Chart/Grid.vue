@@ -61,7 +61,10 @@ export default {
    * Created
    */
   created() {
-    this.root.$on('recenterPosition', this.recenterPosition);
+    this.$set = function(obj, key, val) { obj[key] = val; };
+    this.$delete = function(obj, key) { delete obj[key]; };
+
+    this.root.$emitBus.on('recenterPosition', this.recenterPosition);
   },
 
   /**
@@ -74,6 +77,10 @@ export default {
         this.root.scrollToTime(this.timeLinePosition.time);
       });
     });
+  },
+
+  beforeUnmount() {
+    this.root.$emitBus.off('recenterPosition', this.recenterPosition);
   },
 
   methods: {

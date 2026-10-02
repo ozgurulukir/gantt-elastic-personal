@@ -3,21 +3,21 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
-    <title>Gangtt-elastic demo</title>
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js" crossorigin="anonymous"></script>
+    <title>GanttElastic standalone demo</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs" crossorigin="anonymous"></script>
     <script src="/dist/bundle.js"></script>
-    <script src="https://unpkg.com/gantt-elastic-header@0.1.11/dist/Header.umd.js" crossorigin="anonymous"></script>
   </head>
 
   <body>
-    <div id="gantt" style="width:100%;height:100%;"></div>
-    <button id="btn-add" onclick="addTask()">Add task</button>
-    <button id="btn-reset" onclick="addTasks()">Add tasks</button><br />
-    <button id="btn-destroy" onclick="destroy()">Destroy</button><br />
-    <button id="btn-options" onclick="changeOptions()">Change options</button>
+    <div style="width:100%;height:100%">
+      <div id="app"></div>
+    </div>
+
+    <button id="btn-add" onclick="addTask()">Add task</button><br />
+
     <script>
-      // just helper to get current dates
+
       function getDate(hours) {
         const currentDate = new Date();
         const currentYear = currentDate.getFullYear();
@@ -239,13 +239,17 @@
           progress: 'percent'
         },
         maxRows: 100,
-        maxHeight: 300,
+        maxHeight: 500,
+        title: {
+          label: 'Your project title as html (link or whatever...)',
+          html: false
+        },
         row: {
           height: 24
         },
         calendar: {
           hour: {
-            display: false
+            display: true
           }
         },
         chart: {
@@ -261,32 +265,14 @@
             straight: false
           },
           columns: [
-            {
-              id: 1,
-              label: 'ID',
-              value: 'id',
-              width: 40
-            },
-            {
-              id: 2,
-              label: 'Description',
-              value: 'label',
-              width: 200,
-              expander: true,
-              html: true,
-              events: {
+            { id: 1, label: 'ID', value: 'id', width: 40 },
+            { id: 2, label: 'Description', value: 'label', width: 200, expander: true, html: true, events: {
                 click({ data, column }) {
                   alert('description clicked!\n' + data.label);
                 }
               }
             },
-            {
-              id: 3,
-              label: 'Assigned to',
-              value: 'user',
-              width: 130,
-              html: true
-            },
+            { id: 3, label: 'Assigned to', value: 'user', width: 130, html: true },
             {
               id: 3,
               label: 'Start',
@@ -316,124 +302,45 @@
               }
             }
           ]
+        },
+        locale: {
+          name: 'en',
+          Now: 'Now',
+          'X-Scale': 'Zoom-X',
+          'Y-Scale': 'Zoom-Y',
+          'Task list width': 'Task list',
+          'Before/After': 'Expand',
+          'Display task list': 'Task list'
         }
       };
 
-      const app = (window.app = GanttElastic.mount({
-        el: '#gantt',
-        data: {
-          components: {
-            header: Header
-          },
-          tasks: tasks,
-          options: options,
-          dynamicStyle: {}
-        },
-        ready(ganttInstance) {
-          console.log('ready!', ganttInstance);
-          window.ganttInstance = ganttInstance;
-          ganttInstance.$on('tasks-changed', tasks => {
-            app.tasks = tasks;
-          });
-          ganttInstance.$on('options-changed', options => {
-            console.log('options changed');
-            app.options = options;
-          });
-          ganttInstance.$on('dynamic-style-changed', style => {
-            app.dynamicStyle = style;
-          });
 
-          ganttInstance.$on('chart-task-mouseenter', ({ data, event }) => {
-            console.log('task mouse enter', { data, event });
-          });
-          ganttInstance.$on('updated', () => {
-            //console.log('gantt view was updated');
-          });
-          ganttInstance.$on('destroyed', () => {
-            //console.log('gantt was destroyed');
-          });
-          ganttInstance.$on('times-timeZoom-updated', () => {
-            console.log('time zoom changed');
-          });
-          ganttInstance.$on('taskList-task-click', ({ event, data, column }) => {
-            console.log('task list clicked! (task)', { data, column });
-          });
+      const mountedInstance = GanttElastic.mount({
+        el: '#app',
+        tasks: tasks.map(task => Object.assign({}, task)),
+        options: options,
+        ready: function (ganttElasticInstance) {
+          window.ganttInstance = ganttElasticInstance;
+          console.log('ready');
         }
-      }));
-
-      console.log('gantt', document.getElementById('gantt'));
-
-      function update() {
-        const row = document.getElementById('row').value;
-        const name = document.getElementById('name').value;
-        const value = document.getElementById('value').value;
-        app.tasks[row][name] = value;
+      });
+      // the ready callback (fired during mount) exposes the inner gantt instance;
+      // only fall back to the root proxy when it did not run
+      if (typeof window.ganttInstance === 'undefined') {
+        window.ganttInstance = mountedInstance;
       }
 
-      function deleteRow() {
-        const row = Number(document.getElementById('delrow').value);
-        app.tasks = ganttState.tasks.filter((task, index) => {
-          if (index === row) {
-            console.log('removing task', task, index);
-          }
-          return index !== row;
-        });
-      }
-
-      function progressChange() {
-        const row = Number(document.getElementById('progRow').value);
-        const percent = Number(document.getElementById('progress').value);
-        app.tasks[row].progress = percent;
-      }
+      // Standalone app mock
+      window.app = {
+         tasks: window.ganttInstance.tasks
+      };
 
       function addTask() {
-        const task = {
-          id: 88,
-          label:
-            '<a href="https://images.pexels.com/photos/423364/pexels-photo-423364.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" target="_blank" style="color:#0077c0;">Yeaahh! you have added a task bro!</a>',
-          user:
-            '<a href="https://images.pexels.com/photos/423364/pexels-photo-423364.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" target="_blank" style="color:#0077c0;">Awesome!</a>',
-          parentId: 7,
-          dependentOn: [7],
-          start: getDate(24 * 3),
-          duration: 1 * 24 * 60 * 60 * 1000,
-          percent: 50,
-          type: 'project'
-        };
-        app.tasks.push(task);
-        console.log(app.tasks);
-        console.log(app);
-      }
-
-      function addTasks() {
-        const newTasks = tasks.map(task => Object.assign({}, task));
-        app.tasks = newTasks;
-      }
-
-      function changeOptions() {
-        app.options.taskList.columns[0].label = 'Whooaa!';
-        app.options.taskList.columns[0].width = 100;
-        app.options.taskList.columns[0].style = {
-          'task-list-header-column': {
-            background: 'red',
-            color: 'white'
-          }
-        };
-        Vue.set(app.options.calendar, 'month', {
-          format: {
-            long: function() {
-              return ':P';
-            }
-          }
+        window.ganttInstance.tasks.push({
+          id: 88, label: 'Added task', user: 'Awesome!', parentId: 7, dependentOn: [7], start: getDate(24 * 3), duration: 1 * 24 * 60 * 60 * 1000, percent: 50, type: 'project'
         });
-        Vue.set(app.options, 'times', { timeZoom: 2 });
-        app.options.locale['Now'] = 'Center';
-        ganttInstance.fixScrollPos();
       }
-
-      function destroy() {
-        app.destroy = true;
-      }
+      window.addTask = addTask;
     </script>
   </body>
 </html>

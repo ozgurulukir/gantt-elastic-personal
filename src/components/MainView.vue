@@ -179,35 +179,35 @@ export default {
      * Emit event when mouse is moving inside main view
      */
     mouseMove(event) {
-      this.root.$emit('main-view-mousemove', event);
+      this.root.$emitBus.emit('main-view-mousemove', event);
     },
 
     /**
      * Emit mouseup event inside main view
      */
     mouseUp(event) {
-      this.root.$emit('main-view-mouseup', event);
+      this.root.$emitBus.emit('main-view-mouseup', event);
     },
 
     /**
      * Horizontal scroll event handler
      */
     onHorizontalScroll(ev) {
-      this.root.$emit('chart-scroll-horizontal', ev);
+      this.root.$emitBus.emit('chart-scroll-horizontal', ev);
     },
 
     /**
      * Vertical scroll event handler
      */
     onVerticalScroll(ev) {
-      this.root.$emit('chart-scroll-vertical', ev);
+      this.root.$emitBus.emit('chart-scroll-vertical', ev);
     },
 
     /**
      * Mouse wheel event handler
      */
     chartWheel(ev) {
-      this.root.$emit('chart-wheel', ev);
+      this.root.$emitBus.emit('chart-wheel', ev);
     },
 
     /**
@@ -279,7 +279,7 @@ export default {
   /**
    * Before destroy event - clean up
    */
-  beforeDestroy() {
+  beforeUnmount() {
     document.removeEventListener('mouseup', this.chartMouseUp);
     document.removeEventListener('mousemove', this.chartMouseMove);
     document.removeEventListener('touchmove', this.chartMouseMove);

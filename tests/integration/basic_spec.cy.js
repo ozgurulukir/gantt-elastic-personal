@@ -26,8 +26,8 @@ function expectTimeZoomChange(url) {
       const offset = $timeZoom.offset();
       cy.wrap($timeZoom).as('timeZoom');
       expect(typeof window.app).to.equal('object');
-      expect(typeof window.app.$children).to.equal('object');
-      const gantt = window.app.$children[0];
+      expect(typeof window.ganttInstance).to.equal('object');
+      const gantt = window.ganttInstance;
       expect(gantt.state.options.times.timeZoom).to.equal(17);
       cy.get('@timeZoom').should('be.visible');
       cy.get(timeZoomSelector)
@@ -53,7 +53,7 @@ function expectAddTask(url) {
     })
     .visit(url, { timeout: 10000 })
     .then(window => {
-      const gantt = window.app.$children[0];
+      const gantt = window.ganttInstance;
       expect(gantt).to.equal(window.ganttInstance);
       expect(gantt.state.tasks.length).to.equal(15);
       expect(typeof gantt.getTask).to.equal('function');
@@ -95,7 +95,7 @@ function expectCollapseExpandTask(url) {
     })
     .visit(url, { timeout: 10000 })
     .then(window => {
-      const gantt = window.app.$children[0];
+      const gantt = window.ganttInstance;
       expect(gantt.state.tasks.length).to.equal(15);
       expect(typeof gantt.getTask).to.equal('function');
       const task = gantt.getTask(2);

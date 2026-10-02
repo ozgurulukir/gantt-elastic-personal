@@ -8,7 +8,11 @@
 -->
 <template>
   <div class="gantt-elastic" style="width:100%">
-    <slot name="header"></slot>
+    <slot name="header">
+      <!-- default header when the consumer does not provide one (Vue 3 port: the old
+           external gantt-elastic-header UMD is Vue 2 only, so the local Header ships in) -->
+      <gantt-header></gantt-header>
+    </slot>
     <main-view ref="mainView"></main-view>
     <slot name="footer"></slot>
   </div>
@@ -17,7 +21,9 @@
 <script>
 import VueInstance from 'vue';
 import dayjs from 'dayjs';
+import mitt from 'mitt';
 import MainView from './components/MainView.vue';
+import Header from './components/Header.vue';
 import getStyle from './style.js';
 import ResizeObserver from 'resize-observer-polyfill';
 
@@ -446,7 +452,8 @@ export function notEqualDeep(left, right, cache = [], path = '') {
 const GanttElastic = {
   name: 'GanttElastic',
   components: {
-    MainView
+    MainView,
+    GanttHeader: Header
   },
   props: ['tasks', 'options', 'dynamicStyle'],
   provide() {
@@ -482,6 +489,8 @@ const GanttElastic = {
         unwatchTasks: null,
         unwatchOptions: null,
         unwatchStyle: null,
+        unwatchVisibleTasksGeometry: null,
+        initialized: false,
         unwatchOutputTasks: null,
         unwatchOutputOptions: null,
         unwatchOutputStyle: null
@@ -583,27 +592,34 @@ const GanttElastic = {
      * @param {Object} options
      */
     mapTasks(tasks, options) {
-      for (let [index, task] of tasks.entries()) {
-        tasks[index] = {
-          ...task,
-          id: task[options.taskMapping.id],
-          start: task[options.taskMapping.start],
-          label: task[options.taskMapping.label],
-          duration: task[options.taskMapping.duration],
-          progress: task[options.taskMapping.progress],
-          type: task[options.taskMapping.type],
-          style: task[options.taskMapping.style],
-          collapsed: task[options.taskMapping.collapsed]
-        };
-      }
-      return tasks;
+      // do not mutate the reactive props array - replacing its entries
+      // would re-trigger the deep tasks watcher on every setup (infinite loop in Vue 3)
+      return tasks.map(task => ({
+        ...task,
+        id: task[options.taskMapping.id],
+        start: task[options.taskMapping.start],
+        label: task[options.taskMapping.label],
+        duration: task[options.taskMapping.duration],
+        progress: task[options.taskMapping.progress],
+        type: task[options.taskMapping.type],
+        style: task[options.taskMapping.style],
+        collapsed: task[options.taskMapping.collapsed]
+      }));
     },
 
     /**
      * Initialize component
      */
     initialize(itsUpdate = '') {
+      // on re-initialization (tasks/options prop changed at runtime) user-modified
+      // runtime values must survive: collapsed flags toggled via the expander and
+      // times.timeZoom changed through the header slider or directly on state
+      const reinit = this.state.initialized === true;
+      const prevTasksById = reinit ? this.state.tasksById : null;
       let options = mergeDeep({}, this.state.options, getOptions(this.options), this.options);
+      if (reinit && typeof this.options.times === 'undefined') {
+        options.times.timeZoom = this.state.options.times.timeZoom;
+      }
       let tasks = this.mapTasks(this.tasks, options);
       if (Object.keys(this.state.dynamicStyle).length === 0) {
         this.initializeStyle();
@@ -628,12 +644,21 @@ const GanttElastic = {
       });
       this.state.options = options;
       tasks = this.fillTasks(tasks);
+      if (reinit && prevTasksById) {
+        for (let task of tasks) {
+          const prev = prevTasksById[task.id];
+          if (prev && typeof prev.collapsed !== 'undefined') {
+            task.collapsed = prev.collapsed;
+          }
+        }
+      }
       this.state.tasksById = this.resetTaskTree(tasks);
       this.state.taskTree = this.makeTaskTree(this.state.rootTask, tasks);
       this.state.tasks = this.state.taskTree.allChildren.map(childId => this.getTask(childId));
       this.calculateTaskListColumnsDimensions();
       this.state.options.scrollBarHeight = this.getScrollBarHeight();
       this.state.options.outerHeight = this.state.options.height + this.state.options.scrollBarHeight;
+      this.state.initialized = true;
       this.globalOnResize();
     },
 
@@ -1091,14 +1116,14 @@ const GanttElastic = {
      * Listen to specified event names
      */
     initializeEvents() {
-      this.$on('chart-scroll-horizontal', this.onScrollChart);
-      this.$on('chart-scroll-vertical', this.onScrollChart);
-      this.$on('chart-wheel', this.onWheelChart);
-      this.$on('times-timeZoom-change', this.onTimeZoomChange);
-      this.$on('row-height-change', this.onRowHeightChange);
-      this.$on('scope-change', this.onScopeChange);
-      this.$on('taskList-width-change', this.onTaskListWidthChange);
-      this.$on('taskList-column-width-change', this.onTaskListColumnWidthChange);
+      this.$emitBus.on('chart-scroll-horizontal', this.onScrollChart);
+      this.$emitBus.on('chart-scroll-vertical', this.onScrollChart);
+      this.$emitBus.on('chart-wheel', this.onWheelChart);
+      this.$emitBus.on('times-timeZoom-change', this.onTimeZoomChange);
+      this.$emitBus.on('row-height-change', this.onRowHeightChange);
+      this.$emitBus.on('scope-change', this.onScopeChange);
+      this.$emitBus.on('taskList-width-change', this.onTaskListWidthChange);
+      this.$emitBus.on('taskList-column-width-change', this.onTaskListColumnWidthChange);
     },
 
     /**
@@ -1408,32 +1433,9 @@ const GanttElastic = {
      * For example when task is collapsed - children of this task are not visible - we should not render them
      */
     visibleTasks() {
-      const visibleTasks = this.state.tasks.filter(task => this.isTaskVisible(task));
-      const maxRows = visibleTasks.slice(0, this.state.options.maxRows);
-      this.state.options.rowsHeight = this.getTasksHeight(maxRows);
-      let heightCompensation = 0;
-      if (this.state.options.maxHeight && this.state.options.rowsHeight > this.state.options.maxHeight) {
-        heightCompensation = this.state.options.rowsHeight - this.state.options.maxHeight;
-        this.state.options.rowsHeight = this.state.options.maxHeight;
-      }
-      this.state.options.height = this.getHeight(maxRows) - heightCompensation;
-      this.state.options.allVisibleTasksHeight = this.getTasksHeight(visibleTasks);
-      this.state.options.outerHeight = this.getHeight(maxRows, true) - heightCompensation;
-      let len = visibleTasks.length;
-      for (let index = 0; index < len; index++) {
-        let task = visibleTasks[index];
-        task.width =
-          task.duration / this.state.options.times.timePerPixel - this.style['grid-line-vertical']['stroke-width'];
-        if (task.width < 0) {
-          task.width = 0;
-        }
-        task.height = this.state.options.row.height;
-        task.x = this.timeToPixelOffsetX(task.startTime);
-        task.y =
-          (this.state.options.row.height + this.state.options.chart.grid.horizontal.gap * 2) * index +
-          this.state.options.chart.grid.horizontal.gap;
-      }
-      return visibleTasks;
+      // pure computed - the geometry side effects live in the visibleTasks watcher,
+      // a computed that mutates reactive state re-triggers itself endlessly in Vue 3
+      return this.state.tasks.filter(task => this.isTaskVisible(task));
     },
 
     /**
@@ -1444,10 +1446,10 @@ const GanttElastic = {
     },
 
     /**
-     * Get columns and compute dimensions on the fly
+     * Get task list columns; dimensions are calculated in initialize(),
+     * a computed must not mutate reactive state or Vue 3 will re-trigger it endlessly
      */
     getTaskListColumns() {
-      this.calculateTaskListColumnsDimensions();
       return this.state.options.taskList.columns;
     },
 
@@ -1470,6 +1472,9 @@ const GanttElastic = {
    * Watch tasks after gantt instance is created and react when we have new kids on the block
    */
   created() {
+    this.$set = function(obj, key, val) { obj[key] = val; };
+    this.$delete = function(obj, key) { delete obj[key]; };
+    this.$emitBus = mitt();
     this.initializeEvents();
     this.setup();
     this.state.unwatchTasks = this.$watch(
@@ -1495,7 +1500,7 @@ const GanttElastic = {
     this.state.unwatchStyle = this.$watch(
       'dynamicStyle',
       style => {
-        const notEqual = notEqualDeep(style, this.dynamicStyle);
+        const notEqual = notEqualDeep(style, this.style);
         if (notEqual) {
           this.initializeStyle();
         }
@@ -1525,7 +1530,40 @@ const GanttElastic = {
       { deep: true }
     );
 
-    this.$root.$emit('gantt-elastic-created', this);
+    // apply geometry when the set of visible tasks (or anything it depends on) changes;
+    // this used to be a side effect inside the visibleTasks computed, which loops in Vue 3
+    this.state.unwatchVisibleTasksGeometry = this.$watch(
+      'visibleTasks',
+      visibleTasks => {
+        const maxRows = visibleTasks.slice(0, this.state.options.maxRows);
+        this.state.options.rowsHeight = this.getTasksHeight(maxRows);
+        let heightCompensation = 0;
+        if (this.state.options.maxHeight && this.state.options.rowsHeight > this.state.options.maxHeight) {
+          heightCompensation = this.state.options.rowsHeight - this.state.options.maxHeight;
+          this.state.options.rowsHeight = this.state.options.maxHeight;
+        }
+        this.state.options.height = this.getHeight(maxRows) - heightCompensation;
+        this.state.options.allVisibleTasksHeight = this.getTasksHeight(visibleTasks);
+        this.state.options.outerHeight = this.getHeight(maxRows, true) - heightCompensation;
+        let len = visibleTasks.length;
+        for (let index = 0; index < len; index++) {
+          let task = visibleTasks[index];
+          task.width =
+            task.duration / this.state.options.times.timePerPixel - this.style['grid-line-vertical']['stroke-width'];
+          if (task.width < 0) {
+            task.width = 0;
+          }
+          task.height = this.state.options.row.height;
+          task.x = this.timeToPixelOffsetX(task.startTime);
+          task.y =
+            (this.state.options.row.height + this.state.options.chart.grid.horizontal.gap * 2) * index +
+            this.state.options.chart.grid.horizontal.gap;
+        }
+      },
+      { immediate: true }
+    );
+
+    this.$emitBus.emit('gantt-elastic-created', this);
     this.$emit('created', this);
   },
 
@@ -1547,9 +1585,10 @@ const GanttElastic = {
     this.state.resizeObserver.observe(this.$el.parentNode);
     this.globalOnResize();
     this.$emit('ready', this);
-    this.$root.$emit('gantt-elastic-mounted', this);
+    this.$emitBus.emit('gantt-elastic-mounted', this);
     this.$emit('mounted', this);
-    this.$root.$emit('gantt-elastic-ready', this);
+    this.$emitBus.emit('gantt-elastic-ready', this);
+    this.$emit('gantt-elastic-ready', this);
   },
 
   /**
@@ -1571,11 +1610,12 @@ const GanttElastic = {
   /**
    * Before destroy event - clean up
    */
-  beforeDestroy() {
+  beforeUnmount() {
     this.state.resizeObserver.unobserve(this.$el.parentNode);
     this.state.unwatchTasks();
     this.state.unwatchOptions();
     this.state.unwatchStyle();
+    this.state.unwatchVisibleTasksGeometry();
     this.state.unwatchOutputTasks();
     this.state.unwatchOutputOptions();
     this.state.unwatchOutputStyle();
@@ -1585,7 +1625,7 @@ const GanttElastic = {
   /**
    * Emit event after gantt-elastic was destroyed
    */
-  destroyed() {
+  unmounted() {
     this.$emit('destroyed');
   }
 };

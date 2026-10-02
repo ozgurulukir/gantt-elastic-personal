@@ -45,7 +45,7 @@ export default {
      */
     emitEvent(eventName, event) {
       if (!this.root.state.options.scroll.scrolling) {
-        this.root.$emit(`chart-${this.task.type}-${eventName}`, { event, data: this.task });
+        this.root.$emitBus.emit(`chart-${this.task.type}-${eventName}`, { event, data: this.task });
       }
     }
   }

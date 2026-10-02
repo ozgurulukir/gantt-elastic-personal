@@ -4,7 +4,7 @@
  * @author Rafal Pospiech <neuronet.io@gmail.com>
  * @package GanttElasticStandalone
  */
-import Vue from 'vue';
+import { createApp } from 'vue';
 import { mergeDeep } from './GanttElastic.vue';
 import GanttElasticStandalone from './GanttElastic.standalone.vue';
 
@@ -17,17 +17,21 @@ window.GanttElastic = {
       cfg.dynamicStyle = {};
     }
     const ganttElastic = { ...GanttElasticStandalone };
-    for (let prop in cfg) {
-      if (['el', 'ready'].includes(prop)) {
-        continue;
-      }
-      if (typeof ganttElastic[prop] !== 'undefined') {
-        ganttElastic[prop] = { ...ganttElastic[prop], ...cfg[prop] };
-        continue;
-      }
-      ganttElastic[prop] = cfg[prop];
-    }
-    return new Vue(ganttElastic).$on('gantt-elastic-ready', ready).$mount(cfg.el);
+    ganttElastic.ready = ready;
+    // standalone.vue's data() returns empty defaults, so the user config must be
+    // delivered through data() - merging it onto the options object is ignored by Vue 3
+    ganttElastic.data = function () {
+      return {
+        components: cfg.components || {},
+        tasks: Array.isArray(cfg.tasks) ? cfg.tasks : [],
+        options: cfg.options || {},
+        dynamicStyle: cfg.dynamicStyle || {}
+      };
+    };
+
+    const app = createApp(ganttElastic);
+    const instance = app.mount(cfg.el);
+    return instance;
   }
 };
 export default GanttElasticStandalone;
