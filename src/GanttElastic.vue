@@ -1422,6 +1422,7 @@ const GanttElastic = {
       }
       this.calculateTaskListColumnsDimensions();
       this.$emit('calendar-recalculate');
+      this.$emitBus.emit('calendar-recalculate');
       this.syncScrollTop();
     }
   },
@@ -1475,6 +1476,16 @@ const GanttElastic = {
     this.$set = function(obj, key, val) { obj[key] = val; };
     this.$delete = function(obj, key) { delete obj[key]; };
     this.$emitBus = mitt();
+    // Vue 3 removed $on - expose a Vue 2 style subscription API backed by the
+    // event bus so consumers can register listeners programmatically
+    this.$on = (event, handler) => {
+      this.$emitBus.on(event, handler);
+      return this;
+    };
+    this.$off = (event, handler) => {
+      this.$emitBus.off(event, handler);
+      return this;
+    };
     this.initializeEvents();
     this.setup();
     this.state.unwatchTasks = this.$watch(
@@ -1512,6 +1523,7 @@ const GanttElastic = {
       'outputTasks',
       tasks => {
         this.$emit('tasks-changed', tasks.map(task => task));
+        this.$emitBus.emit('tasks-changed', tasks.map(task => task));
       },
       { deep: true }
     );
@@ -1519,6 +1531,7 @@ const GanttElastic = {
       'outputOptions',
       options => {
         this.$emit('options-changed', mergeDeep({}, options));
+        this.$emitBus.emit('options-changed', mergeDeep({}, options));
       },
       { deep: true }
     );
@@ -1526,6 +1539,7 @@ const GanttElastic = {
       'style',
       style => {
         this.$emit('dynamic-style-changed', mergeDeep({}, style));
+        this.$emitBus.emit('dynamic-style-changed', mergeDeep({}, style));
       },
       { deep: true }
     );
@@ -1565,6 +1579,7 @@ const GanttElastic = {
 
     this.$emitBus.emit('gantt-elastic-created', this);
     this.$emit('created', this);
+    this.$emitBus.emit('created', this);
   },
 
   /**
@@ -1572,6 +1587,7 @@ const GanttElastic = {
    */
   beforeMount() {
     this.$emit('before-mount', this);
+    this.$emitBus.emit('before-mount', this);
   },
 
   /**
@@ -1585,10 +1601,13 @@ const GanttElastic = {
     this.state.resizeObserver.observe(this.$el.parentNode);
     this.globalOnResize();
     this.$emit('ready', this);
+    this.$emitBus.emit('ready', this);
     this.$emitBus.emit('gantt-elastic-mounted', this);
     this.$emit('mounted', this);
+    this.$emitBus.emit('mounted', this);
     this.$emitBus.emit('gantt-elastic-ready', this);
     this.$emit('gantt-elastic-ready', this);
+    this.$emitBus.emit('gantt-elastic-ready', this);
   },
 
   /**
@@ -1596,6 +1615,7 @@ const GanttElastic = {
    */
   beforeUpdate() {
     this.$emit('before-update');
+    this.$emitBus.emit('before-update');
   },
 
   /**
@@ -1604,6 +1624,7 @@ const GanttElastic = {
   updated() {
     this.$nextTick(() => {
       this.$emit('updated');
+      this.$emitBus.emit('updated');
     });
   },
 
@@ -1620,6 +1641,7 @@ const GanttElastic = {
     this.state.unwatchOutputOptions();
     this.state.unwatchOutputStyle();
     this.$emit('before-destroy');
+    this.$emitBus.emit('before-destroy');
   },
 
   /**
@@ -1627,6 +1649,7 @@ const GanttElastic = {
    */
   unmounted() {
     this.$emit('destroyed');
+    this.$emitBus.emit('destroyed');
   }
 };
 export default GanttElastic;
