@@ -3849,12 +3849,12 @@ let ignoreScrollEvents = false;
 const MainView_exports_ = /*#__PURE__*/(0,exportHelper_namespaceObject.A)(MainViewvue_type_script_lang_js, [['render',MainViewvue_type_template_id_7ac81826_render]])
 
 /* harmony default export */ const MainView = (MainView_exports_);
-;// ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./src/components/Header.vue?vue&type=template&id=e33ad0f0
+;// ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./src/components/Header.vue?vue&type=template&id=72c6a89f
 
 
-const Headervue_type_template_id_e33ad0f0_hoisted_1 = ["innerHTML"]
+const Headervue_type_template_id_72c6a89f_hoisted_1 = ["innerHTML"]
 
-function Headervue_type_template_id_e33ad0f0_render(_ctx, _cache, $props, $setup, $data, $options) {
+function Headervue_type_template_id_72c6a89f_render(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_vue_slider = (0,external_Vue_.resolveComponent)("vue-slider")
   const _component_switches = (0,external_Vue_.resolveComponent)("switches")
 
@@ -3879,7 +3879,7 @@ function Headervue_type_template_id_e33ad0f0_render(_ctx, _cache, $props, $setup
             class: "gantt-elastic__header-title--html",
             style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-title--html'] }),
             innerHTML: $data.opts.title.label
-          }, null, 12 /* STYLE, PROPS */, Headervue_type_template_id_e33ad0f0_hoisted_1))
+          }, null, 12 /* STYLE, PROPS */, Headervue_type_template_id_72c6a89f_hoisted_1))
         : (0,external_Vue_.createCommentVNode)("v-if", true)
     ], 4 /* STYLE */),
     (0,external_Vue_.createElementVNode)("div", {
@@ -3990,15 +3990,15 @@ function Headervue_type_template_id_e33ad0f0_render(_ctx, _cache, $props, $setup
         (0,external_Vue_.createVNode)(_component_switches, {
           class: "gantt-elastic__header-task-list-switch",
           style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-task-list-switch'] }),
-          modelValue: $options.root.state.options.taskList.display,
-          "onUpdate:modelValue": _cache[5] || (_cache[5] = $event => (($options.root.state.options.taskList.display) = $event))
-        }, null, 8 /* PROPS */, ["style", "modelValue"]),
+          value: $options.root.state.options.taskList.display,
+          onInput: _cache[5] || (_cache[5] = value => ($options.root.state.options.taskList.display = value))
+        }, null, 8 /* PROPS */, ["style", "value"]),
         (0,external_Vue_.createTextVNode)(" " + (0,external_Vue_.toDisplayString)($data.opts.locale["Display task list"]), 1 /* TEXT */)
       ], 4 /* STYLE */)
     ], 4 /* STYLE */)
   ], 4 /* STYLE */))
 }
-;// ./src/components/Header.vue?vue&type=template&id=e33ad0f0
+;// ./src/components/Header.vue?vue&type=template&id=72c6a89f
 
 // EXTERNAL MODULE: ./node_modules/vue-slider-component/dist/vue-slider-component.umd.min.js
 var vue_slider_component_umd_min = __webpack_require__(378);
@@ -4364,7 +4364,7 @@ const defaultOptions = {
 
 
 ;
-const Header_exports_ = /*#__PURE__*/(0,exportHelper_namespaceObject.A)(Headervue_type_script_lang_js, [['render',Headervue_type_template_id_e33ad0f0_render]])
+const Header_exports_ = /*#__PURE__*/(0,exportHelper_namespaceObject.A)(Headervue_type_script_lang_js, [['render',Headervue_type_template_id_72c6a89f_render]])
 
 /* harmony default export */ const Header = (Header_exports_);
 ;// ./src/style.js

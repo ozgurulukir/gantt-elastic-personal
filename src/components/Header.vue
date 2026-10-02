@@ -132,7 +132,8 @@
         <switches
           class="gantt-elastic__header-task-list-switch"
           :style="{ ...style['header-task-list-switch'] }"
-          v-model="root.state.options.taskList.display"
+          :value="root.state.options.taskList.display"
+          @input="value => (root.state.options.taskList.display = value)"
         ></switches>
         {{ opts.locale["Display task list"] }}
       </label>
