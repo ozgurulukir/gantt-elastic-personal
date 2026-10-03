@@ -175,6 +175,8 @@ function getOptions(userOptions) {
       finalWidth: 0,
       widthFromPercentage: 0,
       minWidth: 18,
+      persistColumnWidths: false, //* persist runtime column widths to localStorage
+      persistKey: 'default', //* storage key suffix when persistColumnWidths is on
       expander: {
         type: 'task-list',
         size: 16,
@@ -659,6 +661,9 @@ const GanttElastic = {
           column.style = {};
         }
         column._id = `${index}-${column.label}`;
+        // width as configured by the user options - double-click on the column
+        // resizer resets to this (issue #11)
+        column._initialWidth = column.width;
         return column;
       });
       this.state.options = options;
