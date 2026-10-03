@@ -24,9 +24,19 @@
       >
         <!-- virtualization spacers keep the scroll height stable while only
              rows inside the viewport are mounted (issue #9) -->
-        <div class="gantt-elastic__task-list-spacer" :style="{ height: topSpacer + 'px' }" v-if="topSpacer > 0"></div>
+        <div
+          class="gantt-elastic__task-list-spacer"
+          :style="{ height: topSpacer + 'px' }"
+          role="presentation"
+          v-if="topSpacer > 0"
+        ></div>
         <task-list-item v-for="task in root.renderedTasks" :key="task.id" :task="task"></task-list-item>
-        <div class="gantt-elastic__task-list-spacer" :style="{ height: bottomSpacer + 'px' }" v-if="bottomSpacer > 0"></div>
+        <div
+          class="gantt-elastic__task-list-spacer"
+          :style="{ height: bottomSpacer + 'px' }"
+          role="presentation"
+          v-if="bottomSpacer > 0"
+        ></div>
       </div>
     </div>
   </div>

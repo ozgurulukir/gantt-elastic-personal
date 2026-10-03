@@ -56,7 +56,6 @@
             <dependency-lines :tasks="root.visibleTasks"></dependency-lines>
             <g
               class="gantt-elastic__chart-row-wrapper"
-              role="row"
               :class="{
                 'gantt-elastic__chart-row--selected': root.state.selectedTaskId === task.id,
                 'gantt-elastic__chart-row--hover': root.state.hoveredTaskId === task.id

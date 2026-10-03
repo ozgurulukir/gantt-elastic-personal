@@ -133,6 +133,7 @@
           class="gantt-elastic__header-task-list-switch"
           :style="{ ...style['header-task-list-switch'] }"
           :value="root.state.options.taskList.display"
+          :label="opts.locale['Display task list']"
           @input="value => (root.state.options.taskList.display = value)"
         ></gantt-switch>
         {{ opts.locale["Display task list"] }}
@@ -150,7 +151,10 @@ import { sanitizeHtml } from "../html.js";
 // tiny inline on/off switch - replaces the Vue 2 only vue-switches dependency
 const GanttSwitch = {
   name: "GanttSwitch",
-  props: { value: { type: Boolean, default: false } },
+  props: {
+    value: { type: Boolean, default: false },
+    label: { type: String, default: "" }
+  },
   emits: ["input"],
   methods: {
     toggle(event) {
@@ -159,7 +163,7 @@ const GanttSwitch = {
   },
   render() {
     return h("label", { class: ["gantt-elastic__switch", this.value ? "gantt-elastic__switch--on" : "gantt-elastic__switch--off"] }, [
-      h("input", { type: "checkbox", checked: this.value, onChange: this.toggle })
+      h("input", { type: "checkbox", checked: this.value, onChange: this.toggle, "aria-label": this.label })
     ]);
   }
 };
