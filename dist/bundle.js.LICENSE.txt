@@ -10,6 +10,18 @@
  */
 
 /**
+ * @fileoverview Delegated mouse/touch/keyboard handling (issue #10): one
+ * listener set per container instead of ~12 listeners on every row element.
+ * Bar and cell elements carry data-task-id (cells also data-column-id), rows
+ * carry data-task-row; events are resolved with closest() and re-emitted on
+ * the event bus with the same payloads the per-element handlers used.
+ * mouseenter/mouseleave do not bubble - they are synthesized from delegated
+ * mouseover/mouseout with relatedTarget containment checks.
+ * @license MIT
+ * @package GanttElastic
+ */
+
+/**
  * @fileoverview HTML sanitization for user-supplied task data
  * @license MIT
  * @package GanttElastic
@@ -19,5 +31,31 @@
  * @fileoverview Styles for gantt-elastic
  * @license MIT
  * @author Rafal Pospiech <neuronet.io@gmail.com>
+ * @package GanttElastic
+ */
+
+/**
+ * @fileoverview Task mixin
+ * @license MIT
+ * @author Rafal Pospiech <neuronet.io@gmail.com>
+ * @package GanttElastic
+ */
+
+/**
+ * @fileoverview Task model: normalization of user-supplied task fields and
+ * derivation of time fields from patches. The single source of truth for
+ * "what a task's canonical time fields are" - previously three divergent
+ * copies lived in GanttElastic.vue (fillTasks, applyTaskPatch), Task.mixin
+ * and Tooltip.
+ * @license MIT
+ * @package GanttElastic
+ */
+
+/**
+ * @fileoverview Time-scale math: chart time window, pixel-per-time scale and
+ * day steps. Pure functions over a plain `times` object (the shape of
+ * `options.times`) so the highest-risk math in the chart is testable
+ * without mounting the component.
+ * @license MIT
  * @package GanttElastic
  */

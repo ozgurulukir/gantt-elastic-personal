@@ -5,6 +5,7 @@
  * @package GanttElastic
  */
 import dayjs from 'dayjs';
+import { taskEndTime } from '../../../task-model.js';
 
 export default {
   computed: {
@@ -44,7 +45,7 @@ export default {
      */
     barAriaLabel() {
       const task = this.task;
-      const endTime = typeof task.endTime === 'undefined' ? task.startTime + task.duration : task.endTime;
+      const endTime = taskEndTime(task);
       const start = dayjs(task.startTime).format('YYYY-MM-DD');
       const end = dayjs(endTime).format('YYYY-MM-DD');
       return `${task.label}, ${start} - ${end}`;

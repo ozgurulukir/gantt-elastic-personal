@@ -17,6 +17,7 @@
 
 <script>
 import dayjs from 'dayjs';
+import { taskEndTime } from '../../task-model.js';
 
 const BAR_TYPES = ['task', 'milestone', 'project'];
 
@@ -92,7 +93,7 @@ export default {
         return String(custom(task));
       }
       const localeName = this.root.state.options.locale.name;
-      const endTime = typeof task.endTime === 'undefined' ? task.startTime + task.duration : task.endTime;
+      const endTime = taskEndTime(task);
       const start = dayjs(task.startTime)
         .locale(localeName)
         .format('L LT');
