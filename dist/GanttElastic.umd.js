@@ -76,233 +76,57 @@ foreignObject > * {
 
 /***/ },
 
-/***/ 917
+/***/ 431
 (module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(354);
-/* harmony import */ var _css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(314);
-/* harmony import */ var _css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(354);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(314);
+/* harmony import */ var _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1__);
 // Imports
 
 
-var ___CSS_LOADER_EXPORT___ = _css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
+var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_1___default()((_node_modules_css_loader_dist_runtime_sourceMaps_js__WEBPACK_IMPORTED_MODULE_0___default()));
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, `/**
- * Default
- */
-/**
- * Bulma
- */
-/**
- * Bootstrap
- */
-.vue-switcher {
+___CSS_LOADER_EXPORT___.push([module.id, `
+.gantt-elastic__switch {
+  display: inline-block;
   position: relative;
-  display: inline-block; }
-  .vue-switcher__label {
-    display: block;
-    font-size: 10px;
-    margin-bottom: 5px; }
-  .vue-switcher input {
-    opacity: 0;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    z-index: 1;
-    cursor: pointer; }
-  .vue-switcher div {
-    height: 15px;
-    width: 36px;
-    position: relative;
-    border-radius: 30px;
-    display: -webkit-flex;
-    display: -ms-flex;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    cursor: pointer;
-    transition: linear .2s, background-color linear .2s; }
-    .vue-switcher div:after {
-      content: '';
-      height: 20px;
-      width: 20px;
-      border-radius: 100px;
-      display: block;
-      transition: linear .15s, background-color linear .15s;
-      position: absolute;
-      left: 100%;
-      margin-left: -18px;
-      cursor: pointer;
-      top: -3px;
-      box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.1); }
-  .vue-switcher--unchecked div {
-    justify-content: flex-end; }
-    .vue-switcher--unchecked div:after {
-      left: 15px; }
-  .vue-switcher--disabled div {
-    opacity: .3; }
-  .vue-switcher--disabled input {
-    cursor: not-allowed; }
-  .vue-switcher--bold div {
-    top: -8px;
-    height: 26px;
-    width: 51px; }
-    .vue-switcher--bold div:after {
-      margin-left: -24px;
-      top: 3px; }
-  .vue-switcher--bold--unchecked div:after {
-    left: 28px; }
-  .vue-switcher--bold .vue-switcher__label span {
-    padding-bottom: 7px;
-    display: inline-block; }
-  .vue-switcher-theme--default.vue-switcher-color--default div {
-    background-color: #b7b7b7; }
-    .vue-switcher-theme--default.vue-switcher-color--default div:after {
-      background-color: #9d9d9d; }
-  .vue-switcher-theme--default.vue-switcher-color--default.vue-switcher--unchecked div {
-    background-color: #aaa; }
-    .vue-switcher-theme--default.vue-switcher-color--default.vue-switcher--unchecked div:after {
-      background-color: #c4c4c4; }
-  .vue-switcher-theme--default.vue-switcher-color--blue div {
-    background-color: #77b0c8; }
-    .vue-switcher-theme--default.vue-switcher-color--blue div:after {
-      background-color: #539bb9; }
-  .vue-switcher-theme--default.vue-switcher-color--blue.vue-switcher--unchecked div {
-    background-color: #c0dae5; }
-    .vue-switcher-theme--default.vue-switcher-color--blue.vue-switcher--unchecked div:after {
-      background-color: #77b0c8; }
-  .vue-switcher-theme--default.vue-switcher-color--red div {
-    background-color: #c87777; }
-    .vue-switcher-theme--default.vue-switcher-color--red div:after {
-      background-color: #b95353; }
-  .vue-switcher-theme--default.vue-switcher-color--red.vue-switcher--unchecked div {
-    background-color: #e5c0c0; }
-    .vue-switcher-theme--default.vue-switcher-color--red.vue-switcher--unchecked div:after {
-      background-color: #c87777; }
-  .vue-switcher-theme--default.vue-switcher-color--yellow div {
-    background-color: #c9c377; }
-    .vue-switcher-theme--default.vue-switcher-color--yellow div:after {
-      background-color: #bab353; }
-  .vue-switcher-theme--default.vue-switcher-color--yellow.vue-switcher--unchecked div {
-    background-color: #e6e3c0; }
-    .vue-switcher-theme--default.vue-switcher-color--yellow.vue-switcher--unchecked div:after {
-      background-color: #c9c377; }
-  .vue-switcher-theme--default.vue-switcher-color--orange div {
-    background-color: #c89577; }
-    .vue-switcher-theme--default.vue-switcher-color--orange div:after {
-      background-color: #b97953; }
-  .vue-switcher-theme--default.vue-switcher-color--orange.vue-switcher--unchecked div {
-    background-color: #e5cec0; }
-    .vue-switcher-theme--default.vue-switcher-color--orange.vue-switcher--unchecked div:after {
-      background-color: #c89577; }
-  .vue-switcher-theme--default.vue-switcher-color--green div {
-    background-color: #77c88d; }
-    .vue-switcher-theme--default.vue-switcher-color--green div:after {
-      background-color: #53b96e; }
-  .vue-switcher-theme--default.vue-switcher-color--green.vue-switcher--unchecked div {
-    background-color: #c0e5ca; }
-    .vue-switcher-theme--default.vue-switcher-color--green.vue-switcher--unchecked div:after {
-      background-color: #77c88d; }
-  .vue-switcher-theme--bulma.vue-switcher-color--default div {
-    background-color: gainsboro; }
-    .vue-switcher-theme--bulma.vue-switcher-color--default div:after {
-      background-color: #f5f5f5; }
-  .vue-switcher-theme--bulma.vue-switcher-color--default.vue-switcher--unchecked div {
-    background-color: #e8e8e8; }
-    .vue-switcher-theme--bulma.vue-switcher-color--default.vue-switcher--unchecked div:after {
-      background-color: #f5f5f5; }
-  .vue-switcher-theme--bulma.vue-switcher-color--primary div {
-    background-color: #05ffda; }
-    .vue-switcher-theme--bulma.vue-switcher-color--primary div:after {
-      background-color: #00d1b2; }
-  .vue-switcher-theme--bulma.vue-switcher-color--primary.vue-switcher--unchecked div {
-    background-color: #6bffe9; }
-    .vue-switcher-theme--bulma.vue-switcher-color--primary.vue-switcher--unchecked div:after {
-      background-color: #05ffda; }
-  .vue-switcher-theme--bulma.vue-switcher-color--blue div {
-    background-color: #5e91e3; }
-    .vue-switcher-theme--bulma.vue-switcher-color--blue div:after {
-      background-color: #3273dc; }
-  .vue-switcher-theme--bulma.vue-switcher-color--blue.vue-switcher--unchecked div {
-    background-color: #b5ccf2; }
-    .vue-switcher-theme--bulma.vue-switcher-color--blue.vue-switcher--unchecked div:after {
-      background-color: #5e91e3; }
-  .vue-switcher-theme--bulma.vue-switcher-color--red div {
-    background-color: #ff6b89; }
-    .vue-switcher-theme--bulma.vue-switcher-color--red div:after {
-      background-color: #ff3860; }
-  .vue-switcher-theme--bulma.vue-switcher-color--red.vue-switcher--unchecked div {
-    background-color: #ffd1da; }
-    .vue-switcher-theme--bulma.vue-switcher-color--red.vue-switcher--unchecked div:after {
-      background-color: #ff6b89; }
-  .vue-switcher-theme--bulma.vue-switcher-color--yellow div {
-    background-color: #ffe78a; }
-    .vue-switcher-theme--bulma.vue-switcher-color--yellow div:after {
-      background-color: #ffdd57; }
-  .vue-switcher-theme--bulma.vue-switcher-color--yellow.vue-switcher--unchecked div {
-    background-color: #fffcf0; }
-    .vue-switcher-theme--bulma.vue-switcher-color--yellow.vue-switcher--unchecked div:after {
-      background-color: #ffe78a; }
-  .vue-switcher-theme--bulma.vue-switcher-color--green div {
-    background-color: #3dde75; }
-    .vue-switcher-theme--bulma.vue-switcher-color--green div:after {
-      background-color: #22c65b; }
-  .vue-switcher-theme--bulma.vue-switcher-color--green.vue-switcher--unchecked div {
-    background-color: #94edb3; }
-    .vue-switcher-theme--bulma.vue-switcher-color--green.vue-switcher--unchecked div:after {
-      background-color: #3dde75; }
-  .vue-switcher-theme--bootstrap.vue-switcher-color--default div {
-    background-color: #e6e6e6; }
-    .vue-switcher-theme--bootstrap.vue-switcher-color--default div:after {
-      background-color: #f0f0f0; }
-  .vue-switcher-theme--bootstrap.vue-switcher-color--default.vue-switcher--unchecked div {
-    background-color: whitesmoke; }
-    .vue-switcher-theme--bootstrap.vue-switcher-color--default.vue-switcher--unchecked div:after {
-      background-color: #f0f0f0; }
-  .vue-switcher-theme--bootstrap.vue-switcher-color--primary div {
-    background-color: #4f93ce; }
-    .vue-switcher-theme--bootstrap.vue-switcher-color--primary div:after {
-      background-color: #337ab7; }
-  .vue-switcher-theme--bootstrap.vue-switcher-color--primary.vue-switcher--unchecked div {
-    background-color: #9fc4e4; }
-    .vue-switcher-theme--bootstrap.vue-switcher-color--primary.vue-switcher--unchecked div:after {
-      background-color: #4f93ce; }
-  .vue-switcher-theme--bootstrap.vue-switcher-color--success div {
-    background-color: #80c780; }
-    .vue-switcher-theme--bootstrap.vue-switcher-color--success div:after {
-      background-color: #5cb85c; }
-  .vue-switcher-theme--bootstrap.vue-switcher-color--success.vue-switcher--unchecked div {
-    background-color: #c7e6c7; }
-    .vue-switcher-theme--bootstrap.vue-switcher-color--success.vue-switcher--unchecked div:after {
-      background-color: #80c780; }
-  .vue-switcher-theme--bootstrap.vue-switcher-color--info div {
-    background-color: #85d0e7; }
-    .vue-switcher-theme--bootstrap.vue-switcher-color--info div:after {
-      background-color: #5bc0de; }
-  .vue-switcher-theme--bootstrap.vue-switcher-color--info.vue-switcher--unchecked div {
-    background-color: #daf1f8; }
-    .vue-switcher-theme--bootstrap.vue-switcher-color--info.vue-switcher--unchecked div:after {
-      background-color: #85d0e7; }
-  .vue-switcher-theme--bootstrap.vue-switcher-color--warning div {
-    background-color: #f4c37d; }
-    .vue-switcher-theme--bootstrap.vue-switcher-color--warning div:after {
-      background-color: #f0ad4e; }
-  .vue-switcher-theme--bootstrap.vue-switcher-color--warning.vue-switcher--unchecked div {
-    background-color: #fceedb; }
-    .vue-switcher-theme--bootstrap.vue-switcher-color--warning.vue-switcher--unchecked div:after {
-      background-color: #f4c37d; }
-  .vue-switcher-theme--bootstrap.vue-switcher-color--danger div {
-    background-color: #d9534f; }
-    .vue-switcher-theme--bootstrap.vue-switcher-color--danger div:after {
-      background-color: #c9302c; }
-  .vue-switcher-theme--bootstrap.vue-switcher-color--danger.vue-switcher--unchecked div {
-    background-color: #eba5a3; }
-    .vue-switcher-theme--bootstrap.vue-switcher-color--danger.vue-switcher--unchecked div:after {
-      background-color: #d9534f; }
-`, "",{"version":3,"sources":["webpack://./node_modules/vue-switches/dist/switches.css"],"names":[],"mappings":"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","sourcesContent":["/**\n * Default\n */\n/**\n * Bulma\n */\n/**\n * Bootstrap\n */\n.vue-switcher {\n  position: relative;\n  display: inline-block; }\n  .vue-switcher__label {\n    display: block;\n    font-size: 10px;\n    margin-bottom: 5px; }\n  .vue-switcher input {\n    opacity: 0;\n    width: 100%;\n    height: 100%;\n    position: absolute;\n    z-index: 1;\n    cursor: pointer; }\n  .vue-switcher div {\n    height: 15px;\n    width: 36px;\n    position: relative;\n    border-radius: 30px;\n    display: -webkit-flex;\n    display: -ms-flex;\n    display: flex;\n    align-items: center;\n    justify-content: flex-start;\n    cursor: pointer;\n    transition: linear .2s, background-color linear .2s; }\n    .vue-switcher div:after {\n      content: '';\n      height: 20px;\n      width: 20px;\n      border-radius: 100px;\n      display: block;\n      transition: linear .15s, background-color linear .15s;\n      position: absolute;\n      left: 100%;\n      margin-left: -18px;\n      cursor: pointer;\n      top: -3px;\n      box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.1); }\n  .vue-switcher--unchecked div {\n    justify-content: flex-end; }\n    .vue-switcher--unchecked div:after {\n      left: 15px; }\n  .vue-switcher--disabled div {\n    opacity: .3; }\n  .vue-switcher--disabled input {\n    cursor: not-allowed; }\n  .vue-switcher--bold div {\n    top: -8px;\n    height: 26px;\n    width: 51px; }\n    .vue-switcher--bold div:after {\n      margin-left: -24px;\n      top: 3px; }\n  .vue-switcher--bold--unchecked div:after {\n    left: 28px; }\n  .vue-switcher--bold .vue-switcher__label span {\n    padding-bottom: 7px;\n    display: inline-block; }\n  .vue-switcher-theme--default.vue-switcher-color--default div {\n    background-color: #b7b7b7; }\n    .vue-switcher-theme--default.vue-switcher-color--default div:after {\n      background-color: #9d9d9d; }\n  .vue-switcher-theme--default.vue-switcher-color--default.vue-switcher--unchecked div {\n    background-color: #aaa; }\n    .vue-switcher-theme--default.vue-switcher-color--default.vue-switcher--unchecked div:after {\n      background-color: #c4c4c4; }\n  .vue-switcher-theme--default.vue-switcher-color--blue div {\n    background-color: #77b0c8; }\n    .vue-switcher-theme--default.vue-switcher-color--blue div:after {\n      background-color: #539bb9; }\n  .vue-switcher-theme--default.vue-switcher-color--blue.vue-switcher--unchecked div {\n    background-color: #c0dae5; }\n    .vue-switcher-theme--default.vue-switcher-color--blue.vue-switcher--unchecked div:after {\n      background-color: #77b0c8; }\n  .vue-switcher-theme--default.vue-switcher-color--red div {\n    background-color: #c87777; }\n    .vue-switcher-theme--default.vue-switcher-color--red div:after {\n      background-color: #b95353; }\n  .vue-switcher-theme--default.vue-switcher-color--red.vue-switcher--unchecked div {\n    background-color: #e5c0c0; }\n    .vue-switcher-theme--default.vue-switcher-color--red.vue-switcher--unchecked div:after {\n      background-color: #c87777; }\n  .vue-switcher-theme--default.vue-switcher-color--yellow div {\n    background-color: #c9c377; }\n    .vue-switcher-theme--default.vue-switcher-color--yellow div:after {\n      background-color: #bab353; }\n  .vue-switcher-theme--default.vue-switcher-color--yellow.vue-switcher--unchecked div {\n    background-color: #e6e3c0; }\n    .vue-switcher-theme--default.vue-switcher-color--yellow.vue-switcher--unchecked div:after {\n      background-color: #c9c377; }\n  .vue-switcher-theme--default.vue-switcher-color--orange div {\n    background-color: #c89577; }\n    .vue-switcher-theme--default.vue-switcher-color--orange div:after {\n      background-color: #b97953; }\n  .vue-switcher-theme--default.vue-switcher-color--orange.vue-switcher--unchecked div {\n    background-color: #e5cec0; }\n    .vue-switcher-theme--default.vue-switcher-color--orange.vue-switcher--unchecked div:after {\n      background-color: #c89577; }\n  .vue-switcher-theme--default.vue-switcher-color--green div {\n    background-color: #77c88d; }\n    .vue-switcher-theme--default.vue-switcher-color--green div:after {\n      background-color: #53b96e; }\n  .vue-switcher-theme--default.vue-switcher-color--green.vue-switcher--unchecked div {\n    background-color: #c0e5ca; }\n    .vue-switcher-theme--default.vue-switcher-color--green.vue-switcher--unchecked div:after {\n      background-color: #77c88d; }\n  .vue-switcher-theme--bulma.vue-switcher-color--default div {\n    background-color: gainsboro; }\n    .vue-switcher-theme--bulma.vue-switcher-color--default div:after {\n      background-color: #f5f5f5; }\n  .vue-switcher-theme--bulma.vue-switcher-color--default.vue-switcher--unchecked div {\n    background-color: #e8e8e8; }\n    .vue-switcher-theme--bulma.vue-switcher-color--default.vue-switcher--unchecked div:after {\n      background-color: #f5f5f5; }\n  .vue-switcher-theme--bulma.vue-switcher-color--primary div {\n    background-color: #05ffda; }\n    .vue-switcher-theme--bulma.vue-switcher-color--primary div:after {\n      background-color: #00d1b2; }\n  .vue-switcher-theme--bulma.vue-switcher-color--primary.vue-switcher--unchecked div {\n    background-color: #6bffe9; }\n    .vue-switcher-theme--bulma.vue-switcher-color--primary.vue-switcher--unchecked div:after {\n      background-color: #05ffda; }\n  .vue-switcher-theme--bulma.vue-switcher-color--blue div {\n    background-color: #5e91e3; }\n    .vue-switcher-theme--bulma.vue-switcher-color--blue div:after {\n      background-color: #3273dc; }\n  .vue-switcher-theme--bulma.vue-switcher-color--blue.vue-switcher--unchecked div {\n    background-color: #b5ccf2; }\n    .vue-switcher-theme--bulma.vue-switcher-color--blue.vue-switcher--unchecked div:after {\n      background-color: #5e91e3; }\n  .vue-switcher-theme--bulma.vue-switcher-color--red div {\n    background-color: #ff6b89; }\n    .vue-switcher-theme--bulma.vue-switcher-color--red div:after {\n      background-color: #ff3860; }\n  .vue-switcher-theme--bulma.vue-switcher-color--red.vue-switcher--unchecked div {\n    background-color: #ffd1da; }\n    .vue-switcher-theme--bulma.vue-switcher-color--red.vue-switcher--unchecked div:after {\n      background-color: #ff6b89; }\n  .vue-switcher-theme--bulma.vue-switcher-color--yellow div {\n    background-color: #ffe78a; }\n    .vue-switcher-theme--bulma.vue-switcher-color--yellow div:after {\n      background-color: #ffdd57; }\n  .vue-switcher-theme--bulma.vue-switcher-color--yellow.vue-switcher--unchecked div {\n    background-color: #fffcf0; }\n    .vue-switcher-theme--bulma.vue-switcher-color--yellow.vue-switcher--unchecked div:after {\n      background-color: #ffe78a; }\n  .vue-switcher-theme--bulma.vue-switcher-color--green div {\n    background-color: #3dde75; }\n    .vue-switcher-theme--bulma.vue-switcher-color--green div:after {\n      background-color: #22c65b; }\n  .vue-switcher-theme--bulma.vue-switcher-color--green.vue-switcher--unchecked div {\n    background-color: #94edb3; }\n    .vue-switcher-theme--bulma.vue-switcher-color--green.vue-switcher--unchecked div:after {\n      background-color: #3dde75; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--default div {\n    background-color: #e6e6e6; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--default div:after {\n      background-color: #f0f0f0; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--default.vue-switcher--unchecked div {\n    background-color: whitesmoke; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--default.vue-switcher--unchecked div:after {\n      background-color: #f0f0f0; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--primary div {\n    background-color: #4f93ce; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--primary div:after {\n      background-color: #337ab7; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--primary.vue-switcher--unchecked div {\n    background-color: #9fc4e4; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--primary.vue-switcher--unchecked div:after {\n      background-color: #4f93ce; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--success div {\n    background-color: #80c780; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--success div:after {\n      background-color: #5cb85c; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--success.vue-switcher--unchecked div {\n    background-color: #c7e6c7; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--success.vue-switcher--unchecked div:after {\n      background-color: #80c780; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--info div {\n    background-color: #85d0e7; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--info div:after {\n      background-color: #5bc0de; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--info.vue-switcher--unchecked div {\n    background-color: #daf1f8; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--info.vue-switcher--unchecked div:after {\n      background-color: #85d0e7; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--warning div {\n    background-color: #f4c37d; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--warning div:after {\n      background-color: #f0ad4e; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--warning.vue-switcher--unchecked div {\n    background-color: #fceedb; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--warning.vue-switcher--unchecked div:after {\n      background-color: #f4c37d; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--danger div {\n    background-color: #d9534f; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--danger div:after {\n      background-color: #c9302c; }\n  .vue-switcher-theme--bootstrap.vue-switcher-color--danger.vue-switcher--unchecked div {\n    background-color: #eba5a3; }\n    .vue-switcher-theme--bootstrap.vue-switcher-color--danger.vue-switcher--unchecked div:after {\n      background-color: #d9534f; }\n"],"sourceRoot":""}]);
+  vertical-align: middle;
+  margin: 0px 15px;
+  width: 40px;
+  height: 20px;
+  border-radius: 10px;
+  background-color: #bfc9ca;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.gantt-elastic__switch--on {
+  background-color: #1ebc61;
+}
+.gantt-elastic__switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+.gantt-elastic__switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #fff;
+  transition: left 0.2s;
+}
+.gantt-elastic__switch--on::after {
+  left: 23px;
+}
+`, "",{"version":3,"sources":["webpack://./src/components/Header.vue"],"names":[],"mappings":";AA+WA;EACE,qBAAqB;EACrB,kBAAkB;EAClB,sBAAsB;EACtB,gBAAgB;EAChB,WAAW;EACX,YAAY;EACZ,mBAAmB;EACnB,yBAAyB;EACzB,eAAe;EACf,iCAAiC;AACnC;AACA;EACE,yBAAyB;AAC3B;AACA;EACE,UAAU;EACV,QAAQ;EACR,SAAS;EACT,kBAAkB;AACpB;AACA;EACE,WAAW;EACX,kBAAkB;EAClB,QAAQ;EACR,SAAS;EACT,WAAW;EACX,YAAY;EACZ,kBAAkB;EAClB,sBAAsB;EACtB,qBAAqB;AACvB;AACA;EACE,UAAU;AACZ","sourcesContent":["<!--\r\n/**\r\n * @fileoverview Header component\r\n * @license MIT\r\n * @author Rafal Pospiech <neuronet.io@gmail.com>\r\n * @package GanttElasticHeader\r\n */\r\n-->\r\n<template>\r\n  <div class=\"gantt-elastic__header\" :style=\"{ ...style['header'] }\">\r\n    <div\r\n      class=\"gantt-elastic__header-title\"\r\n      :style=\"{ ...style['header-title'] }\"\r\n    >\r\n      <div\r\n        class=\"gantt-elastic__header-title--text\"\r\n        :style=\"{ ...style['header-title--text'] }\"\r\n        v-if=\"!opts.title.html\"\r\n      >\r\n        {{ opts.title.label }}\r\n      </div>\r\n      <div\r\n        class=\"gantt-elastic__header-title--html\"\r\n        :style=\"{ ...style['header-title--html'] }\"\r\n        v-if=\"opts.title.html\"\r\n        v-html=\"opts.title.label\"\r\n      ></div>\r\n    </div>\r\n    <div\r\n      class=\"gantt-elastic__header-options\"\r\n      :style=\"{ ...style['header-options'] }\"\r\n    >\r\n      <button\r\n        class=\"gantt-elastic__header-btn-recenter\"\r\n        :style=\"{ ...style['header-btn-recenter'] }\"\r\n        @click.prevent=\"recenterPosition\"\r\n      >\r\n        {{ opts.locale.Now }}\r\n      </button>\r\n      <label\r\n        class=\"gantt-elastic__header-label\"\r\n        :style=\"{ ...style['header-label'] }\"\r\n      >\r\n        {{ opts.locale[\"X-Scale\"] }}\r\n        <div\r\n          class=\"gantt-elastic__header-slider-wrapper\"\r\n          :style=\"{ ...style['header-slider-wrapper'] }\"\r\n        >\r\n          <vue-slider\r\n            class=\"gantt-elastic__header-slider\"\r\n            tooltip=\"none\"\r\n            :style=\"{ ...style['header-slider'] }\"\r\n            :process-style=\"{ ...style['header-slider--process'] }\"\r\n            :slider-style=\"{ ...style['header-slider--slider'] }\"\r\n            v-model=\"scale\"\r\n            :max=\"24\"\r\n            :min=\"2\"\r\n            width=\"100px\"\r\n          ></vue-slider>\r\n        </div>\r\n      </label>\r\n      <label\r\n        class=\"gantt-elastic__header-label\"\r\n        :style=\"{ ...style['header-label'] }\"\r\n      >\r\n        {{ opts.locale[\"Y-Scale\"] }}\r\n        <div\r\n          class=\"gantt-elastic__header-slider-wrapper\"\r\n          :style=\"{ ...style['header-slider-wrapper'] }\"\r\n        >\r\n          <vue-slider\r\n            class=\"gantt-elastic__header-slider\"\r\n            tooltip=\"none\"\r\n            :style=\"{ ...style['header-slider'] }\"\r\n            :process-style=\"{ ...style['header-slider--process'] }\"\r\n            :slider-style=\"{ ...style['header-slider--slider'] }\"\r\n            v-model=\"height\"\r\n            :max=\"100\"\r\n            :min=\"7\"\r\n            width=\"100px\"\r\n          ></vue-slider>\r\n        </div>\r\n      </label>\r\n      <label\r\n        class=\"gantt-elastic__header-label\"\r\n        :style=\"{ ...style['header-label'] }\"\r\n      >\r\n        {{ opts.locale[\"Before/After\"] }}\r\n        <div\r\n          class=\"gantt-elastic__header-slider-wrapper\"\r\n          :style=\"{ ...style['header-slider-wrapper'] }\"\r\n        >\r\n          <vue-slider\r\n            class=\"gantt-elastic__header-slider\"\r\n            tooltip=\"none\"\r\n            :style=\"{ ...style['header-slider'] }\"\r\n            :process-style=\"{ ...style['header-slider--process'] }\"\r\n            :slider-style=\"{ ...style['header-slider--slider'] }\"\r\n            v-model=\"scope\"\r\n            :max=\"31\"\r\n            :min=\"0\"\r\n            width=\"100px\"\r\n          ></vue-slider>\r\n        </div>\r\n      </label>\r\n      <label\r\n        class=\"gantt-elastic__header-label\"\r\n        :style=\"{ ...style['header-label'] }\"\r\n      >\r\n        {{ opts.locale[\"Task list width\"] }}\r\n        <div\r\n          class=\"gantt-elastic__header-slider-wrapper\"\r\n          :style=\"{ ...style['header-slider-wrapper'] }\"\r\n        >\r\n          <vue-slider\r\n            class=\"gantt-elastic__header-slider\"\r\n            tooltip=\"none\"\r\n            :style=\"{ ...style['header-slider'] }\"\r\n            :process-style=\"{ ...style['header-slider--process'] }\"\r\n            :slider-style=\"{ ...style['header-slider--slider'] }\"\r\n            v-model=\"divider\"\r\n            :max=\"100\"\r\n            :min=\"0\"\r\n            width=\"100px\"\r\n          ></vue-slider>\r\n        </div>\r\n      </label>\r\n      <label\r\n        class=\"gantt-elastic__header-task-list-switch--wrapper\"\r\n        :style=\"{ ...style['header-task-list-switch--label'] }\"\r\n      >\r\n        <gantt-switch\r\n          class=\"gantt-elastic__header-task-list-switch\"\r\n          :style=\"{ ...style['header-task-list-switch'] }\"\r\n          :value=\"root.state.options.taskList.display\"\r\n          @input=\"value => (root.state.options.taskList.display = value)\"\r\n        ></gantt-switch>\r\n        {{ opts.locale[\"Display task list\"] }}\r\n      </label>\r\n    </div>\r\n  </div>\r\n</template>\r\n\r\n<script>\r\nimport vueSlider from \"vue-slider-component\";\r\nimport \"vue-slider-component/theme/default.css\";\r\nimport { h } from \"vue\";\r\n\r\n// tiny inline on/off switch - replaces the Vue 2 only vue-switches dependency\r\nconst GanttSwitch = {\r\n  name: \"GanttSwitch\",\r\n  props: { value: { type: Boolean, default: false } },\r\n  emits: [\"input\"],\r\n  methods: {\r\n    toggle(event) {\r\n      this.$emit(\"input\", event.target.checked);\r\n    }\r\n  },\r\n  render() {\r\n    return h(\"label\", { class: [\"gantt-elastic__switch\", this.value ? \"gantt-elastic__switch--on\" : \"gantt-elastic__switch--off\"] }, [\r\n      h(\"input\", { type: \"checkbox\", checked: this.value, onChange: this.toggle })\r\n    ]);\r\n  }\r\n};\r\n\r\nconst defaultStyle = {\r\n  header: {\r\n    margin: \"0px auto\",\r\n    background: \"#f3f5f747\",\r\n    padding: \"10px\",\r\n    overflow: \"hidden\",\r\n    clear: \"both\",\r\n    display: \"flex\",\r\n    \"justify-content\": \"space-between\"\r\n  },\r\n  \"header-title\": { float: \"left\" },\r\n  \"header-options\": { float: \"right\" },\r\n  \"header-title--text\": {\r\n    \"font-size\": \"20px\",\r\n    \"vertical-align\": \"middle\",\r\n    \"font-weight\": \"400\",\r\n    \"line-height\": \"35px\",\r\n    \"padding-left\": \"22px\",\r\n    \"letter-spacing\": \"1px\"\r\n  },\r\n  \"header-title--html\": {\r\n    \"font-size\": \"20px\",\r\n    \"vertical-align\": \"middle\",\r\n    \"font-weight\": \"400\",\r\n    \"line-height\": \"35px\",\r\n    \"padding-left\": \"22px\",\r\n    \"letter-spacing\": \"1px\"\r\n  },\r\n  \"header-btn-recenter\": {\r\n    background: \"#95A5A6\",\r\n    border: \"none\",\r\n    outline: \"none\",\r\n    cursor: \"pointer\",\r\n    color: \"white\",\r\n    \"border-radius\": \"3px\",\r\n    \"margin-right\": \"27px\",\r\n    \"font-size\": \"16px\",\r\n    padding: \"8px 12px\"\r\n  },\r\n  \"header-slider\": {\r\n    \"box-sizing\": \"content-box\"\r\n  },\r\n  \"header-slider-wrapper\": {\r\n    display: \"inline-block\",\r\n    \"vertical-align\": \"middle\"\r\n  },\r\n  \"header-slider--slider\": { \"box-sizing\": \"content-box\" },\r\n  \"header-slider--process\": { \"box-sizing\": \"content-box\" },\r\n  \"header-task-list-switch--label\": { \"box-sizing\": \"content-box\" },\r\n  \"header-task-list-switch\": {\r\n    margin: \"0px 15px\",\r\n    \"vertical-align\": \"middle\"\r\n  },\r\n  \"header-label\": {}\r\n};\r\nconst defaultOptions = {\r\n  title: {\r\n    label: \"gantt-elastic\",\r\n    html: false\r\n  },\r\n  locale: {\r\n    Now: \"Now\",\r\n    \"X-Scale\": \"Zoom-X\",\r\n    \"Y-Scale\": \"Zoom-Y\",\r\n    \"Task list width\": \"Task list\",\r\n    \"Before/After\": \"Expand\",\r\n    \"Display task list\": \"Show task list\"\r\n  }\r\n};\r\nexport default {\r\n  name: \"GanttHeader\",\r\n  components: {\r\n    vueSlider,\r\n    GanttSwitch\r\n  },\r\n  props: [\"options\", \"dynamicStyle\"],\r\n  inject: [\"root\"],\r\n  data() {\r\n    return {\r\n      scaleTimeoutId: null,\r\n      firstScale: false,\r\n      localScale: 0,\r\n      localHeight: 0,\r\n      localBefore: 0,\r\n      localPercent: 0,\r\n      sliderOptions: {\r\n        xScale: {\r\n          value: 0\r\n        }\r\n      },\r\n      style: {},\r\n      opts: {}\r\n    };\r\n  },\r\n  created() {\r\n    this.$set = function(obj, key, val) { obj[key] = val; };\r\n    this.$delete = function(obj, key) { delete obj[key]; };\r\n\r\n    this.localScale = this.root.state.options.times.timeZoom;\r\n    this.localHeight = this.root.state.options.row.height;\r\n    this.localBefore = this.root.state.options.scope.before;\r\n    this.localPercent = this.root.state.options.taskList.percent;\r\n    this.sliderOptions.xScale.value = this.root.state.options.times.timeZoom;\r\n    this.style = this.root.mergeDeep({}, defaultStyle, this.dynamicStyle);\r\n    this.opts = this.root.mergeDeep({}, defaultOptions, this.options);\r\n  },\r\n  methods: {\r\n    getImage() {\r\n      this.root.getImage(\"image/png\").then(imgB64 => {\r\n        const link = document.createElement(\"a\");\r\n        link.href = imgB64;\r\n        link.download = \"gantt-elastic.png\";\r\n        document.body.appendChild(link);\r\n        link.click();\r\n        document.body.removeChild(link);\r\n      });\r\n    },\r\n    recenterPosition() {\r\n      this.root.$emitBus.emit(\"recenterPosition\");\r\n    },\r\n    setScale(value) {\r\n      if (this.scaleTimeoutId !== null) {\r\n        clearTimeout(this.scaleTimeoutId);\r\n        this.scaleTimeoutId = null;\r\n      }\r\n      // debouncing\r\n      if (this.firstScale) {\r\n        this.scaleTimeoutId = setTimeout(() => {\r\n          this.root.$emitBus.emit(\"times-timeZoom-change\", value);\r\n          this.scaleTimeoutId = null;\r\n        }, 50);\r\n      } else {\r\n        this.root.$emitBus.emit(\"times-timeZoom-change\", value);\r\n        this.firstScale = true;\r\n      }\r\n    }\r\n  },\r\n  computed: {\r\n    /**\r\n     * If there is a component slot specified for header\r\n     * @returns {bool}\r\n     */\r\n    beforeOptionsIsComponent() {\r\n      const headerSlot = this.options.slots.header;\r\n      if (\r\n        typeof headerSlot.beforeOptions === \"object\" &&\r\n        !Array.isArray(headerSlot.beforeOptions)\r\n      ) {\r\n        return true;\r\n      }\r\n      return false;\r\n    },\r\n    /**\r\n     * If there is a slot with beforeOptions html content\r\n     * @returns {bool}\r\n     */\r\n    beforeOptionsIsHtml() {\r\n      if (typeof this.options.slots.header.beforeOptions === \"string\") {\r\n        return true;\r\n      }\r\n      return false;\r\n    },\r\n    scale: {\r\n      get() {\r\n        return this.localScale;\r\n      },\r\n      set(value) {\r\n        this.localScale = Number(value);\r\n        this.setScale(this.localScale);\r\n      }\r\n    },\r\n    height: {\r\n      get() {\r\n        return this.localHeight;\r\n      },\r\n      set(value) {\r\n        this.localHeight = Number(value);\r\n        this.root.$emitBus.emit(\"row-height-change\", Number(value));\r\n      }\r\n    },\r\n    scope: {\r\n      get() {\r\n        return this.localBefore;\r\n      },\r\n      set(value) {\r\n        this.localBefore = Number(value);\r\n        this.root.$emitBus.emit(\"scope-change\", Number(value));\r\n      }\r\n    },\r\n    divider: {\r\n      get() {\r\n        return this.localPercent;\r\n      },\r\n      set(value) {\r\n        this.localPercent = Number(value);\r\n        this.root.$emitBus.emit(\"taskList-width-change\", Number(value));\r\n      }\r\n    }\r\n  }\r\n};\r\n</script>\r\n<style>\n.gantt-elastic__switch {\n  display: inline-block;\n  position: relative;\n  vertical-align: middle;\n  margin: 0px 15px;\n  width: 40px;\n  height: 20px;\n  border-radius: 10px;\n  background-color: #bfc9ca;\n  cursor: pointer;\n  transition: background-color 0.2s;\n}\n.gantt-elastic__switch--on {\n  background-color: #1ebc61;\n}\n.gantt-elastic__switch input {\n  opacity: 0;\n  width: 0;\n  height: 0;\n  position: absolute;\n}\n.gantt-elastic__switch::after {\n  content: \"\";\n  position: absolute;\n  top: 3px;\n  left: 3px;\n  width: 14px;\n  height: 14px;\n  border-radius: 50%;\n  background-color: #fff;\n  transition: left 0.2s;\n}\n.gantt-elastic__switch--on::after {\n  left: 23px;\n}\n</style>\n"],"sourceRoot":""}]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -611,19 +435,19 @@ if(false) // removed by dead control flow
 
 /***/ },
 
-/***/ 304
+/***/ 284
 (module, __unused_webpack_exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(917);
+var content = __webpack_require__(431);
 if(content.__esModule) content = content.default;
 if(typeof content === 'string') content = [[module.id, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
 var add = (__webpack_require__(534)/* ["default"] */ .A)
-var update = add("208a412a", content, false, {});
+var update = add("77752248", content, false, {});
 // Hot Module Replacement
 if(false) // removed by dead control flow
 {}
@@ -3859,14 +3683,14 @@ let ignoreScrollEvents = false;
 const MainView_exports_ = /*#__PURE__*/(0,exportHelper_namespaceObject.A)(MainViewvue_type_script_lang_js, [['render',MainViewvue_type_template_id_7ac81826_render]])
 
 /* harmony default export */ const MainView = (MainView_exports_);
-;// ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./src/components/Header.vue?vue&type=template&id=72c6a89f
+;// ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./src/components/Header.vue?vue&type=template&id=4b84e83a
 
 
-const Headervue_type_template_id_72c6a89f_hoisted_1 = ["innerHTML"]
+const Headervue_type_template_id_4b84e83a_hoisted_1 = ["innerHTML"]
 
-function Headervue_type_template_id_72c6a89f_render(_ctx, _cache, $props, $setup, $data, $options) {
+function Headervue_type_template_id_4b84e83a_render(_ctx, _cache, $props, $setup, $data, $options) {
   const _component_vue_slider = (0,external_Vue_.resolveComponent)("vue-slider")
-  const _component_switches = (0,external_Vue_.resolveComponent)("switches")
+  const _component_gantt_switch = (0,external_Vue_.resolveComponent)("gantt-switch")
 
   return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("div", {
     class: "gantt-elastic__header",
@@ -3889,7 +3713,7 @@ function Headervue_type_template_id_72c6a89f_render(_ctx, _cache, $props, $setup
             class: "gantt-elastic__header-title--html",
             style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-title--html'] }),
             innerHTML: $data.opts.title.label
-          }, null, 12 /* STYLE, PROPS */, Headervue_type_template_id_72c6a89f_hoisted_1))
+          }, null, 12 /* STYLE, PROPS */, Headervue_type_template_id_4b84e83a_hoisted_1))
         : (0,external_Vue_.createCommentVNode)("v-if", true)
     ], 4 /* STYLE */),
     (0,external_Vue_.createElementVNode)("div", {
@@ -3997,7 +3821,7 @@ function Headervue_type_template_id_72c6a89f_render(_ctx, _cache, $props, $setup
         class: "gantt-elastic__header-task-list-switch--wrapper",
         style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-task-list-switch--label'] })
       }, [
-        (0,external_Vue_.createVNode)(_component_switches, {
+        (0,external_Vue_.createVNode)(_component_gantt_switch, {
           class: "gantt-elastic__header-task-list-switch",
           style: (0,external_Vue_.normalizeStyle)({ ...$data.style['header-task-list-switch'] }),
           value: $options.root.state.options.taskList.display,
@@ -4008,162 +3832,35 @@ function Headervue_type_template_id_72c6a89f_render(_ctx, _cache, $props, $setup
     ], 4 /* STYLE */)
   ], 4 /* STYLE */))
 }
-;// ./src/components/Header.vue?vue&type=template&id=72c6a89f
+;// ./src/components/Header.vue?vue&type=template&id=4b84e83a
 
 // EXTERNAL MODULE: ./node_modules/vue-slider-component/dist/vue-slider-component.umd.min.js
 var vue_slider_component_umd_min = __webpack_require__(378);
 var vue_slider_component_umd_min_default = /*#__PURE__*/__webpack_require__.n(vue_slider_component_umd_min);
 // EXTERNAL MODULE: ./node_modules/vue-slider-component/theme/default.css
 var theme_default = __webpack_require__(670);
-;// ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[1]!./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./node_modules/vue-switches/src/switches.vue?vue&type=template&id=8e4870fc
-
-
-const switchesvue_type_template_id_8e4870fc_hoisted_1 = {
-  key: 0,
-  class: "vue-switcher__label"
-}
-const switchesvue_type_template_id_8e4870fc_hoisted_2 = ["textContent"]
-const switchesvue_type_template_id_8e4870fc_hoisted_3 = ["textContent"]
-const switchesvue_type_template_id_8e4870fc_hoisted_4 = ["textContent"]
-const switchesvue_type_template_id_8e4870fc_hoisted_5 = ["disabled", "checked"]
-
-function switchesvue_type_template_id_8e4870fc_render(_ctx, _cache, $props, $setup, $data, $options) {
-  return ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("label", {
-    class: (0,external_Vue_.normalizeClass)($options.classObject)
-  }, [
-    ($options.shouldShowLabel)
-      ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("span", switchesvue_type_template_id_8e4870fc_hoisted_1, [
-          ($props.label)
-            ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("span", {
-                key: 0,
-                textContent: (0,external_Vue_.toDisplayString)($props.label)
-              }, null, 8 /* PROPS */, switchesvue_type_template_id_8e4870fc_hoisted_2))
-            : (0,external_Vue_.createCommentVNode)("v-if", true),
-          (!$props.label && $props.value)
-            ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("span", {
-                key: 1,
-                textContent: (0,external_Vue_.toDisplayString)($props.textEnabled)
-              }, null, 8 /* PROPS */, switchesvue_type_template_id_8e4870fc_hoisted_3))
-            : (0,external_Vue_.createCommentVNode)("v-if", true),
-          (!$props.label && !$props.value)
-            ? ((0,external_Vue_.openBlock)(), (0,external_Vue_.createElementBlock)("span", {
-                key: 2,
-                textContent: (0,external_Vue_.toDisplayString)($props.textDisabled)
-              }, null, 8 /* PROPS */, switchesvue_type_template_id_8e4870fc_hoisted_4))
-            : (0,external_Vue_.createCommentVNode)("v-if", true)
-        ]))
-      : (0,external_Vue_.createCommentVNode)("v-if", true),
-    (0,external_Vue_.createElementVNode)("input", {
-      type: "checkbox",
-      disabled: $props.disabled,
-      onChange: _cache[0] || (_cache[0] = (...args) => ($options.trigger && $options.trigger(...args))),
-      checked: $props.value
-    }, null, 40 /* PROPS, NEED_HYDRATION */, switchesvue_type_template_id_8e4870fc_hoisted_5),
-    _cache[1] || (_cache[1] = (0,external_Vue_.createElementVNode)("div", null, null, -1 /* CACHED */))
-  ], 2 /* CLASS */))
-}
-;// ./node_modules/vue-switches/src/switches.vue?vue&type=template&id=8e4870fc
-
-;// ./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./node_modules/vue-switches/src/switches.vue?vue&type=script&lang=js
-
-
-/* harmony default export */ const switchesvue_type_script_lang_js = ({
-    name: 'switches',
-
-    props: {
-        typeBold: {
-            default: false
-        },
-
-        value: {
-            default: false
-        },
-
-        disabled: {
-            default: false
-        },
-
-        label: {
-            default: ''
-        },
-
-        textEnabled: {
-            default: ''
-        },
-
-        textDisabled: {
-            default: ''
-        },
-
-        color: {
-            default: 'default'
-        },
-
-        theme: {
-            default: 'default'
-        },
-
-        emitOnMount: {
-            default: true
-        }
-    },
-
-    mounted () {
-        if(this.emitOnMount) {
-            this.$emit('input', this.value)
-        }
-    },
-
-    methods: {
-        trigger (e) {
-            this.$emit('input', e.target.checked)
-        }
-    },
-
-    computed: {
-        classObject () {
-
-            const { color, value, theme, typeBold, disabled } = this;
-
-            return {
-                'vue-switcher' : true,
-                ['vue-switcher--unchecked'] : !value,
-                ['vue-switcher--disabled'] : disabled,
-                ['vue-switcher--bold']: typeBold,
-                ['vue-switcher--bold--unchecked']: typeBold && !value,
-                [`vue-switcher-theme--${theme}`] : color,
-                [`vue-switcher-color--${color}`] : color,
-            };
-
-        },
-
-        shouldShowLabel () {
-            return this.label !== '' || this.textEnabled !== '' || this.textDisabled !== '';
-        }
-    }
-});
-
-
-// EXTERNAL MODULE: ./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/vue-switches/dist/switches.css?vue&type=style&index=0&lang=css&external
-var switchesvue_type_style_index_0_lang_css_external = __webpack_require__(304);
-;// ./node_modules/vue-switches/dist/switches.css?vue&type=style&index=0&lang=css&external
-
-;// ./node_modules/vue-switches/src/switches.vue
-
-
-
-
-;
-
-
-const switches_exports_ = /*#__PURE__*/(0,exportHelper_namespaceObject.A)(switchesvue_type_script_lang_js, [['render',switchesvue_type_template_id_8e4870fc_render]])
-
-/* harmony default export */ const switches = (switches_exports_);
 ;// ./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./src/components/Header.vue?vue&type=script&lang=js
 
 
 
 
+
+// tiny inline on/off switch - replaces the Vue 2 only vue-switches dependency
+const GanttSwitch = {
+  name: "GanttSwitch",
+  props: { value: { type: Boolean, default: false } },
+  emits: ["input"],
+  methods: {
+    toggle(event) {
+      this.$emit("input", event.target.checked);
+    }
+  },
+  render() {
+    return (0,external_Vue_.h)("label", { class: ["gantt-elastic__switch", this.value ? "gantt-elastic__switch--on" : "gantt-elastic__switch--off"] }, [
+      (0,external_Vue_.h)("input", { type: "checkbox", checked: this.value, onChange: this.toggle })
+    ]);
+  }
+};
 
 const defaultStyle = {
   header: {
@@ -4238,7 +3935,7 @@ const defaultOptions = {
   name: "GanttHeader",
   components: {
     vueSlider: (vue_slider_component_umd_min_default()),
-    Switches: switches
+    GanttSwitch
   },
   props: ["options", "dynamicStyle"],
   inject: ["root"],
@@ -4368,13 +4065,19 @@ const defaultOptions = {
 
 ;// ./src/components/Header.vue?vue&type=script&lang=js
  
+// EXTERNAL MODULE: ./node_modules/vue-style-loader/index.js!./node_modules/css-loader/dist/cjs.js!./node_modules/vue-loader/dist/stylePostLoader.js!./node_modules/vue-loader/dist/index.js??ruleSet[1].rules[3].use[0]!./src/components/Header.vue?vue&type=style&index=0&id=4b84e83a&lang=css
+var Headervue_type_style_index_0_id_4b84e83a_lang_css = __webpack_require__(284);
+;// ./src/components/Header.vue?vue&type=style&index=0&id=4b84e83a&lang=css
+
 ;// ./src/components/Header.vue
 
 
 
 
 ;
-const Header_exports_ = /*#__PURE__*/(0,exportHelper_namespaceObject.A)(Headervue_type_script_lang_js, [['render',Headervue_type_template_id_72c6a89f_render]])
+
+
+const Header_exports_ = /*#__PURE__*/(0,exportHelper_namespaceObject.A)(Headervue_type_script_lang_js, [['render',Headervue_type_template_id_4b84e83a_render]])
 
 /* harmony default export */ const Header = (Header_exports_);
 ;// ./src/style.js

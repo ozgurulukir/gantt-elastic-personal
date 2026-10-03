@@ -129,12 +129,12 @@
         class="gantt-elastic__header-task-list-switch--wrapper"
         :style="{ ...style['header-task-list-switch--label'] }"
       >
-        <switches
+        <gantt-switch
           class="gantt-elastic__header-task-list-switch"
           :style="{ ...style['header-task-list-switch'] }"
           :value="root.state.options.taskList.display"
           @input="value => (root.state.options.taskList.display = value)"
-        ></switches>
+        ></gantt-switch>
         {{ opts.locale["Display task list"] }}
       </label>
     </div>
@@ -144,7 +144,24 @@
 <script>
 import vueSlider from "vue-slider-component";
 import "vue-slider-component/theme/default.css";
-import Switches from "vue-switches";
+import { h } from "vue";
+
+// tiny inline on/off switch - replaces the Vue 2 only vue-switches dependency
+const GanttSwitch = {
+  name: "GanttSwitch",
+  props: { value: { type: Boolean, default: false } },
+  emits: ["input"],
+  methods: {
+    toggle(event) {
+      this.$emit("input", event.target.checked);
+    }
+  },
+  render() {
+    return h("label", { class: ["gantt-elastic__switch", this.value ? "gantt-elastic__switch--on" : "gantt-elastic__switch--off"] }, [
+      h("input", { type: "checkbox", checked: this.value, onChange: this.toggle })
+    ]);
+  }
+};
 
 const defaultStyle = {
   header: {
@@ -219,7 +236,7 @@ export default {
   name: "GanttHeader",
   components: {
     vueSlider,
-    Switches
+    GanttSwitch
   },
   props: ["options", "dynamicStyle"],
   inject: ["root"],
@@ -347,3 +364,40 @@ export default {
   }
 };
 </script>
+<style>
+.gantt-elastic__switch {
+  display: inline-block;
+  position: relative;
+  vertical-align: middle;
+  margin: 0px 15px;
+  width: 40px;
+  height: 20px;
+  border-radius: 10px;
+  background-color: #bfc9ca;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.gantt-elastic__switch--on {
+  background-color: #1ebc61;
+}
+.gantt-elastic__switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+.gantt-elastic__switch::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #fff;
+  transition: left 0.2s;
+}
+.gantt-elastic__switch--on::after {
+  left: 23px;
+}
+</style>
