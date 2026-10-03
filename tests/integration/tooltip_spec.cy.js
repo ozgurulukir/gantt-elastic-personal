@@ -30,7 +30,7 @@ describe('Chart tooltip', () => {
       .and('contain.text', 'progress:');
     cy.get('.gantt-elastic__chart-row-bar')
       .first()
-      .trigger('mouseout');
+      .trigger('mouseleave');
     cy.get('.gantt-elastic__chart-tooltip').should('not.exist');
   });
 

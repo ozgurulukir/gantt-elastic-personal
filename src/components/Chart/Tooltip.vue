@@ -40,7 +40,7 @@ export default {
     }
     // bars already emit chart-<type>-<event> through the event bus (Task.mixin emitEvent)
     for (let type of BAR_TYPES) {
-      for (let eventName of ['mouseenter', 'mousemove', 'mouseout']) {
+      for (let eventName of ['mouseenter', 'mousemove', 'mouseleave']) {
         const handler = payload => this.onBarEvent(eventName, payload);
         this.root.$emitBus.on(`chart-${type}-${eventName}`, handler);
         this.boundHandlers.push([`chart-${type}-${eventName}`, handler]);
@@ -59,11 +59,11 @@ export default {
     /**
      * Bus event dispatched by a chart bar
      *
-     * @param {string} eventName mouseenter | mousemove | mouseout
+     * @param {string} eventName mouseenter | mousemove | mouseleave
      * @param {object} payload { event, data } as emitted by the row mixin
      */
     onBarEvent(eventName, { event, data }) {
-      if (eventName === 'mouseout') {
+      if (eventName === 'mouseleave') {
         this.visible = false;
         this.task = null;
         return;

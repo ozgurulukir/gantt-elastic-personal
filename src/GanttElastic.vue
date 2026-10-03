@@ -1258,18 +1258,20 @@ const GanttElastic = {
         this.$emitBus.on(`chart-${type}-click`, ({ data }) => this.selectTask(data.id));
         this.$emitBus.on(`taskList-${type}-click`, ({ data }) => this.selectTask(data.id));
       }
-      // hovering a bar or a task list row highlights both (issue #12)
-      for (let source of ['chart', 'taskList']) {
-        for (let type of ['task', 'milestone', 'project']) {
-          this.$emitBus.on(`${source}-${type}-mouseenter`, ({ data }) => {
-            this.state.hoveredTaskId = data.id;
-          });
-          this.$emitBus.on(`${source}-${type}-mouseout`, ({ data }) => {
-            if (this.state.hoveredTaskId === data.id) {
-              this.state.hoveredTaskId = null;
-            }
-          });
-        }
+      // hovering a row highlights it in both the chart and the task list
+      // (issue #12). Row level enter/leave only - mouseenter/mouseleave do not
+      // bubble, so crossings between a row's children (progress bar, expander,
+      // links) cannot flicker the highlight. Bar and cell level events stay
+      // available on the bus for consumers.
+      for (let source of ['chart-row', 'taskList-row']) {
+        this.$emitBus.on(`${source}-mouseenter`, ({ data }) => {
+          this.state.hoveredTaskId = data.id;
+        });
+        this.$emitBus.on(`${source}-mouseleave`, ({ data }) => {
+          if (this.state.hoveredTaskId === data.id) {
+            this.state.hoveredTaskId = null;
+          }
+        });
       }
     },
 

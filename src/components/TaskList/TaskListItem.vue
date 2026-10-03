@@ -14,6 +14,8 @@
       'gantt-elastic__task-list-item--hover': root.state.hoveredTaskId === task.id
     }"
     :style="{ ...root.style['task-list-item'], ...highlightStyle }"
+    @mouseenter="emitRowEvent('mouseenter', $event)"
+    @mouseleave="emitRowEvent('mouseleave', $event)"
   >
     <item-column v-for="column in columns" :key="column._id" :column="column" :task="task">
       <task-list-expander
@@ -39,6 +41,19 @@ export default {
   props: ['task'],
   data() {
     return {};
+  },
+  methods: {
+    /**
+     * Row level hover events (issue #12) - non-bubbling enter/leave on the
+     * row root so crossings between columns, values and the expander
+     * cannot flicker the highlight
+     *
+     * @param {string} eventName
+     * @param {event} event
+     */
+    emitRowEvent(eventName, event) {
+      this.root.$emitBus.emit(`taskList-row-${eventName}`, { event, data: this.task });
+    }
   },
   computed: {
     columns() {
