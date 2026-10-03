@@ -40,7 +40,7 @@
             ...contentStyle
           }"
           v-if="html"
-          v-html="task.label"
+          v-html="sanitizedLabel"
         ></div>
       </div>
     </foreignObject>
@@ -48,6 +48,8 @@
 </template>
 
 <script>
+import { sanitizeHtml } from '../../html.js';
+
 export default {
   name: 'ChartText',
   inject: ['root'],
@@ -56,6 +58,16 @@ export default {
     return {};
   },
   computed: {
+    /**
+     * Task label sanitized before v-html injection - the html branch is opt-in
+     * (label column with html: true) but the label itself is still untrusted
+     *
+     * @returns {string}
+     */
+    sanitizedLabel() {
+      return sanitizeHtml(this.task.label);
+    },
+
     /**
      * Get width
      *

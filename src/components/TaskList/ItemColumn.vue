@@ -44,7 +44,7 @@
           @touchstart="emitEvent('touchstart', $event)"
           @touchmove="emitEvent('touchmove', $event)"
           @touchend="emitEvent('touchend', $event)"
-          v-html="value"
+          v-html="sanitizedValue"
         ></div>
       </div>
     </div>
@@ -52,6 +52,8 @@
 </template>
 
 <script>
+import { sanitizeHtml } from '../../html.js';
+
 export default {
   name: 'ItemColumn',
   inject: ['root'],
@@ -107,6 +109,16 @@ export default {
         return this.column.value(this.task);
       }
       return this.task[this.column.value];
+    },
+
+    /**
+     * Column value sanitized before v-html injection - html rendering is
+     * opt-in per column but the value itself is still untrusted input
+     *
+     * @returns {string}
+     */
+    sanitizedValue() {
+      return sanitizeHtml(this.value);
     },
 
     itemColumnStyle() {

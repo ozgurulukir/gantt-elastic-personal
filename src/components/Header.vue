@@ -23,7 +23,7 @@
         class="gantt-elastic__header-title--html"
         :style="{ ...style['header-title--html'] }"
         v-if="opts.title.html"
-        v-html="opts.title.label"
+        v-html="sanitizedTitle"
       ></div>
     </div>
     <div
@@ -145,6 +145,7 @@
 import vueSlider from "vue-slider-component";
 import "vue-slider-component/theme/default.css";
 import { h } from "vue";
+import { sanitizeHtml } from "../html.js";
 
 // tiny inline on/off switch - replaces the Vue 2 only vue-switches dependency
 const GanttSwitch = {
@@ -267,7 +268,21 @@ export default {
     this.localPercent = this.root.state.options.taskList.percent;
     this.sliderOptions.xScale.value = this.root.state.options.times.timeZoom;
     this.style = this.root.mergeDeep({}, defaultStyle, this.dynamicStyle);
-    this.opts = this.root.mergeDeep({}, defaultOptions, this.options);
+    // the integrated header (rendered when the consumer overrides no header slot)
+    // gets no props - read title and locale from the gantt options instead, so
+    // options.title.html and translated labels actually take effect
+    const rootOptions = this.root.state.options;
+    const sources = [defaultOptions];
+    if (rootOptions.title) {
+      sources.push({ title: rootOptions.title });
+    }
+    if (rootOptions.locale) {
+      sources.push({ locale: rootOptions.locale });
+    }
+    if (this.options) {
+      sources.push(this.options);
+    }
+    this.opts = this.root.mergeDeep({}, ...sources);
   },
   methods: {
     getImage() {
@@ -301,6 +316,14 @@ export default {
     }
   },
   computed: {
+    /**
+     * Header title sanitized before v-html injection - html rendering is
+     * opt-in via options.title.html but the label itself is untrusted input
+     * @returns {string}
+     */
+    sanitizedTitle() {
+      return sanitizeHtml(this.opts.title.label);
+    },
     /**
      * If there is a component slot specified for header
      * @returns {bool}

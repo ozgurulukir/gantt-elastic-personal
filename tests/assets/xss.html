@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GanttElastic XSS fixture</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs" crossorigin="anonymous"></script>
+    <script src="/dist/bundle.js"></script>
+  </head>
+
+  <body>
+    <div id="app"></div>
+    <script>
+      // untrusted payloads used across label, header title and the user column
+      const XSS_PAYLOAD = '<img src=x onerror="window.__xsspwned=1">';
+
+      const mountedInstance = GanttElastic.mount({
+        el: '#app',
+        tasks: [
+          {
+            id: 1,
+            label: XSS_PAYLOAD,
+            user: '<a href="https://example.com/john" target="_blank" style="color:#0077c0;">John Doe</a>',
+            start: '2026-01-01',
+            duration: 15 * 24 * 60 * 60 * 1000,
+            percent: 85,
+            type: 'project'
+          }
+        ],
+        options: {
+          title: { label: XSS_PAYLOAD, html: true },
+          taskList: {
+            percent: 45,
+            columns: [
+              { id: 0, label: 'ID', value: 'id', width: 40 },
+              { id: 1, label: 'Description', value: 'label', width: 200, expander: true, html: true },
+              { id: 2, label: 'Assigned to', value: 'user', width: 130, html: true }
+            ]
+          }
+        }
+      });
+
+      if (typeof window.ganttInstance === 'undefined') {
+        window.ganttInstance = mountedInstance;
+      }
+    </script>
+  </body>
+</html>
