@@ -173,6 +173,12 @@ export default function getStyle(
       display: 'flex',
       background: 'transparent'
     },
+    'task-list-item--selected': {
+      background: '#e8f3fb'
+    },
+    'task-list-item--hover': {
+      background: '#f5f5f5'
+    },
     'task-list-item-column': {
       display: 'inline-flex',
       'flex-shrink': '0',
@@ -256,6 +262,12 @@ export default function getStyle(
     'chart-row-text-content--text': {},
     'chart-row-text-content--html': {},
     'chart-row-wrapper': {},
+    'chart-row--selected': {
+      filter: 'drop-shadow(0px 0px 3px #2C80BC)'
+    },
+    'chart-row--hover': {
+      filter: 'brightness(0.96)'
+    },
     'chart-row-bar-wrapper': {},
     'chart-row-bar': {},
     'chart-row-bar-polygon': {

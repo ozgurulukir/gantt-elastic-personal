@@ -54,7 +54,8 @@
             <dependency-lines :tasks="root.visibleTasks"></dependency-lines>
             <g
               class="gantt-elastic__chart-row-wrapper"
-              :style="{ ...root.style['chart-row-wrapper'] }"
+              :class="{ 'gantt-elastic__chart-row--selected': root.state.selectedTaskId === task.id }"
+              :style="{ ...root.style['chart-row-wrapper'], ...selectionStyle(task) }"
               v-for="task in root.visibleTasks"
               :task="task"
               :key="task.id"
@@ -112,6 +113,20 @@ export default {
      */
     getViewBox() {
       return `0 0 ${this.root.state.options.width} ${this.root.state.options.allVisibleTasksHeight}`;
+    }
+  },
+  methods: {
+    /**
+     * Selection highlight style for a task row wrapper (issue #6)
+     *
+     * @param {object} task
+     * @returns {object}
+     */
+    selectionStyle(task) {
+      if (this.root.state.selectedTaskId === task.id) {
+        return { ...this.root.style['chart-row--selected'] };
+      }
+      return {};
     }
   }
 };

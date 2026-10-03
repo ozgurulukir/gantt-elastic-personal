@@ -119,6 +119,9 @@ function getOptions(userOptions) {
     },
     maxRows: 20, //*
     maxHeight: 0, //*
+    taskSelection: {
+      display: true //*
+    },
     chart: {
       grid: {
         horizontal: {
@@ -480,6 +483,8 @@ const GanttElastic = {
           }
         },
         dynamicStyle: {},
+        selectedTaskId: null,
+        hoveredTaskId: null,
         refs: {},
         tasksById: {},
         taskTree: {},
@@ -1120,6 +1125,32 @@ const GanttElastic = {
     },
 
     /**
+     * Select a task - highlights its chart bar and task list row
+     *
+     * @param {any} taskId
+     */
+    selectTask(taskId) {
+      if (this.state.options.taskSelection.display === false || this.getTask(taskId) === null) {
+        return;
+      }
+      this.state.selectedTaskId = taskId;
+      this.$emit('task-selected', this.getTask(taskId));
+      this.$emitBus.emit('task-selected', this.getTask(taskId));
+    },
+
+    /**
+     * Clear the current task selection
+     */
+    clearSelection() {
+      if (this.state.selectedTaskId === null) {
+        return;
+      }
+      this.state.selectedTaskId = null;
+      this.$emit('task-selected', null);
+      this.$emitBus.emit('task-selected', null);
+    },
+
+    /**
      * Listen to specified event names
      */
     initializeEvents() {
@@ -1131,6 +1162,11 @@ const GanttElastic = {
       this.$emitBus.on('scope-change', this.onScopeChange);
       this.$emitBus.on('taskList-width-change', this.onTaskListWidthChange);
       this.$emitBus.on('taskList-column-width-change', this.onTaskListColumnWidthChange);
+      // clicking a bar or a task list cell selects the task (issue #6)
+      for (let type of ['task', 'milestone', 'project']) {
+        this.$emitBus.on(`chart-${type}-click`, ({ data }) => this.selectTask(data.id));
+        this.$emitBus.on(`taskList-${type}-click`, ({ data }) => this.selectTask(data.id));
+      }
     },
 
     /**

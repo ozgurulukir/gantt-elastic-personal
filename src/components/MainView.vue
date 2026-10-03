@@ -215,9 +215,16 @@ export default {
 
     /**
      * Chart mousedown event handler
-     * Initiates drag scrolling mode
+     * Initiates drag scrolling mode; a press on empty chart area clears the selection
      */
     chartMouseDown(ev) {
+      // presses on a bar belong to that bar's click event, everything else deselects
+      if (
+        this.root.state.options.taskSelection.display !== false &&
+        (typeof ev.target.closest !== 'function' || !ev.target.closest('.gantt-elastic__chart-row-bar-wrapper'))
+      ) {
+        this.root.clearSelection();
+      }
       if (typeof ev.touches !== 'undefined') {
         this.mousePos.x = this.mousePos.lastX = ev.touches[0].screenX;
         this.mousePos.y = this.mousePos.lastY = ev.touches[0].screenY;

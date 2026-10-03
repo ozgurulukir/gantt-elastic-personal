@@ -7,7 +7,11 @@
  */
 -->
 <template>
-  <div class="gantt-elastic__task-list-item" :style="{ ...root.style['task-list-item'] }">
+  <div
+    class="gantt-elastic__task-list-item"
+    :class="{ 'gantt-elastic__task-list-item--selected': root.state.selectedTaskId === task.id }"
+    :style="{ ...root.style['task-list-item'], ...selectionStyle }"
+  >
     <item-column v-for="column in columns" :key="column._id" :column="column" :task="task">
       <task-list-expander
         v-if="column.expander"
@@ -36,6 +40,18 @@ export default {
   computed: {
     columns() {
       return this.root.state.options.taskList.columns;
+    },
+
+    /**
+     * Selection highlight style for this row (issue #6)
+     *
+     * @returns {object}
+     */
+    selectionStyle() {
+      if (this.root.state.selectedTaskId === this.task.id) {
+        return { ...this.root.style['task-list-item--selected'] };
+      }
+      return {};
     }
   }
 };
