@@ -228,6 +228,27 @@ dynamicStyle: {
 
 All other style keys (`task-list-item`, `chart-row-bar-polygon`, ...) are overridable the same way - see [src/style.js](src/style.js) for the full key list.
 
+### Interactions
+
+- **Tooltip** - hovering a bar shows task label, date range, duration and progress. Disable with `options.chart.tooltip.display = false` or provide custom text through `chart.tooltip.format: task => '...'` (plain text, interpolated - never HTML).
+- **Selection** - clicking a bar or a task list row highlights both (`chart-row--selected` / `task-list-item--selected` style keys). Programmatic API: `ganttInstance.selectTask(id)` / `ganttInstance.clearSelection()`; every change emits `task-selected`. Pressing empty chart area deselects; disable entirely with `options.taskSelection.display = false`.
+- **Hover highlight** - rows highlight in chart and task list together (`chart-row--hover` / `task-list-item--hover` style keys).
+- **Keyboard** - Tab reaches bars, list rows, expanders and column resize handles. Enter/Space activate, ArrowUp/ArrowDown move between rows/bars, Escape clears the selection, expanders toggle. Focus outlines are drawn via `:focus-visible`; transitions respect `prefers-reduced-motion`.
+- **Current time line** - vertical line at "now" (`chart.currentTimeLine: { display, color, strokeWidth, updateInterval }`, default on, refreshing every 60s; call `ganttInstance.startNowTimer()` after changing the interval).
+- **Column widths** - drag the task list header dividers, resize with arrow keys (shift for 1px steps), double click to reset to the configured width. `options.taskList.persistColumnWidths: true` persists runtime widths to localStorage (namespace with `taskList.persistKey`).
+
+### Updating a task without a full rebuild
+
+`ganttInstance.updateTask(id, patch)` applies a patch to a single task and recomputes only that row's geometry, emitting the usual `tasks-changed`. Mutating the `tasks` prop array instead triggers the deep watcher and a full rebuild. A patch that moves the task outside the rendered time window (new `start`, `end`, `duration` beyond the chart range) falls back to a rebuild automatically. Keep your own task array in sync through the `tasks-changed` event, as in the usage example above.
+
+### HTML rendering and security
+
+Task fields render as plain text by default. Opt-in HTML (a task list column with `html: true`, or `options.title.html`) is sanitized with DOMPurify before injection - scripts and event handlers are stripped, safe markup like links survives. Never feed untrusted data into the gantt expecting raw HTML output.
+
+### Large datasets
+
+Only rows inside the viewport (+ a small overscan) are mounted; a 2000-task dataset renders ~17 row components (see [tests/assets/large.html](tests/assets/large.html)). `getSVG()`/`getImage()` export the currently rendered window.
+
 ### Development
 
 ```bash
