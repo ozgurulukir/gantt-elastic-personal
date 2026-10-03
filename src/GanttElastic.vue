@@ -581,6 +581,11 @@ const GanttElastic = {
         if (typeof task.duration === 'undefined' && task.hasOwnProperty('endTime')) {
           task.duration = task.endTime - task.startTime;
         }
+        // a task with neither end nor duration would produce NaN geometry
+        // (width, prepareDates' lastTaskTime) further down the pipeline
+        if (typeof task.duration === 'undefined') {
+          task.duration = 0;
+        }
       }
       return tasks;
     },
@@ -912,10 +917,11 @@ const GanttElastic = {
      */
     timeToPixelOffsetX(ms) {
       let x = ms - this.state.options.times.firstTime;
-      if (x) {
-        x = x / this.state.options.times.timePerPixel;
+      if (!x) {
+        return 0;
       }
-      return x;
+      // timePerPixel is 0 until recalculateTimes() runs - never divide into Infinity
+      return this.state.options.times.timePerPixel > 0 ? x / this.state.options.times.timePerPixel : 0;
     },
 
     /**
@@ -1564,7 +1570,9 @@ const GanttElastic = {
           let task = visibleTasks[index];
           task.width =
             task.duration / this.state.options.times.timePerPixel - this.style['grid-line-vertical']['stroke-width'];
-          if (task.width < 0) {
+          // NaN (missing duration) / Infinity (timePerPixel still 0) must never
+          // reach the SVG attributes - issue #2 first-paint regression net
+          if (!Number.isFinite(task.width) || task.width < 0) {
             task.width = 0;
           }
           task.height = this.state.options.row.height;
