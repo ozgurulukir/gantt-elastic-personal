@@ -1,4 +1,5 @@
 const umd = '/tests/assets/umd.html';
+const standalone = '/tests/assets/standalone.html';
 
 function mountGantt(url) {
   return cy
@@ -21,9 +22,10 @@ describe('updateTask - O(changed) mutation API', () => {
       // full setup() recreates every task object - reference identity proves
       // this update ran O(changed) instead of the rebuild path
       const before = gantt.getTask(1);
-      const updated = gantt.updateTask(1, { label: 'patched by updateTask', percent: 42 });
+      const updated = gantt.updateTask(1, { label: 'patched by updateTask', progress: 42 });
       expect(updated).to.equal(before);
       expect(updated.label).to.equal('patched by updateTask');
+      expect(updated.progress).to.equal(42);
       expect(gantt.getTask(1)).to.equal(before);
       cy.wait(100).then(() => {
         // tasks-changed still flows through the output watcher
@@ -35,6 +37,44 @@ describe('updateTask - O(changed) mutation API', () => {
       cy.get('.gantt-elastic__task-list-item-value')
         .eq(1)
         .should('contain.text', 'patched by updateTask');
+    });
+  });
+
+  it('translates legacy patch fields (percent, dependentOn) onto the canonical names', () => {
+    mountGantt(umd).then(window => {
+      const gantt = window.ganttInstance;
+      const updated = gantt.updateTask(2, { percent: 55, dependentOn: [1] });
+      expect(updated.progress).to.equal(55);
+      expect(updated.dependencies).to.deep.equal([1]);
+      // the legacy keys are not written onto the task
+      expect(updated.percent).to.equal(undefined);
+      expect(updated.dependentOn).to.equal(undefined);
+    });
+  });
+
+  it('keeps canonical patches durable across reinit when taskMapping renames the field', () => {
+    mountGantt(standalone).then(window => {
+      const gantt = window.ganttInstance;
+      // simulate the documented owner contract (README usage example): the
+      // tasks prop always reflects the latest tasks-changed output
+      const propTasks = gantt.tasks;
+      gantt.$on('tasks-changed', tasks => {
+        propTasks.splice(0, propTasks.length, ...tasks);
+      });
+      gantt.updateTask(1, { progress: 66 });
+      expect(gantt.getTask(1).progress).to.equal(66);
+      // the fixture maps progress onto a 'percent' source field - the add-task
+      // reinit below re-maps every task from that source, so the patch must
+      // have been mirrored onto it or it would be silently reverted
+      cy.wait(150)
+        .then(() => {
+          window.addTask();
+        })
+        .wait(300)
+        .then(() => {
+          expect(gantt.getTask(88), 'reinit picked up the added task').to.not.equal(null);
+          expect(gantt.getTask(1).progress, 'patch survives the reinit').to.equal(66);
+        });
     });
   });
 

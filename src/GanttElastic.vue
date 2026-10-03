@@ -83,6 +83,7 @@ function getOptions(userOptions) {
       label: 'label',
       duration: 'duration',
       progress: 'progress',
+      dependencies: 'dependencies',
       type: 'type',
       style: 'style',
       collapsed: 'collapsed'
@@ -589,8 +590,9 @@ const GanttElastic = {
         if (typeof task.collapsed === 'undefined') {
           task.collapsed = false;
         }
-        if (typeof task.dependentOn === 'undefined') {
-          task.dependentOn = [];
+        if (typeof task.dependencies === 'undefined') {
+          // 'dependentOn' is the pre-rename field name - still accepted transparently
+          task.dependencies = Array.isArray(task.dependentOn) ? task.dependentOn : [];
         }
         if (typeof task.parentId === 'undefined') {
           task.parentId = null;
@@ -646,6 +648,7 @@ const GanttElastic = {
         label: task[options.taskMapping.label],
         duration: task[options.taskMapping.duration],
         progress: task[options.taskMapping.progress],
+        dependencies: task[options.taskMapping.dependencies],
         type: task[options.taskMapping.type],
         style: task[options.taskMapping.style],
         collapsed: task[options.taskMapping.collapsed]
@@ -1287,10 +1290,35 @@ const GanttElastic = {
      * @param {object} patch task fields to change
      * @returns {object|null} the updated state task
      */
-    updateTask(taskId, patch) {
+    updateTask(taskId, userPatch) {
       const task = this.getTask(taskId);
-      if (task === null || !isObject(patch)) {
+      if (task === null || !isObject(userPatch)) {
         return null;
+      }
+      // legacy patch vocabulary (percent, dependentOn) is translated onto the
+      // canonical field names (progress, dependencies)
+      const patch = { ...userPatch };
+      if (typeof patch.progress === 'undefined' && typeof patch.percent !== 'undefined') {
+        patch.progress = patch.percent;
+        delete patch.percent;
+      }
+      if (typeof patch.dependencies === 'undefined' && typeof patch.dependentOn !== 'undefined') {
+        patch.dependencies = patch.dependentOn;
+        delete patch.dependentOn;
+      }
+      // when a taskMapping renames a field, later re-maps read the mapping
+      // source key - mirror the canonical value there or the patch would be
+      // silently reverted by the next setup()
+      const mapping = this.state.options.taskMapping || {};
+      if (typeof patch.progress !== 'undefined' && typeof mapping.progress === 'string' && mapping.progress !== 'progress') {
+        patch[mapping.progress] = patch.progress;
+      }
+      if (
+        typeof patch.dependencies !== 'undefined' &&
+        typeof mapping.dependencies === 'string' &&
+        mapping.dependencies !== 'dependencies'
+      ) {
+        patch[mapping.dependencies] = patch.dependencies;
       }
       if (this.applyTaskPatch(task, patch)) {
         this.setup('updateTask');

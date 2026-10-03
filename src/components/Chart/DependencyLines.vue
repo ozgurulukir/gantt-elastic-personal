@@ -107,10 +107,10 @@ export default {
      */
     dependencyTasks() {
       return this.tasks
-        .filter(task => Array.isArray(task.dependentOn))
+        .filter(task => Array.isArray(task.dependencies))
         .map(task => ({
           task,
-          lines: task.dependentOn
+          lines: task.dependencies
             .map(id => ({ points: this.getPoints(id, task.id), task_id: id }))
             .filter(line => line.points !== null)
         }))

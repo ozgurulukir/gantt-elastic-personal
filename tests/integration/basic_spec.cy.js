@@ -61,6 +61,9 @@ function expectAddTask(url) {
       expect(task.children.length).to.equal(1);
       expect(task.allChildren.length).to.equal(2);
       expect(task.children[0]).to.equal(8);
+      // umd.html declares the canonical 'dependencies' field (task 4), standalone.html
+      // the legacy 'dependentOn' - both normalize to the same internal name
+      expect(gantt.getTask(4).dependencies).to.deep.equal([3]);
       expect(gantt.getTask(2).collapsed).to.equal(true);
       expect(gantt.state.options.times.timeZoom).to.equal(17);
       gantt.state.options.times.timeZoom = 10;
