@@ -239,7 +239,7 @@ All other style keys (`task-list-item`, `chart-row-bar-polygon`, ...) are overri
 
 ### Updating a task without a full rebuild
 
-`ganttInstance.updateTask(id, patch)` applies a patch to a single task and recomputes only that row's geometry, emitting the usual `tasks-changed`. Mutating the `tasks` prop array instead triggers the deep watcher and a full rebuild. A patch that moves the task outside the rendered time window (new `start`, `end`, `duration` beyond the chart range) falls back to a rebuild automatically. Keep your own task array in sync through the `tasks-changed` event, as in the usage example above.
+`ganttInstance.updateTask(id, patch)` applies a patch to a single task and recomputes only that row's geometry, emitting the usual `tasks-changed`. Mutating the `tasks` prop array instead triggers the deep watcher and a full rebuild. A patch that moves the task outside the rendered time window (new `start`, `end`, `duration` beyond the chart range) rebuilds the chart range around the new dates — the patch is re-applied to the rebuilt task and the time window grows, so the change is never lost. Keep your own task array in sync through the `tasks-changed` event, as in the usage example above.
 
 ### HTML rendering and security
 
@@ -253,10 +253,19 @@ Only rows inside the viewport (+ a small overscan) are mounted; a 2000-task data
 
 ```bash
 npm install
-npm run build    # webpack production build -> dist/
+npm run build    # webpack production build -> dist/ (the test pages load these bundles)
 npm run dev      # webpack watch build
-npm test         # cypress e2e suite
 ```
+
+The e2e suite (Cypress) needs a static server for the repo root, plus a matching `baseUrl` — and a fresh `npm run build` first, since the test pages load the `dist/` bundles:
+
+```bash
+npx http-server -p 8085 -c-1 .          # terminal 1 - keep it running
+npx cypress run --browser chrome --config baseUrl=http://localhost:8085   # terminal 2
+npx cypress open --config baseUrl=http://localhost:8085                   # interactive mode
+```
+
+A bare `npm test` without the server and `baseUrl` fails on taze clones.
 
 ### Licence
 

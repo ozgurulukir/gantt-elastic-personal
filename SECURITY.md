@@ -18,6 +18,10 @@ Gantt-elastic is a client-side charting library:
   harness), the upstream `neuronetio/gantt-elastic` repository, and demo
   dependencies loaded from CDNs in the example pages.
 
+Task fields render as plain text by default; opt-in HTML (`html: true` columns,
+`options.title.html`) is sanitized through DOMPurify (`src/html.js`) before
+injection. Sanitizer bypasses fall under this policy — please report them.
+
 ## Supported versions
 
 Only the latest commit on `master` is supported. This is a personal fork of an

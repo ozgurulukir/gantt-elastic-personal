@@ -36,6 +36,8 @@
     <br />
     <button onclick="addTask()">Add task</button>
     <button onclick="addTasks()">Add tasks</button><br />
+    <button onclick="selectFirst()">Select first task</button>
+    <button onclick="clearSelection()">Clear selection</button><br />
     <button onclick="destroy()">Destroy</button><br />
     <button onclick="changeOptions()">Change options</button>
     <script>
@@ -323,13 +325,20 @@
         app.options.times.timeZoom = zoom;
       });
 
+      // patch a single task through ganttInstance.updateTask - O(changed):
+      // only that row's geometry is recalculated, no full rebuild
       window.update = function update() {
-        const row = document.getElementById('row').value;
+        const row = Number(document.getElementById('row').value);
         const name = document.getElementById('name').value;
         const value = document.getElementById('value').value;
-        app.tasks[row][name] = value;
+        const task = app.tasks[row];
+        if (task) {
+          ganttInstance.updateTask(task.id, { [name]: value });
+        }
       };
 
+      // raw prop mutations (add/remove/replace) go through the deep tasks
+      // watcher and trigger a full rebuild - fine for structural changes
       window.deleteRow = function deleteRow() {
         const row = Number(document.getElementById('delrow').value);
         app.tasks = app.tasks.filter((task, index) => {
@@ -343,7 +352,10 @@
       window.progressChange = function progressChange() {
         const row = Number(document.getElementById('progRow').value);
         const percent = Number(document.getElementById('progress').value);
-        app.tasks[row].progress = percent;
+        const task = app.tasks[row];
+        if (task) {
+          ganttInstance.updateTask(task.id, { percent });
+        }
       };
 
       window.addTask = function addTask() {
@@ -390,6 +402,18 @@
 
       window.destroy = function destroy() {
         app.destroy = true;
+      };
+
+      // selection API - highlight chart bar + task list row programmatically
+      window.selectFirst = function selectFirst() {
+        const task = app.tasks[Number(document.getElementById('row').value) || 0];
+        if (task) {
+          ganttInstance.selectTask(task.id);
+        }
+      };
+
+      window.clearSelection = function clearSelection() {
+        ganttInstance.clearSelection();
       };
     </script>
   </body>
