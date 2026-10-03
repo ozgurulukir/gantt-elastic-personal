@@ -11,41 +11,15 @@
     <div class="gantt-elastic__task-list-item-value-wrapper" :style="wrapperStyle">
       <slot></slot>
       <div class="gantt-elastic__task-list-item-value-container" :style="containerStyle">
-        <div
-          v-if="!html"
-          class="gantt-elastic__task-list-item-value"
-          :style="valueStyle"
-          @click="emitEvent('click', $event)"
-          @mouseenter="emitEvent('mouseenter', $event)"
-          @mouseover="emitEvent('mouseover', $event)"
-          @mouseout="emitEvent('mouseout', $event)"
-          @mouseleave="emitEvent('mouseleave', $event)"
-          @mousemove="emitEvent('mousemove', $event)"
-          @mousedown="emitEvent('mousedown', $event)"
-          @mouseup="emitEvent('mouseup', $event)"
-          @mousewheel="emitEvent('mousewheel', $event)"
-          @touchstart="emitEvent('touchstart', $event)"
-          @touchmove="emitEvent('touchmove', $event)"
-          @touchend="emitEvent('touchend', $event)"
-        >
+        <div v-if="!html" class="gantt-elastic__task-list-item-value" :style="valueStyle" :data-task-id="task.id" :data-column-id="column._id">
           {{ value }}
         </div>
         <div
           v-else
           class="gantt-elastic__task-list-item-value"
           :style="valueStyle"
-          @click="emitEvent('click', $event)"
-          @mouseenter="emitEvent('mouseenter', $event)"
-          @mouseover="emitEvent('mouseover', $event)"
-          @mouseout="emitEvent('mouseout', $event)"
-          @mouseleave="emitEvent('mouseleave', $event)"
-          @mousemove="emitEvent('mousemove', $event)"
-          @mousedown="emitEvent('mousedown', $event)"
-          @mouseup="emitEvent('mouseup', $event)"
-          @mousewheel="emitEvent('mousewheel', $event)"
-          @touchstart="emitEvent('touchstart', $event)"
-          @touchmove="emitEvent('touchmove', $event)"
-          @touchend="emitEvent('touchend', $event)"
+          :data-task-id="task.id"
+          :data-column-id="column._id"
           v-html="sanitizedValue"
         ></div>
       </div>
@@ -62,20 +36,6 @@ export default {
   props: ['column', 'task'],
   data() {
     return {};
-  },
-  methods: {
-    /**
-     * Emit event
-     *
-     * @param {String} eventName
-     * @param {Event} event
-     */
-    emitEvent(eventName, event) {
-      if (typeof this.column.events !== 'undefined' && typeof this.column.events[eventName] === 'function') {
-        this.column.events[eventName]({ event, data: this.task, column: this.column });
-      }
-      this.root.$emitBus.emit(`taskList-${this.task.type}-${eventName}`, { event, data: this.task, column: this.column });
-    }
   },
   computed: {
     /**

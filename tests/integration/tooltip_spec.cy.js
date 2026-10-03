@@ -15,14 +15,15 @@ describe('Chart tooltip', () => {
     mountGantt(umd).then(window => {
       expect(window.ganttInstance.getTask(1).label.length).to.be.greaterThan(0);
     });
-    // hover any bar that is fully inside the viewport (initial scroll position varies)
+    // hover any bar that is fully inside the viewport (initial scroll position varies);
+    // mouseenter/leave are synthesized from delegated mouseover/mouseout (issue #10)
     cy.get('.gantt-elastic__chart-row-bar').then($bars => {
       const visible = [...$bars].find(el => {
         const rect = el.getBoundingClientRect();
         return rect.width > 0 && rect.top > 60 && rect.left > 300 && rect.right < 1400;
       });
       expect(visible, 'a chart bar inside the viewport').to.exist;
-      cy.wrap(visible).trigger('mouseenter');
+      cy.wrap(visible).trigger('mouseover');
     });
     cy.get('.gantt-elastic__chart-tooltip')
       .should('exist')
@@ -30,7 +31,7 @@ describe('Chart tooltip', () => {
       .and('contain.text', 'progress:');
     cy.get('.gantt-elastic__chart-row-bar')
       .first()
-      .trigger('mouseleave');
+      .trigger('mouseout');
     cy.get('.gantt-elastic__chart-tooltip').should('not.exist');
   });
 

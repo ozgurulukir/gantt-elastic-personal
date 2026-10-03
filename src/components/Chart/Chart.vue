@@ -64,8 +64,7 @@
               v-for="task in root.renderedTasks"
               :task="task"
               :key="task.id"
-              @mouseenter="emitRowEvent('mouseenter', $event, task)"
-              @mouseleave="emitRowEvent('mouseleave', $event, task)"
+              :data-task-row="task.id"
             >
               <component :task="task" :is="task.type"></component>
             </g>
@@ -123,18 +122,6 @@ export default {
     }
   },
   methods: {
-    /**
-     * Row level hover events (issue #12) - non-bubbling enter/leave on the
-     * row wrapper so child element crossings cannot flicker the highlight
-     *
-     * @param {string} eventName
-     * @param {event} event
-     * @param {object} task
-     */
-    emitRowEvent(eventName, event, task) {
-      this.root.$emitBus.emit(`chart-row-${eventName}`, { event, data: task });
-    },
-
     /**
      * Selection / hover highlight style for a task row wrapper (issues #6, #12)
      *

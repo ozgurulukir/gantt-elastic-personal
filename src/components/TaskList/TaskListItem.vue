@@ -19,9 +19,7 @@
     :aria-level="task.parents.length + 1"
     :aria-expanded="task.allChildren.length > 0 ? !task.collapsed : undefined"
     :aria-selected="root.state.selectedTaskId === task.id"
-    @keydown="onRowKeyDown"
-    @mouseenter="emitRowEvent('mouseenter', $event)"
-    @mouseleave="emitRowEvent('mouseleave', $event)"
+    :data-task-row="task.id"
   >
     <item-column v-for="column in columns" :key="column._id" :column="column" :task="task">
       <task-list-expander
@@ -47,43 +45,6 @@ export default {
   props: ['task'],
   data() {
     return {};
-  },
-  methods: {
-    /**
-     * Keyboard interaction on a focused task list row (issue #13):
-     * Enter/Space select the task, arrows move between rendered rows,
-     * Escape clears the selection
-     *
-     * @param {event} event
-     */
-    onRowKeyDown(event) {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        this.root.selectTask(this.task.id);
-      } else if (event.key === 'Escape') {
-        this.root.clearSelection();
-      } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
-        event.preventDefault();
-        const rows = Array.from(document.querySelectorAll('.gantt-elastic__task-list-item'));
-        const index = rows.indexOf(event.currentTarget);
-        const next = rows[index + (event.key === 'ArrowDown' ? 1 : -1)];
-        if (next) {
-          next.focus();
-        }
-      }
-    },
-
-    /**
-     * Row level hover events (issue #12) - non-bubbling enter/leave on the
-     * row root so crossings between columns, values and the expander
-     * cannot flicker the highlight
-     *
-     * @param {string} eventName
-     * @param {event} event
-     */
-    emitRowEvent(eventName, event) {
-      this.root.$emitBus.emit(`taskList-row-${eventName}`, { event, data: this.task });
-    }
   },
   computed: {
     columns() {

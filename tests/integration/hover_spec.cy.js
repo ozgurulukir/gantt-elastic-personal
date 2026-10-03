@@ -49,21 +49,30 @@ describe('Row hover highlight', () => {
 
   it('real mouse crossing inside a bar does not drop the highlight', () => {
     mountGantt(umd);
-    cy.get('.gantt-elastic__chart-row-bar')
-      .first()
-      .trigger('mouseenter')
-      .trigger('mouseover')
-      .trigger('mouseout', { bubbles: true })
-      .wait(50);
-    // bubbling mouseout from a child element must not clear the hover;
-    // the wrapper g is still hovered until the pointer truly leaves the row
+    // enter the bar, then mouseout with the relatedTarget still inside the
+    // same row - the row hover must survive child-element crossings
     cy.get('.gantt-elastic__chart-row-wrapper')
       .first()
-      .should('have.class', 'gantt-elastic__chart-row--hover');
-    cy.get('.gantt-elastic__chart-row-wrapper')
+      .as('row');
+    cy.get('@row')
+      .find('.gantt-elastic__chart-row-bar')
       .first()
-      .trigger('mouseleave')
-      .wait(50);
+      .trigger('mouseover');
+    cy.get('@row').should('have.class', 'gantt-elastic__chart-row--hover');
+    cy.get('@row')
+      .find('.gantt-elastic__chart-row-bar-polygon')
+      .first()
+      .then($polygon => {
+        cy.get('@row')
+          .find('.gantt-elastic__chart-row-bar')
+          .first()
+          .trigger('mouseout', { relatedTarget: $polygon[0] });
+      });
+    cy.wait(50);
+    cy.get('@row').should('have.class', 'gantt-elastic__chart-row--hover');
+    // leaving the row entirely (relatedTarget null) clears the hover
+    cy.get('@row').trigger('mouseout');
+    cy.wait(50);
     cy.get('.gantt-elastic__chart-row--hover').should('not.exist');
   });
 });
