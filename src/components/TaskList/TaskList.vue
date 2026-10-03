@@ -89,9 +89,9 @@ export default {
    * Mounted
    */
   mounted() {
-    this.root.state.refs.taskListWrapper = this.$refs.taskListWrapper;
-    this.root.state.refs.taskList = this.$refs.taskList;
-    this.root.state.refs.taskListItems = this.$refs.taskListItems;
+    this.root.registerRef('taskListWrapper', this.$refs.taskListWrapper);
+    this.root.registerRef('taskList', this.$refs.taskList);
+    this.root.registerRef('taskListItems', this.$refs.taskListItems);
   }
 };
 </script>

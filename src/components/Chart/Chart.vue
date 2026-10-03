@@ -104,11 +104,11 @@ export default {
    * Mounted
    */
   mounted() {
-    this.root.state.refs.chart = this.$refs.chart;
-    this.root.state.refs.chartCalendarContainer = this.$refs.chartCalendarContainer;
-    this.root.state.refs.chartGraphContainer = this.$refs.chartGraphContainer;
-    this.root.state.refs.chartGraph = this.$refs.chartGraph;
-    this.root.state.refs.chartGraphSvg = this.$refs.chartGraphSvg;
+    this.root.registerRef('chart', this.$refs.chart);
+    this.root.registerRef('chartCalendarContainer', this.$refs.chartCalendarContainer);
+    this.root.registerRef('chartGraphContainer', this.$refs.chartGraphContainer);
+    this.root.registerRef('chartGraph', this.$refs.chartGraph);
+    this.root.registerRef('chartGraphSvg', this.$refs.chartGraphSvg);
   },
 
   computed: {

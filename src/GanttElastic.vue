@@ -36,6 +36,7 @@ import {
 } from './time-scale.js';
 import { normalizeTasks, deriveTimeFields, taskEndTime } from './task-model.js';
 import { createDelegation } from './delegation.js';
+import { computeCalendarWidths } from './calendar-widths.js';
 
 const ctx = document.createElement('canvas').getContext('2d');
 
@@ -552,6 +553,32 @@ const GanttElastic = {
   methods: {
     mergeDeep,
     mergeDeepReactive,
+
+    /**
+     * Register a child component element in the shared refs registry.
+     * Children call this from mounted() instead of writing
+     * root.state.refs directly - the one discoverable seam for DOM access.
+     *
+     * @param {string} name registry key (chartContainer, taskListItems, ...)
+     * @param {element} ref the mounted element
+     */
+    registerRef(name, ref) {
+      this.state.refs[name] = ref;
+    },
+
+    /**
+     * Emit an event on both channels: the component $emit (template
+     * listeners) and the internal event bus (programmatic $on / other
+     * components). Every consumer-facing event goes through here so the
+     * dual-channel contract lives in one place.
+     *
+     * @param {string} name
+     * @param  {...any} args
+     */
+    emitBoth(name, ...args) {
+      this.$emit(name, ...args);
+      this.$emitBus.emit(name, ...args);
+    },
 
     /**
      * Calculate height of scrollbar in current browser
@@ -1137,8 +1164,7 @@ const GanttElastic = {
         return;
       }
       this.state.selectedTaskId = taskId;
-      this.$emit('task-selected', this.getTask(taskId));
-      this.$emitBus.emit('task-selected', this.getTask(taskId));
+      this.emitBoth('task-selected', this.getTask(taskId));
     },
 
     /**
@@ -1149,8 +1175,7 @@ const GanttElastic = {
         return;
       }
       this.state.selectedTaskId = null;
-      this.$emit('task-selected', null);
-      this.$emitBus.emit('task-selected', null);
+      this.emitBoth('task-selected', null);
     },
 
     /**
@@ -1397,75 +1422,16 @@ const GanttElastic = {
 
     /**
      * Calculate calendar widths - when scale was changed for example
+     * (text measurement lives in calendar-widths.js)
      */
     computeCalendarWidths() {
-      this.computeDayWidths();
-      this.computeHourWidths();
-      this.computeMonthWidths();
-    },
-
-    /**
-     * Compute width of calendar hours column widths basing on text widths
-     */
-    computeHourWidths() {
-      const style = { ...this.style['calendar-row-text'], ...this.style['calendar-row-text--hour'] };
-      this.state.ctx.font = style['font-size'] + ' ' + style['font-family'];
-      const localeName = this.state.options.locale.name;
-      let currentDate = dayjs('2018-01-01T00:00:00').locale(localeName); // any date will be good for hours
-      let maxWidths = this.state.options.calendar.hour.maxWidths;
-      if (maxWidths.length) {
-        return;
-      }
-      for (let formatName in this.state.options.calendar.hour.format) {
-        maxWidths[formatName] = 0;
-      }
-      for (let hour = 0; hour < 24; hour++) {
-        let widths = { hour };
-        for (let formatName in this.state.options.calendar.hour.format) {
-          const hourFormatted = this.state.options.calendar.hour.format[formatName](currentDate);
-          this.state.options.calendar.hour.formatted[formatName].push(hourFormatted);
-          widths[formatName] = this.state.ctx.measureText(hourFormatted).width;
-        }
-        this.state.options.calendar.hour.widths.push(widths);
-        for (let formatName in this.state.options.calendar.hour.format) {
-          if (widths[formatName] > maxWidths[formatName]) {
-            maxWidths[formatName] = widths[formatName];
-          }
-        }
-        currentDate = currentDate.add(1, 'hour');
-      }
-    },
-
-    /**
-     * Compute calendar days column widths basing on text widths
-     */
-    computeDayWidths() {
-      const style = { ...this.style['calendar-row-text'], ...this.style['calendar-row-text--day'] };
-      this.state.ctx.font = style['font-size'] + ' ' + style['font-family'];
-      const localeName = this.state.options.locale.name;
-      let currentDate = dayjs(this.state.options.times.steps[0].time).locale(localeName);
-      let maxWidths = this.state.options.calendar.day.maxWidths;
-      this.state.options.calendar.day.widths = [];
-      Object.keys(this.state.options.calendar.day.format).forEach(formatName => {
-        maxWidths[formatName] = 0;
-      });
-      for (let day = 0, daysLen = this.state.options.times.steps.length; day < daysLen; day++) {
-        const widths = {
-          day
-        };
-        Object.keys(this.state.options.calendar.day.format).forEach(formatName => {
-          widths[formatName] = this.state.ctx.measureText(
-            this.state.options.calendar.day.format[formatName](currentDate)
-          ).width;
-        });
-        this.state.options.calendar.day.widths.push(widths);
-        Object.keys(this.state.options.calendar.day.format).forEach(formatName => {
-          if (widths[formatName] > maxWidths[formatName]) {
-            maxWidths[formatName] = widths[formatName];
-          }
-        });
-        currentDate = currentDate.add(1, 'day');
-      }
+      computeCalendarWidths(
+        this.state.ctx,
+        this.style,
+        this.state.options.calendar,
+        this.state.options.times,
+        this.state.options.locale.name
+      );
     },
 
     /**
@@ -1481,39 +1447,6 @@ const GanttElastic = {
      */
     monthsCount(fromTime, toTime) {
       return monthsCount(fromTime, toTime);
-    },
-
-    /**
-     * Compute month calendar columns widths basing on text widths
-     */
-    computeMonthWidths() {
-      const style = { ...this.style['calendar-row-text'], ...this.style['calendar-row-text--month'] };
-      this.state.ctx.font = style['font-size'] + ' ' + style['font-family'];
-      let maxWidths = this.state.options.calendar.month.maxWidths;
-      this.state.options.calendar.month.widths = [];
-      Object.keys(this.state.options.calendar.month.format).forEach(formatName => {
-        maxWidths[formatName] = 0;
-      });
-      const localeName = this.state.options.locale.name;
-      let currentDate = dayjs(this.state.options.times.firstTime).locale(localeName);
-      const monthsCount = this.monthsCount(this.state.options.times.firstTime, this.state.options.times.lastTime);
-      for (let month = 0; month < monthsCount; month++) {
-        const widths = {
-          month
-        };
-        Object.keys(this.state.options.calendar.month.format).forEach(formatName => {
-          widths[formatName] = this.state.ctx.measureText(
-            this.state.options.calendar.month.format[formatName](currentDate)
-          ).width;
-        });
-        this.state.options.calendar.month.widths.push(widths);
-        Object.keys(this.state.options.calendar.month.format).forEach(formatName => {
-          if (widths[formatName] > maxWidths[formatName]) {
-            maxWidths[formatName] = widths[formatName];
-          }
-        });
-        currentDate = currentDate.add(1, 'month');
-      }
     },
 
     /**
@@ -1575,8 +1508,7 @@ const GanttElastic = {
         });
       }
       this.calculateTaskListColumnsDimensions();
-      this.$emit('calendar-recalculate');
-      this.$emitBus.emit('calendar-recalculate');
+      this.emitBoth('calendar-recalculate');
       this.syncScrollTop();
     }
   },
@@ -1707,24 +1639,21 @@ const GanttElastic = {
     this.state.unwatchOutputTasks = this.$watch(
       'outputTasks',
       tasks => {
-        this.$emit('tasks-changed', tasks.map(task => task));
-        this.$emitBus.emit('tasks-changed', tasks.map(task => task));
+        this.emitBoth('tasks-changed', tasks.map(task => task));
       },
       { deep: true }
     );
     this.state.unwatchOutputOptions = this.$watch(
       'outputOptions',
       options => {
-        this.$emit('options-changed', mergeDeep({}, options));
-        this.$emitBus.emit('options-changed', mergeDeep({}, options));
+        this.emitBoth('options-changed', mergeDeep({}, options));
       },
       { deep: true }
     );
     this.state.unwatchOutputStyle = this.$watch(
       'style',
       style => {
-        this.$emit('dynamic-style-changed', mergeDeep({}, style));
-        this.$emitBus.emit('dynamic-style-changed', mergeDeep({}, style));
+        this.emitBoth('dynamic-style-changed', mergeDeep({}, style));
       },
       { deep: true }
     );
@@ -1756,16 +1685,14 @@ const GanttElastic = {
     );
 
     this.$emitBus.emit('gantt-elastic-created', this);
-    this.$emit('created', this);
-    this.$emitBus.emit('created', this);
+    this.emitBoth('created', this);
   },
 
   /**
    * Emit before-mount event
    */
   beforeMount() {
-    this.$emit('before-mount', this);
-    this.$emitBus.emit('before-mount', this);
+    this.emitBoth('before-mount', this);
   },
 
   /**
@@ -1782,22 +1709,18 @@ const GanttElastic = {
     this.startNowTimer();
     // one delegated listener set per container instead of per-row handlers (issue #10)
     this.initializeDelegation();
-    this.$emit('ready', this);
-    this.$emitBus.emit('ready', this);
+    this.emitBoth('ready', this);
     this.$emitBus.emit('gantt-elastic-mounted', this);
-    this.$emit('mounted', this);
-    this.$emitBus.emit('mounted', this);
+    this.emitBoth('mounted', this);
     this.$emitBus.emit('gantt-elastic-ready', this);
-    this.$emit('gantt-elastic-ready', this);
-    this.$emitBus.emit('gantt-elastic-ready', this);
+    this.emitBoth('gantt-elastic-ready', this);
   },
 
   /**
    * Emit event when data was changed and before update (you can cleanup dom events here for example)
    */
   beforeUpdate() {
-    this.$emit('before-update');
-    this.$emitBus.emit('before-update');
+    this.emitBoth('before-update');
   },
 
   /**
@@ -1805,8 +1728,7 @@ const GanttElastic = {
    */
   updated() {
     this.$nextTick(() => {
-      this.$emit('updated');
-      this.$emitBus.emit('updated');
+      this.emitBoth('updated');
     });
   },
 
@@ -1827,16 +1749,14 @@ const GanttElastic = {
     this.state.unwatchOutputTasks();
     this.state.unwatchOutputOptions();
     this.state.unwatchOutputStyle();
-    this.$emit('before-destroy');
-    this.$emitBus.emit('before-destroy');
+    this.emitBoth('before-destroy');
   },
 
   /**
    * Emit event after gantt-elastic was destroyed
    */
   unmounted() {
-    this.$emit('destroyed');
-    this.$emitBus.emit('destroyed');
+    this.emitBoth('destroyed');
   }
 };
 export default GanttElastic;

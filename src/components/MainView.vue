@@ -127,11 +127,11 @@ export default {
    */
   mounted() {
     this.viewBoxWidth = this.$el.clientWidth;
-    this.root.state.refs.mainView = this.$refs.mainView;
-    this.root.state.refs.chartContainer = this.$refs.chartContainer;
-    this.root.state.refs.taskList = this.$refs.taskList;
-    this.root.state.refs.chartScrollContainerHorizontal = this.$refs.chartScrollContainerHorizontal;
-    this.root.state.refs.chartScrollContainerVertical = this.$refs.chartScrollContainerVertical;
+    this.root.registerRef('mainView', this.$refs.mainView);
+    this.root.registerRef('chartContainer', this.$refs.chartContainer);
+    this.root.registerRef('taskList', this.$refs.taskList);
+    this.root.registerRef('chartScrollContainerHorizontal', this.$refs.chartScrollContainerHorizontal);
+    this.root.registerRef('chartScrollContainerVertical', this.$refs.chartScrollContainerVertical);
     // bind once and keep the references so beforeUnmount can actually detach them
     this.boundChartMouseUp = this.chartMouseUp.bind(this);
     this.boundChartMouseMove = this.chartMouseMove.bind(this);
