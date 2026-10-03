@@ -4,3 +4,7 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # major version bumps need a manual compat look - dependabot handles minor/patch only
+    ignore:
+      - dependency-name: "*"
+        update-type: "version-update:semver-major"
