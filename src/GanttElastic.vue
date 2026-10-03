@@ -1151,6 +1151,97 @@ const GanttElastic = {
     },
 
     /**
+     * Calculate geometry (width, height, x, y) of a single visible task
+     * Shared by the visibleTasks watcher and updateTask()
+     *
+     * @param {object} task
+     * @param {number} index row index inside visibleTasks
+     */
+    calculateTaskGeometry(task, index) {
+      task.width =
+        task.duration / this.state.options.times.timePerPixel - this.style['grid-line-vertical']['stroke-width'];
+      // NaN (missing duration) / Infinity (timePerPixel still 0) must never
+      // reach the SVG attributes - issue #2 first-paint regression net
+      if (!Number.isFinite(task.width) || task.width < 0) {
+        task.width = 0;
+      }
+      task.height = this.state.options.row.height;
+      task.x = this.timeToPixelOffsetX(task.startTime);
+      task.y =
+        (this.state.options.row.height + this.state.options.chart.grid.horizontal.gap * 2) * index +
+        this.state.options.chart.grid.horizontal.gap;
+    },
+
+    /**
+     * Update a single task in place - the O(changed) alternative to mutating
+     * the tasks prop, which a deep watcher answers with a full rebuild.
+     * The patch is applied to the state task only; owners stay current through
+     * the tasks-changed event (mirroring onto the props task would fire the
+     * props watcher, whose array-order comparison treats any mutation as
+     * drift and triggers exactly the rebuild this API avoids).
+     * A patch moving the task outside the rendered time window falls back to
+     * a full setup() because the chart range itself must be recalculated -
+     * in that case the returned task is the freshly rebuilt state task.
+     *
+     * @param {any} taskId
+     * @param {object} patch task fields to change
+     * @returns {object|null} the updated state task
+     */
+    updateTask(taskId, patch) {
+      const task = this.getTask(taskId);
+      if (task === null || !isObject(patch)) {
+        return null;
+      }
+      Object.assign(task, patch);
+      if (
+        typeof patch.start !== 'undefined' ||
+        typeof patch.end !== 'undefined' ||
+        typeof patch.startTime !== 'undefined' ||
+        typeof patch.endTime !== 'undefined' ||
+        typeof patch.duration !== 'undefined'
+      ) {
+        const prevStartTime = task.startTime;
+        if (typeof patch.start !== 'undefined') {
+          task.startTime = dayjs(task.start).valueOf();
+        }
+        if (typeof patch.end !== 'undefined') {
+          task.endTime = dayjs(task.end).valueOf();
+        }
+        if (typeof patch.startTime !== 'undefined') {
+          task.startTime = patch.startTime;
+        }
+        if (typeof patch.endTime !== 'undefined') {
+          task.endTime = patch.endTime;
+        }
+        if (
+          (typeof patch.start !== 'undefined' || typeof patch.startTime !== 'undefined') &&
+          typeof patch.end === 'undefined' &&
+          typeof patch.endTime === 'undefined' &&
+          typeof prevStartTime !== 'undefined' &&
+          typeof task.endTime !== 'undefined'
+        ) {
+          // the start moved without a new end - shift the end to keep the duration
+          task.endTime = task.startTime + (task.endTime - prevStartTime);
+        }
+        if (typeof patch.duration !== 'undefined') {
+          task.endTime = task.startTime + task.duration;
+        } else if (typeof task.endTime !== 'undefined') {
+          task.duration = task.endTime - task.startTime;
+        }
+        const endTime = typeof task.endTime !== 'undefined' ? task.endTime : task.startTime + task.duration;
+        if (task.startTime < this.state.options.times.firstTime || endTime > this.state.options.times.lastTime) {
+          this.setup('updateTask');
+          return this.getTask(taskId);
+        }
+      }
+      const index = this.visibleTasks.indexOf(task);
+      if (index !== -1) {
+        this.calculateTaskGeometry(task, index);
+      }
+      return task;
+    },
+
+    /**
      * Listen to specified event names
      */
     initializeEvents() {
@@ -1617,19 +1708,7 @@ const GanttElastic = {
         this.state.options.outerHeight = this.getHeight(maxRows, true) - heightCompensation;
         let len = visibleTasks.length;
         for (let index = 0; index < len; index++) {
-          let task = visibleTasks[index];
-          task.width =
-            task.duration / this.state.options.times.timePerPixel - this.style['grid-line-vertical']['stroke-width'];
-          // NaN (missing duration) / Infinity (timePerPixel still 0) must never
-          // reach the SVG attributes - issue #2 first-paint regression net
-          if (!Number.isFinite(task.width) || task.width < 0) {
-            task.width = 0;
-          }
-          task.height = this.state.options.row.height;
-          task.x = this.timeToPixelOffsetX(task.startTime);
-          task.y =
-            (this.state.options.row.height + this.state.options.chart.grid.horizontal.gap * 2) * index +
-            this.state.options.chart.grid.horizontal.gap;
+          this.calculateTaskGeometry(visibleTasks[index], index);
         }
       },
       { immediate: true }

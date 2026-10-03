@@ -326,13 +326,25 @@ export default {
   },
 
   computed: {
+    /**
+     * Calendar cells per row - pure computed; the resulting dimensions are
+     * applied in the watcher below (a computed that mutates reactive state
+     * re-triggers itself in Vue 3 - issue #3)
+     */
     dates() {
       const hours = this.generateHours();
       const days = this.generateDays();
       const months = this.generateMonths();
-      const allDates = { hours, days, months };
-      this.calculateCalendarDimensions(allDates);
-      return allDates;
+      return { hours, days, months };
+    }
+  },
+
+  watch: {
+    dates: {
+      immediate: true,
+      handler(allDates) {
+        this.calculateCalendarDimensions(allDates);
+      }
     }
   }
 };

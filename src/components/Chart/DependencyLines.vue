@@ -15,14 +15,14 @@
     class="gantt-elastic__chart-dependency-lines-container"
     :style="{ ...root.style['chart-dependency-lines-container'] }"
   >
-    <g v-for="task in dependencyTasks" :key="task.id" :task="task">
+    <g v-for="entry in dependencyTasks" :key="entry.task.id" :task="entry.task">
       <path
         class="gantt-elastic__chart-dependency-lines-path"
-        :style="{ ...root.style['chart-dependency-lines-path'], ...task.style['chart-dependency-lines-path'], ...task.style['chart-dependency-lines-path-' + dependencyLine.task_id] }"
-        v-for="dependencyLine in task.dependencyLines"
-        :key="dependencyLine.id"
-        :task="task"
-        :d="dependencyLine.points"
+        :style="{ ...root.style['chart-dependency-lines-path'], ...entry.task.style['chart-dependency-lines-path'], ...entry.task.style['chart-dependency-lines-path-' + line.task_id] }"
+        v-for="line in entry.lines"
+        :key="line.task_id"
+        :task="entry.task"
+        :d="line.points"
       ></path>
     </g>
   </svg>
@@ -99,20 +99,22 @@ export default {
   },
   computed: {
     /**
-     * Get tasks which are dependent on other tasks
+     * Tasks which have dependency lines, as { task, lines } entries.
+     * Pure computed - the previous version wrote task.dependencyLines back
+     * onto the reactive task objects from inside the computed (issue #3).
      *
      * @returns {array}
      */
     dependencyTasks() {
       return this.tasks
-        .filter(task => typeof task.dependentOn !== 'undefined')
-        .map(task => {
-          task.dependencyLines = task.dependentOn.map(id => {
-            return { points: this.getPoints(id, task.id), task_id: id };
-          });
-          return task;
-        })
-        .filter(task => task.dependencyLines.points !== null);
+        .filter(task => Array.isArray(task.dependentOn))
+        .map(task => ({
+          task,
+          lines: task.dependentOn
+            .map(id => ({ points: this.getPoints(id, task.id), task_id: id }))
+            .filter(line => line.points !== null)
+        }))
+        .filter(entry => entry.lines.length > 0);
     }
   }
 };
