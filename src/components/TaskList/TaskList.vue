@@ -18,6 +18,8 @@
       <div
         class="gantt-elastic__task-list-items"
         ref="taskListItems"
+        role="tree"
+        aria-label="Task list"
         :style="{ ...root.style['task-list-items'], height: root.state.options.rowsHeight + 'px' }"
       >
         <!-- virtualization spacers keep the scroll height stable while only

@@ -14,7 +14,13 @@
       :width="options.size"
       :height="options.size"
       v-if="allChildren.length"
+      role="button"
+      tabindex="0"
+      :aria-expanded="!collapsed"
+      :aria-label="`Toggle children of ${tasks[0].label}`"
       @click="toggle"
+      @keydown.enter.prevent="toggle"
+      @keydown.space.prevent="toggle"
     >
       <rect
         :class="getClassPrefix() + '-border'"

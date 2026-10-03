@@ -1907,4 +1907,19 @@ foreignObject > * {
 .gantt-elastic__task-list-item-value-wrapper:hover > .gantt-elastic__task-list-item-value {
   position: absolute;
 }
+/* keyboard focus visibility (issue #13) */
+.gantt-elastic__chart-row-bar:focus-visible,
+.gantt-elastic__task-list-item:focus-visible,
+.gantt-elastic__task-list-header-resizer-wrapper:focus-visible,
+.gantt-elastic__chart-expander-content:focus-visible,
+.gantt-elastic__task-list-expander-content:focus-visible {
+  outline: 2px solid #4a90d2;
+  outline-offset: 1px;
+}
+/* respect reduced motion preferences (issue #13) */
+@media (prefers-reduced-motion: reduce) {
+  .gantt-elastic * {
+    transition: none !important;
+  }
+}
 </style>

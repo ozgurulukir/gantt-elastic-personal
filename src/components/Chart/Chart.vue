@@ -47,6 +47,8 @@
             y="0"
             :width="root.state.options.width + 'px'"
             :height="root.state.options.allVisibleTasksHeight + 'px'"
+            role="group"
+            aria-label="Gantt chart timeline"
             xmlns="http://www.w3.org/2000/svg"
           >
             <days-highlight></days-highlight>
@@ -54,6 +56,7 @@
             <dependency-lines :tasks="root.visibleTasks"></dependency-lines>
             <g
               class="gantt-elastic__chart-row-wrapper"
+              role="row"
               :class="{
                 'gantt-elastic__chart-row--selected': root.state.selectedTaskId === task.id,
                 'gantt-elastic__chart-row--hover': root.state.hoveredTaskId === task.id

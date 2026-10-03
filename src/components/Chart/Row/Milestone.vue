@@ -50,6 +50,11 @@
       @touchstart="emitEvent('touchstart', $event)"
       @touchmove="emitEvent('touchmove', $event)"
       @touchend="emitEvent('touchend', $event)"
+      role="button"
+      tabindex="0"
+      :aria-label="barAriaLabel"
+      :aria-pressed="root.state.selectedTaskId === task.id"
+      @keydown="onBarKeyDown"
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
