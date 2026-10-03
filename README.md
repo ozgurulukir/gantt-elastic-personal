@@ -215,6 +215,19 @@ const GanttElastic = require('gantt-elastic/dist/GanttElastic.common.js');
 
 For a standalone build with the bundled header use `dist/bundle.js` and the `GanttElastic.mount({ el, tasks, options, ready })` API - see [examples/index.html](examples/index.html).
 
+### Styling
+
+The gantt ships a default `system-ui` font stack and no longer inherits the host page's `body` font (which made plain integrations render in Times New Roman). Override it per instance through the dynamic style object:
+
+```javascript
+dynamicStyle: {
+  fontFamily: 'Inter, sans-serif',
+  fontSize: '13px',
+}
+```
+
+All other style keys (`task-list-item`, `chart-row-bar-polygon`, ...) are overridable the same way - see [src/style.js](src/style.js) for the full key list.
+
 ### Development
 
 ```bash

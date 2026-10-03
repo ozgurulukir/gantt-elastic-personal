@@ -7,7 +7,7 @@
  */
 -->
 <template>
-  <div class="gantt-elastic" style="width:100%">
+  <div class="gantt-elastic" style="width:100%" :style="{ fontFamily: state.dynamicStyle.fontFamily }">
     <slot name="header">
       <!-- default header when the consumer does not provide one (Vue 3 port: the old
            external gantt-elastic-header UMD is Vue 2 only, so the local Header ships in) -->
@@ -283,10 +283,7 @@ function getOptions(userOptions) {
  */
 function prepareStyle(userStyle) {
   let fontSize = '12px';
-  let fontFamily = window
-    .getComputedStyle(document.body)
-    .getPropertyValue('font-family')
-    .toString();
+  let fontFamily; // getStyle() supplies the default system stack, no body inheritance
   if (typeof userStyle !== 'undefined') {
     if (typeof userStyle.fontSize !== 'undefined') {
       fontSize = userStyle.fontSize;
@@ -1664,6 +1661,12 @@ export default GanttElastic;
 </script>
 
 <style>
+.gantt-elastic {
+  /* default font stack so the widget never falls back to the host page's
+     body font (Times New Roman on plain pages); a dynamicStyle.fontFamily
+     wins over this through the inline style on the root element */
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
 [class^='gantt-elastic'],
 [class*=' gantt-elastic'] {
   box-sizing: border-box;

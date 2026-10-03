@@ -5,7 +5,10 @@
  * @package GanttElastic
  */
 
-export default function getStyle(fontSize = '12px', fontFamily = 'Arial, sans-serif') {
+export default function getStyle(
+  fontSize = '12px',
+  fontFamily = "system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+) {
   return {
     fontSize,
     fontFamily,
