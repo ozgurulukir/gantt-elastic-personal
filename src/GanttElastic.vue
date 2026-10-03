@@ -142,6 +142,10 @@ function getOptions(userOptions) {
         displayIfTaskListHidden: true, //*
         offset: 4, //*
         size: 18
+      },
+      tooltip: {
+        display: true, //*
+        format: null //* custom format(task) returning the tooltip text
       }
     },
     taskList: {

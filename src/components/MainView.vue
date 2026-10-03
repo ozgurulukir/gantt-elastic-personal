@@ -86,12 +86,14 @@
         :style="{ height: '1px', width: root.state.options.width + 'px' }"
       ></div>
     </div>
+    <chart-tooltip v-if="root.state.options.chart.tooltip.display"></chart-tooltip>
   </div>
 </template>
 
 <script>
 import TaskList from './TaskList/TaskList.vue';
 import Chart from './Chart/Chart.vue';
+import ChartTooltip from './Chart/Tooltip.vue';
 
 let ignoreScrollEvents = false;
 
@@ -99,7 +101,8 @@ export default {
   name: 'MainView',
   components: {
     TaskList,
-    Chart
+    Chart,
+    ChartTooltip
   },
   inject: ['root'],
   data() {

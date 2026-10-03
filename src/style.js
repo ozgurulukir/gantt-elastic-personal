@@ -310,6 +310,20 @@ export default function getStyle(
     'chart-days-highlight-rect': {
       fill: '#f3f5f780'
     },
+    'chart-tooltip': {
+      position: 'fixed',
+      'pointer-events': 'none',
+      background: '#ffffff',
+      border: '1px solid #d0d0d0',
+      'border-radius': '4px',
+      padding: '6px 10px',
+      'font-family': fontFamily,
+      'font-size': fontSize,
+      color: '#333333',
+      'box-shadow': '0 2px 8px rgba(0, 0, 0, 0.15)',
+      'z-index': 1000,
+      'white-space': 'pre-line'
+    },
     'slot-header-beforeOptions': {
       display: 'inline-block'
     }
