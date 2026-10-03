@@ -2,3 +2,7 @@
 .sonarlint/
 node_modules/
 .history
+
+# cypress artifacts
+tests/screenshots/
+tests/videos/
