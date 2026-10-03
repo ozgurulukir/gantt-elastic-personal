@@ -59,7 +59,7 @@
                 'gantt-elastic__chart-row--hover': root.state.hoveredTaskId === task.id
               }"
               :style="{ ...root.style['chart-row-wrapper'], ...highlightStyle(task) }"
-              v-for="task in root.visibleTasks"
+              v-for="task in root.renderedTasks"
               :task="task"
               :key="task.id"
               @mouseenter="emitRowEvent('mouseenter', $event, task)"

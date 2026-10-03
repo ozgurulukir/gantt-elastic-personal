@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GanttElastic large dataset fixture (2000 tasks)</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs" crossorigin="anonymous"></script>
+    <script src="/dist/bundle.js"></script>
+  </head>
+
+  <body>
+    <div id="app"></div>
+    <script>
+      const DAY = 24 * 60 * 60 * 1000;
+      const types = ['task', 'milestone', 'project'];
+      const tasks = [];
+      for (let i = 1; i <= 2000; i++) {
+        tasks.push({
+          id: i,
+          label: 'Task ' + i,
+          start: '2026-01-01T08:00:00',
+          duration: DAY * (1 + (i % 20)),
+          percent: (i * 13) % 100,
+          type: types[i % 3]
+        });
+      }
+
+      const mountedInstance = GanttElastic.mount({
+        el: '#app',
+        tasks,
+        options: {
+          maxRows: 100,
+          maxHeight: 400,
+          taskList: {
+            percent: 30,
+            columns: [
+              { id: 0, label: 'ID', value: 'id', width: 60 },
+              { id: 1, label: 'Description', value: 'label', width: 180, expander: false }
+            ]
+          }
+        },
+        // the ready callback receives the inner gantt instance (wrapper has no API)
+        ready(instance) {
+          window.ganttInstance = instance;
+        }
+      });
+
+      if (typeof window.ganttInstance === 'undefined') {
+        window.ganttInstance = mountedInstance;
+      }
+    </script>
+  </body>
+</html>

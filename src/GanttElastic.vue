@@ -1589,6 +1589,37 @@ const GanttElastic = {
     },
 
     /**
+     * First visible row index of the virtualization window (issue #9):
+     * only rows inside the viewport (plus an overscan of a few rows) are
+     * rendered - keeps mounted components constant on large datasets
+     *
+     * @returns {number}
+     */
+    renderedFirstIndex() {
+      const rowHeight = this.state.options.row.height + this.state.options.chart.grid.horizontal.gap * 2;
+      const first = Math.floor(this.state.options.scroll.top / rowHeight) - 5;
+      return first < 0 ? 0 : first;
+    },
+
+    /**
+     * Rows inside the vertical viewport - chart and task list render these
+     * instead of all visibleTasks (issue #9). Chart rows are absolutely
+     * positioned so the window needs no layout compensation there; the task
+     * list uses spacers to keep its scroll height stable.
+     *
+     * @returns {array}
+     */
+    renderedTasks() {
+      const tasks = this.visibleTasks;
+      const rowHeight = this.state.options.row.height + this.state.options.chart.grid.horizontal.gap * 2;
+      const last = Math.min(
+        tasks.length,
+        Math.ceil((this.state.options.scroll.top + this.state.options.rowsHeight) / rowHeight) + 5
+      );
+      return tasks.slice(this.renderedFirstIndex, last);
+    },
+
+    /**
      * Style shortcut
      */
     style() {
