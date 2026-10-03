@@ -215,6 +215,27 @@ const GanttElastic = require('gantt-elastic/dist/GanttElastic.common.js');
 
 For a standalone build with the bundled header use `dist/bundle.js` and the `GanttElastic.mount({ el, tasks, options, ready })` API - see [examples/index.html](examples/index.html).
 
+### Task model
+
+Task fields follow the conventions of mainstream Gantt libraries (Frappe Gantt, dhtmlxGantt):
+
+| field | type | meaning |
+| --- | --- | --- |
+| `id` | any | unique task id |
+| `parentId` | id | parent task for the tree hierarchy (omit for top level) |
+| `label` | string | text shown in the task list and on the bar |
+| `user` | string | free-form value for a custom column (e.g. assignee) |
+| `start` | timestamp \| `Date` | task start |
+| `end` | timestamp \| `Date` | task end - alternative to `duration` |
+| `duration` | number | duration in milliseconds - alternative to `end` |
+| `progress` | number | completion percentage, 0–100 |
+| `dependencies` | id[] | ids of tasks this task depends on; rendered as dependency lines |
+| `type` | string | `task` (default), `project` (summary bar over its children) or `milestone` |
+| `collapsed` | boolean | hide the task's children |
+| `style` | object | per-task style overrides keyed by style name |
+
+Any field can be renamed on the input side through `options.taskMapping` - `{ progress: 'percent' }` reads the completion from a `percent` field, for example. Tasks written with the pre-rename `dependentOn` field are normalized to `dependencies` transparently, and `updateTask` patches accept the legacy `percent` / `dependentOn` names the same way.
+
 ### Styling
 
 The gantt ships a default `system-ui` font stack and no longer inherits the host page's `body` font (which made plain integrations render in Times New Roman). Override it per instance through the dynamic style object:
@@ -239,7 +260,7 @@ All other style keys (`task-list-item`, `chart-row-bar-polygon`, ...) are overri
 
 ### Updating a task without a full rebuild
 
-`ganttInstance.updateTask(id, patch)` applies a patch to a single task and recomputes only that row's geometry, emitting the usual `tasks-changed`. Mutating the `tasks` prop array instead triggers the deep watcher and a full rebuild. A patch that moves the task outside the rendered time window (new `start`, `end`, `duration` beyond the chart range) rebuilds the chart range around the new dates — the patch is re-applied to the rebuilt task and the time window grows, so the change is never lost. Keep your own task array in sync through the `tasks-changed` event, as in the usage example above.
+`ganttInstance.updateTask(id, patch)` applies a patch to a single task and recomputes only that row's geometry, emitting the usual `tasks-changed`. Patch fields use the canonical task model above; legacy `percent` / `dependentOn` keys are translated automatically. Mutating the `tasks` prop array instead triggers the deep watcher and a full rebuild. A patch that moves the task outside the rendered time window (new `start`, `end`, `duration` beyond the chart range) rebuilds the chart range around the new dates — the patch is re-applied to the rebuilt task and the time window grows, so the change is never lost. Keep your own task array in sync through the `tasks-changed` event, as in the usage example above.
 
 ### HTML rendering and security
 

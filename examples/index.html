@@ -61,7 +61,7 @@
           duration: 2 * 24 * 60 * 60 * 1000,
           progress: 50,
           type: 'task',
-          dependentOn: [3]
+          dependencies: [3]
         },
         {
           id: 5,
@@ -90,7 +90,7 @@
           label: 'Devon, the old man wanted me, it was his dying request',
           user: '<a href="https://www.google.com/search?q=Knight+Rider" target="_blank" style="color:#0077c0;">Knight Rider</a>',
           parentId: 2,
-          dependentOn: [6],
+          dependencies: [6],
           start: getDate(24 * 2),
           duration: 4 * 60 * 60 * 1000,
           progress: 20,
@@ -101,7 +101,7 @@
           label: 'Hey, Baby! Anybody ever tell you I have beautiful eyes?',
           user: '<a href="https://www.google.com/search?q=Johhny+Bravo" target="_blank" style="color:#0077c0;">Johhny Bravo</a>',
           parentId: 7,
-          dependentOn: [7],
+          dependencies: [7],
           start: getDate(24 * 3),
           duration: 1 * 24 * 60 * 60 * 1000,
           progress: 0,
@@ -112,7 +112,7 @@
           label: 'This better be important, woman. You are interrupting my very delicate calculations.',
           user: '<a href="https://www.google.com/search?q=Dexter\'s+Laboratory" target="_blank" style="color:#0077c0;">Dexter\'s Laboratory</a>',
           parentId: 8,
-          dependentOn: [8, 7],
+          dependencies: [8, 7],
           start: getDate(24 * 4),
           duration: 4 * 60 * 60 * 1000,
           progress: 20,

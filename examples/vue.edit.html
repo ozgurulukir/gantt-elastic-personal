@@ -57,7 +57,7 @@
           user: '<a href="https://www.google.com/search?q=John+Doe" target="_blank" style="color:#0077c0;">John Doe</a>',
           start: getDate(-24 * 5),
           duration: 15 * 24 * 60 * 60 * 1000,
-          percent: 85,
+          progress: 85,
           type: 'project'
         },
         {
@@ -67,7 +67,7 @@
           parentId: 1,
           start: getDate(-24 * 4),
           duration: 4 * 24 * 60 * 60 * 1000,
-          percent: 50,
+          progress: 50,
           type: 'milestone',
           collapsed: true,
           style: { base: { fill: '#1EBC61', stroke: '#0EAC51' } }
@@ -79,7 +79,7 @@
           parentId: 2,
           start: getDate(-24 * 3),
           duration: 2 * 24 * 60 * 60 * 1000,
-          percent: 100,
+          progress: 100,
           type: 'task'
         },
         {
@@ -88,9 +88,9 @@
           user: '<a href="https://www.google.com/search?q=Clark+Kent" target="_blank" style="color:#0077c0;">Clark Kent</a>',
           start: getDate(-24 * 2),
           duration: 2 * 24 * 60 * 60 * 1000,
-          percent: 50,
+          progress: 50,
           type: 'task',
-          dependentOn: [3]
+          dependencies: [3]
         },
         {
           id: 5,
@@ -99,7 +99,7 @@
           parentId: 4,
           start: getDate(0),
           duration: 2 * 24 * 60 * 60 * 1000,
-          percent: 10,
+          progress: 10,
           type: 'milestone',
           style: { base: { fill: '#0287D0', stroke: '#0077C0' } }
         },
@@ -110,7 +110,7 @@
           parentId: 5,
           start: getDate(24),
           duration: 1 * 24 * 60 * 60 * 1000,
-          percent: 50,
+          progress: 50,
           type: 'task',
           collapsed: true,
           style: { base: { fill: '#8E44AD', stroke: '#7E349D' } }
@@ -120,10 +120,10 @@
           label: 'Devon, the old man wanted me, it was his dying request',
           user: '<a href="https://www.google.com/search?q=Knight+Rider" target="_blank" style="color:#0077c0;">Knight Rider</a>',
           parentId: 2,
-          dependentOn: [6],
+          dependencies: [6],
           start: getDate(24 * 2),
           duration: 4 * 60 * 60 * 1000,
-          percent: 20,
+          progress: 20,
           type: 'task',
           collapsed: true
         },
@@ -132,10 +132,10 @@
           label: 'Hey, Baby! Anybody ever tell you I have beautiful eyes?',
           user: '<a href="https://www.google.com/search?q=Johhny+Bravo" target="_blank" style="color:#0077c0;">Johhny Bravo</a>',
           parentId: 7,
-          dependentOn: [7],
+          dependencies: [7],
           start: dayjs().startOf('day').valueOf(),
           end: dayjs().startOf('day').add(1, 'day').valueOf(),
-          percent: 0,
+          progress: 0,
           type: 'task'
         },
         {
@@ -143,10 +143,10 @@
           label: 'This better be important, woman. You are interrupting my very delicate calculations.',
           user: '<a href="https://www.google.com/search?q=Dexter\'s+Laboratory" target="_blank" style="color:#0077c0;">Dexter\'s Laboratory</a>',
           parentId: 8,
-          dependentOn: [8, 7],
+          dependencies: [8, 7],
           start: getDate(24 * 4),
           duration: 4 * 60 * 60 * 1000,
-          percent: 20,
+          progress: 20,
           type: 'task',
           style: { base: { fill: '#8E44AD', stroke: '#7E349D' } }
         },
@@ -156,7 +156,7 @@
           user: '<a href="https://www.google.com/search?q=Johnattan+Owens" target="_blank" style="color:#0077c0;">Johnattan Owens</a>',
           start: getDate(24 * 5),
           duration: 24 * 60 * 60 * 1000,
-          percent: 0,
+          progress: 0,
           type: 'task'
         },
         {
@@ -165,7 +165,7 @@
           user: '<a href="https://www.google.com/search?q=Johnattan+Owens" target="_blank" style="color:#0077c0;">Johnattan Owens</a>',
           start: getDate(24 * 6),
           duration: 24 * 60 * 60 * 1000,
-          percent: 0,
+          progress: 0,
           type: 'task'
         },
         {
@@ -174,7 +174,7 @@
           user: '<a href="https://www.google.com/search?q=Johnattan+Owens" target="_blank" style="color:#0077c0;">Johnattan Owens</a>',
           start: getDate(24 * 7),
           duration: 24 * 60 * 60 * 1000,
-          percent: 0,
+          progress: 0,
           type: 'task',
           parentId: 11
         },
@@ -184,7 +184,7 @@
           user: '<a href="https://www.google.com/search?q=Johnattan+Owens" target="_blank" style="color:#0077c0;">Johnattan Owens</a>',
           start: getDate(24 * 8),
           duration: 24 * 60 * 60 * 1000,
-          percent: 0,
+          progress: 0,
           type: 'task'
         },
         {
@@ -193,7 +193,7 @@
           user: '<a href="https://www.google.com/search?q=Johnattan+Owens" target="_blank" style="color:#0077c0;">Johnattan Owens</a>',
           start: getDate(24 * 9),
           end: getDate(24 * 12),
-          percent: 0,
+          progress: 0,
           type: 'task'
         },
         {
@@ -202,15 +202,12 @@
           user: '<a href="https://www.google.com/search?q=Johnattan+Owens" target="_blank" style="color:#0077c0;">Johnattan Owens</a>',
           start: getDate(24 * 16),
           duration: 24 * 60 * 60 * 1000,
-          percent: 0,
+          progress: 0,
           type: 'task'
         }
       ];
 
       let options = {
-        taskMapping: {
-          progress: 'percent'
-        },
         maxRows: 100,
         maxHeight: 300,
         title: {
@@ -351,10 +348,10 @@
 
       window.progressChange = function progressChange() {
         const row = Number(document.getElementById('progRow').value);
-        const percent = Number(document.getElementById('progress').value);
+        const progress = Number(document.getElementById('progress').value);
         const task = app.tasks[row];
         if (task) {
-          ganttInstance.updateTask(task.id, { percent });
+          ganttInstance.updateTask(task.id, { progress });
         }
       };
 
@@ -364,10 +361,10 @@
           label: '<a href="https://images.pexels.com/photos/423364/pexels-photo-423364.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" target="_blank" style="color:#0077c0;">Yeaahh! you have added a task bro!</a>',
           user: '<a href="https://images.pexels.com/photos/423364/pexels-photo-423364.jpeg?auto=compress&cs=tinysrgb&h=650&w=940" target="_blank" style="color:#0077c0;">Awesome!</a>',
           parentId: 7,
-          dependentOn: [7],
+          dependencies: [7],
           start: getDate(24 * 3),
           duration: 1 * 24 * 60 * 60 * 1000,
-          percent: 50,
+          progress: 50,
           type: 'project'
         };
         app.tasks.push(task);
