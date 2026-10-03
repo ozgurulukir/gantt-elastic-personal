@@ -49,11 +49,15 @@ describe('updateTask - O(changed) mutation API', () => {
       expect(task.endTime).to.equal(task.startTime + task.duration);
       expect(task.endTime).to.be.lessThan(oldEnd);
       expect(task.width).to.be.lessThan(oldWidth);
-      // moving the task far outside the rendered time window falls back to
-      // setup() - the chart range itself must be recalculated
+      // moving the task far outside the rendered time window rebuilds the
+      // chart range around it - the patch survives the rebuild and the
+      // window actually grows
       const reference = gantt.getTask(1);
+      const oldLastTime = gantt.state.options.times.lastTime;
       gantt.updateTask(1, { start: '2030-06-01' });
       expect(gantt.getTask(1)).to.not.equal(reference);
+      expect(new Date(gantt.getTask(1).startTime).getFullYear(), 'patch survives the rebuild').to.equal(2030);
+      expect(gantt.state.options.times.lastTime, 'window grows around the task').to.be.greaterThan(oldLastTime);
     });
   });
 

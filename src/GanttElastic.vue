@@ -881,12 +881,22 @@ const GanttElastic = {
     },
 
     /**
+     * Get the main view element (state.refs.mainView is set in MainView
+     * mounted(); fall back to the root element for early callers)
+     *
+     * @returns {element}
+     */
+    getMainViewElement() {
+      return this.state.refs.mainView || this.$el;
+    },
+
+    /**
      * Get svg
      *
      * @returns {string} html svg image of gantt
      */
     getSVG() {
-      return this.state.options.mainView.outerHTML;
+      return this.getMainViewElement().outerHTML;
     },
 
     /**
@@ -900,7 +910,7 @@ const GanttElastic = {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          canvas.width = this.state.options.mainView.clientWidth;
+          canvas.width = this.getMainViewElement().clientWidth;
           canvas.height = this.state.options.rowsHeight;
           canvas.getContext('2d').drawImage(img, 0, 0);
           resolve(canvas.toDataURL(type));
@@ -1209,15 +1219,68 @@ const GanttElastic = {
     },
 
     /**
+     * Apply a patch (with time-field derivation) to one task.
+     * Returns true when the patched task no longer fits the rendered time
+     * window, so the caller must recalculate the chart range.
+     *
+     * @param {object} task state task to mutate
+     * @param {object} patch task fields to change
+     * @returns {boolean} true when the task left the rendered time window
+     */
+    applyTaskPatch(task, patch) {
+      const prevStartTime = task.startTime;
+      Object.assign(task, patch);
+      if (
+        typeof patch.start === 'undefined' &&
+        typeof patch.end === 'undefined' &&
+        typeof patch.startTime === 'undefined' &&
+        typeof patch.endTime === 'undefined' &&
+        typeof patch.duration === 'undefined'
+      ) {
+        return false;
+      }
+      if (typeof patch.start !== 'undefined') {
+        task.startTime = dayjs(task.start).valueOf();
+      }
+      if (typeof patch.end !== 'undefined') {
+        task.endTime = dayjs(task.end).valueOf();
+      }
+      if (typeof patch.startTime !== 'undefined') {
+        task.startTime = patch.startTime;
+      }
+      if (typeof patch.endTime !== 'undefined') {
+        task.endTime = patch.endTime;
+      }
+      if (
+        (typeof patch.start !== 'undefined' || typeof patch.startTime !== 'undefined') &&
+        typeof patch.end === 'undefined' &&
+        typeof patch.endTime === 'undefined' &&
+        typeof prevStartTime !== 'undefined' &&
+        typeof task.endTime !== 'undefined'
+      ) {
+        // the start moved without a new end - shift the end to keep the duration
+        task.endTime = task.startTime + (task.endTime - prevStartTime);
+      }
+      if (typeof patch.duration !== 'undefined') {
+        task.endTime = task.startTime + task.duration;
+      } else if (typeof task.endTime !== 'undefined') {
+        task.duration = task.endTime - task.startTime;
+      }
+      const endTime = typeof task.endTime !== 'undefined' ? task.endTime : task.startTime + task.duration;
+      return task.startTime < this.state.options.times.firstTime || endTime > this.state.options.times.lastTime;
+    },
+
+    /**
      * Update a single task in place - the O(changed) alternative to mutating
      * the tasks prop, which a deep watcher answers with a full rebuild.
      * The patch is applied to the state task only; owners stay current through
      * the tasks-changed event (mirroring onto the props task would fire the
      * props watcher, whose array-order comparison treats any mutation as
      * drift and triggers exactly the rebuild this API avoids).
-     * A patch moving the task outside the rendered time window falls back to
-     * a full setup() because the chart range itself must be recalculated -
-     * in that case the returned task is the freshly rebuilt state task.
+     * A patch moving the task outside the rendered time window rebuilds the
+     * chart range: setup() maps fresh tasks from the props (which know nothing
+     * of state-side patches), the patch is re-applied there and the time
+     * window recalculated so the chart actually grows around the task.
      *
      * @param {any} taskId
      * @param {object} patch task fields to change
@@ -1228,47 +1291,19 @@ const GanttElastic = {
       if (task === null || !isObject(patch)) {
         return null;
       }
-      Object.assign(task, patch);
-      if (
-        typeof patch.start !== 'undefined' ||
-        typeof patch.end !== 'undefined' ||
-        typeof patch.startTime !== 'undefined' ||
-        typeof patch.endTime !== 'undefined' ||
-        typeof patch.duration !== 'undefined'
-      ) {
-        const prevStartTime = task.startTime;
-        if (typeof patch.start !== 'undefined') {
-          task.startTime = dayjs(task.start).valueOf();
+      if (this.applyTaskPatch(task, patch)) {
+        this.setup('updateTask');
+        const rebuilt = this.getTask(taskId);
+        if (rebuilt === null) {
+          return null;
         }
-        if (typeof patch.end !== 'undefined') {
-          task.endTime = dayjs(task.end).valueOf();
-        }
-        if (typeof patch.startTime !== 'undefined') {
-          task.startTime = patch.startTime;
-        }
-        if (typeof patch.endTime !== 'undefined') {
-          task.endTime = patch.endTime;
-        }
-        if (
-          (typeof patch.start !== 'undefined' || typeof patch.startTime !== 'undefined') &&
-          typeof patch.end === 'undefined' &&
-          typeof patch.endTime === 'undefined' &&
-          typeof prevStartTime !== 'undefined' &&
-          typeof task.endTime !== 'undefined'
-        ) {
-          // the start moved without a new end - shift the end to keep the duration
-          task.endTime = task.startTime + (task.endTime - prevStartTime);
-        }
-        if (typeof patch.duration !== 'undefined') {
-          task.endTime = task.startTime + task.duration;
-        } else if (typeof task.endTime !== 'undefined') {
-          task.duration = task.endTime - task.startTime;
-        }
-        const endTime = typeof task.endTime !== 'undefined' ? task.endTime : task.startTime + task.duration;
-        if (task.startTime < this.state.options.times.firstTime || endTime > this.state.options.times.lastTime) {
-          this.setup('updateTask');
-          return this.getTask(taskId);
-        }
+        this.applyTaskPatch(rebuilt, patch);
+        this.prepareDates();
+        this.initTimes();
+        this.calculateSteps();
+        this.computeCalendarWidths();
+        this.fixScrollPos();
+        return rebuilt;
       }
       const index = this.visibleTasks.indexOf(task);
       if (index !== -1) {
@@ -1777,11 +1812,14 @@ const GanttElastic = {
       { deep: true }
     );
 
-    // apply geometry when the set of visible tasks (or anything it depends on) changes;
-    // this used to be a side effect inside the visibleTasks computed, which loops in Vue 3
+    // apply geometry when the set of visible tasks (or anything it depends on)
+    // changes; this used to be a side effect inside the visibleTasks computed,
+    // which loops in Vue 3. Zoom (timePerPixel) and row height are geometry
+    // inputs too - bars must resize when the scale or row height changes.
     this.state.unwatchVisibleTasksGeometry = this.$watch(
-      'visibleTasks',
-      visibleTasks => {
+      () => [this.visibleTasks, this.state.options.times.timePerPixel, this.state.options.row.height],
+      () => {
+        const visibleTasks = this.visibleTasks;
         const maxRows = visibleTasks.slice(0, this.state.options.maxRows);
         this.state.options.rowsHeight = this.getTasksHeight(maxRows);
         let heightCompensation = 0;

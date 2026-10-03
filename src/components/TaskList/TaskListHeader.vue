@@ -263,7 +263,9 @@ export default {
             column.width = this.clampColumnWidth(column, widths[column._id]);
           }
         }
-        this.root.$emitBus.emit('taskList-column-width-change');
+        // recalculate the rendered widths directly - emitting the width-change
+        // bus event here reaches scrollTo() before the scroll refs exist
+        this.root.calculateTaskListColumnsDimensions();
       } catch (error) {
         // corrupted storage entry - start from the configured widths
       }

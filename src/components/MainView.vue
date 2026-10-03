@@ -132,10 +132,13 @@ export default {
     this.root.state.refs.taskList = this.$refs.taskList;
     this.root.state.refs.chartScrollContainerHorizontal = this.$refs.chartScrollContainerHorizontal;
     this.root.state.refs.chartScrollContainerVertical = this.$refs.chartScrollContainerVertical;
-    document.addEventListener('mouseup', this.chartMouseUp.bind(this));
-    document.addEventListener('mousemove', this.chartMouseMove.bind(this));
-    document.addEventListener('touchmove', this.chartMouseMove.bind(this));
-    document.addEventListener('touchend', this.chartMouseUp.bind(this));
+    // bind once and keep the references so beforeUnmount can actually detach them
+    this.boundChartMouseUp = this.chartMouseUp.bind(this);
+    this.boundChartMouseMove = this.chartMouseMove.bind(this);
+    document.addEventListener('mouseup', this.boundChartMouseUp);
+    document.addEventListener('mousemove', this.boundChartMouseMove);
+    document.addEventListener('touchmove', this.boundChartMouseMove);
+    document.addEventListener('touchend', this.boundChartMouseUp);
   },
   computed: {
     /**
@@ -290,10 +293,10 @@ export default {
    * Before destroy event - clean up
    */
   beforeUnmount() {
-    document.removeEventListener('mouseup', this.chartMouseUp);
-    document.removeEventListener('mousemove', this.chartMouseMove);
-    document.removeEventListener('touchmove', this.chartMouseMove);
-    document.removeEventListener('touchend', this.chartMouseUp);
+    document.removeEventListener('mouseup', this.boundChartMouseUp);
+    document.removeEventListener('mousemove', this.boundChartMouseMove);
+    document.removeEventListener('touchmove', this.boundChartMouseMove);
+    document.removeEventListener('touchend', this.boundChartMouseUp);
   }
 };
 </script>
