@@ -40,7 +40,8 @@
       ></line>
       <line
         class="gantt-elastic__grid-line-time"
-        :style="{ ...root.style['grid-line-time'] }"
+        :style="timeLineStyle"
+        v-if="timeLinePosition.visible"
         :x1="timeLinePosition.x"
         :y1="timeLinePosition.y1"
         :x2="timeLinePosition.x"
@@ -154,24 +155,44 @@ export default {
     },
 
     /**
-     * Get current time line position
+     * Get current time line position - driven by the root's `now` state,
+     * refreshed by the currentTimeLine.updateInterval timer (issue #7)
      *
      * @returns {object}
      */
     timeLinePosition() {
-      const d = new Date();
-      const current = d.getTime();
-      const currentOffset = this.root.timeToPixelOffsetX(current);
+      const now = this.root.state.now;
+      const currentOffset = this.root.timeToPixelOffsetX(now);
       const timeLine = {
-        x: 0,
+        x: currentOffset,
         y1: 0,
         y2: '100%',
         dateTime: '',
-        time: current
+        time: now,
+        visible:
+          this.root.state.options.chart.currentTimeLine.display !== false &&
+          currentOffset >= 0 &&
+          currentOffset <= this.root.state.options.width
       };
-      timeLine.x = currentOffset;
-      timeLine.dateTime = d.toLocaleDateString();
+      timeLine.dateTime = new Date(now).toLocaleDateString();
       return timeLine;
+    },
+
+    /**
+     * Current time line style with optional per-option overrides (issue #7)
+     *
+     * @returns {object}
+     */
+    timeLineStyle() {
+      const style = { ...this.root.style['grid-line-time'] };
+      const currentTimeLine = this.root.state.options.chart.currentTimeLine;
+      if (currentTimeLine.color) {
+        style.stroke = currentTimeLine.color;
+      }
+      if (currentTimeLine.strokeWidth) {
+        style['stroke-width'] = currentTimeLine.strokeWidth;
+      }
+      return style;
     }
   }
 };

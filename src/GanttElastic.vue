@@ -149,6 +149,12 @@ function getOptions(userOptions) {
       tooltip: {
         display: true, //*
         format: null //* custom format(task) returning the tooltip text
+      },
+      currentTimeLine: {
+        display: true, //*
+        color: '', //* optional stroke color override
+        strokeWidth: 0, //* optional stroke width override
+        updateInterval: 60000 //* ms between "now" refreshes
       }
     },
     taskList: {
@@ -485,6 +491,8 @@ const GanttElastic = {
         dynamicStyle: {},
         selectedTaskId: null,
         hoveredTaskId: null,
+        now: Date.now(),
+        nowTimer: null,
         refs: {},
         tasksById: {},
         taskTree: {},
@@ -1242,6 +1250,23 @@ const GanttElastic = {
     },
 
     /**
+     * (Re)start the "now" refresh timer for the current-time line (issue #7).
+     * Public so consumers can restart it after changing updateInterval.
+     */
+    startNowTimer() {
+      if (this.state.nowTimer !== null) {
+        clearInterval(this.state.nowTimer);
+        this.state.nowTimer = null;
+      }
+      if (this.state.options.chart.currentTimeLine.display !== false) {
+        const updateInterval = this.state.options.chart.currentTimeLine.updateInterval || 60000;
+        this.state.nowTimer = setInterval(() => {
+          this.state.now = Date.now();
+        }, updateInterval);
+      }
+    },
+
+    /**
      * Listen to specified event names
      */
     initializeEvents() {
@@ -1770,6 +1795,8 @@ const GanttElastic = {
     });
     this.state.resizeObserver.observe(this.$el.parentNode);
     this.globalOnResize();
+    // keep the current-time line ticking (issue #7) - single timer, not watcher driven
+    this.startNowTimer();
     this.$emit('ready', this);
     this.$emitBus.emit('ready', this);
     this.$emitBus.emit('gantt-elastic-mounted', this);
@@ -1802,6 +1829,10 @@ const GanttElastic = {
    * Before destroy event - clean up
    */
   beforeUnmount() {
+    if (this.state.nowTimer !== null) {
+      clearInterval(this.state.nowTimer);
+      this.state.nowTimer = null;
+    }
     this.state.resizeObserver.unobserve(this.$el.parentNode);
     this.state.unwatchTasks();
     this.state.unwatchOptions();
