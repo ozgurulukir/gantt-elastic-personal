@@ -9,8 +9,11 @@
 <template>
   <div
     class="gantt-elastic__task-list-item"
-    :class="{ 'gantt-elastic__task-list-item--selected': root.state.selectedTaskId === task.id }"
-    :style="{ ...root.style['task-list-item'], ...selectionStyle }"
+    :class="{
+      'gantt-elastic__task-list-item--selected': root.state.selectedTaskId === task.id,
+      'gantt-elastic__task-list-item--hover': root.state.hoveredTaskId === task.id
+    }"
+    :style="{ ...root.style['task-list-item'], ...highlightStyle }"
   >
     <item-column v-for="column in columns" :key="column._id" :column="column" :task="task">
       <task-list-expander
@@ -43,15 +46,18 @@ export default {
     },
 
     /**
-     * Selection highlight style for this row (issue #6)
+     * Selection / hover highlight style for this row (issues #6, #12)
      *
      * @returns {object}
      */
-    selectionStyle() {
+    highlightStyle() {
+      const style = {};
       if (this.root.state.selectedTaskId === this.task.id) {
-        return { ...this.root.style['task-list-item--selected'] };
+        Object.assign(style, this.root.style['task-list-item--selected']);
+      } else if (this.root.state.hoveredTaskId === this.task.id) {
+        Object.assign(style, this.root.style['task-list-item--hover']);
       }
-      return {};
+      return style;
     }
   }
 };

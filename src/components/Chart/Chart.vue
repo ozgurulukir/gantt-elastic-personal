@@ -54,8 +54,11 @@
             <dependency-lines :tasks="root.visibleTasks"></dependency-lines>
             <g
               class="gantt-elastic__chart-row-wrapper"
-              :class="{ 'gantt-elastic__chart-row--selected': root.state.selectedTaskId === task.id }"
-              :style="{ ...root.style['chart-row-wrapper'], ...selectionStyle(task) }"
+              :class="{
+                'gantt-elastic__chart-row--selected': root.state.selectedTaskId === task.id,
+                'gantt-elastic__chart-row--hover': root.state.hoveredTaskId === task.id
+              }"
+              :style="{ ...root.style['chart-row-wrapper'], ...highlightStyle(task) }"
               v-for="task in root.visibleTasks"
               :task="task"
               :key="task.id"
@@ -117,16 +120,19 @@ export default {
   },
   methods: {
     /**
-     * Selection highlight style for a task row wrapper (issue #6)
+     * Selection / hover highlight style for a task row wrapper (issues #6, #12)
      *
      * @param {object} task
      * @returns {object}
      */
-    selectionStyle(task) {
+    highlightStyle(task) {
+      const style = {};
       if (this.root.state.selectedTaskId === task.id) {
-        return { ...this.root.style['chart-row--selected'] };
+        Object.assign(style, this.root.style['chart-row--selected']);
+      } else if (this.root.state.hoveredTaskId === task.id) {
+        Object.assign(style, this.root.style['chart-row--hover']);
       }
-      return {};
+      return style;
     }
   }
 };

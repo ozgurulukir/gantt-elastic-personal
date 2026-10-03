@@ -1167,6 +1167,19 @@ const GanttElastic = {
         this.$emitBus.on(`chart-${type}-click`, ({ data }) => this.selectTask(data.id));
         this.$emitBus.on(`taskList-${type}-click`, ({ data }) => this.selectTask(data.id));
       }
+      // hovering a bar or a task list row highlights both (issue #12)
+      for (let source of ['chart', 'taskList']) {
+        for (let type of ['task', 'milestone', 'project']) {
+          this.$emitBus.on(`${source}-${type}-mouseenter`, ({ data }) => {
+            this.state.hoveredTaskId = data.id;
+          });
+          this.$emitBus.on(`${source}-${type}-mouseout`, ({ data }) => {
+            if (this.state.hoveredTaskId === data.id) {
+              this.state.hoveredTaskId = null;
+            }
+          });
+        }
+      }
     },
 
     /**
