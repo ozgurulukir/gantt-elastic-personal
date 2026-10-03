@@ -7,7 +7,6 @@
     "dayjs": "^1.11.21",
     "dompurify": "^3.4.16",
     "mitt": "^3.0.1",
-    "resize-observer-polyfill": "^1.5.1",
     "vue": "^3.5.41",
     "vue-slider-component": "^4.1.0-beta.7"
   },

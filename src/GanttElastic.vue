@@ -25,9 +25,32 @@ import mitt from 'mitt';
 import MainView from './components/MainView.vue';
 import Header from './components/Header.vue';
 import getStyle from './style.js';
-import ResizeObserver from 'resize-observer-polyfill';
 
 const ctx = document.createElement('canvas').getContext('2d');
+
+/**
+ * Native ResizeObserver with a window-resize fallback for environments that
+ * predate it - the resize-observer-polyfill dependency was dropped (issue #14)
+ */
+class ResizeObserverFallback {
+  constructor(callback) {
+    this.callback = callback;
+    this.windowListener = () => this.callback([], this);
+  }
+  observe() {
+    window.addEventListener('resize', this.windowListener);
+  }
+  unobserve() {
+    window.removeEventListener('resize', this.windowListener);
+  }
+  disconnect() {
+    this.unobserve();
+  }
+}
+const ResizeObserverImpl =
+  typeof window !== 'undefined' && typeof window.ResizeObserver !== 'undefined'
+    ? window.ResizeObserver
+    : ResizeObserverFallback;
 let VueInst = VueInstance;
 function initVue() {
   if (typeof Vue !== 'undefined' && typeof VueInst === 'undefined') {
@@ -1795,7 +1818,7 @@ const GanttElastic = {
    */
   mounted() {
     this.state.options.clientWidth = this.$el.clientWidth;
-    this.state.resizeObserver = new ResizeObserver((entries, observer) => {
+    this.state.resizeObserver = new ResizeObserverImpl(() => {
       this.globalOnResize();
     });
     this.state.resizeObserver.observe(this.$el.parentNode);
