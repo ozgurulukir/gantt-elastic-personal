@@ -1,36 +1,27 @@
 ---
 name: Bug report
-about: Create a report to help us improve
-labels: 
-
+about: Report a reproducible problem with Gantt Elastic
+title: ''
+labels: ''
+assignees: ''
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+## What happened?
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+Describe the problem and what you expected to happen.
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+## Reproduction steps
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
+1. Add the smallest steps or example that reproduce the issue.
+2. Include the options and task data involved, with private data removed.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+## Environment
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+- Gantt Elastic version or commit:
+- Vue version:
+- Browser and version:
+- Operating system:
 
-**Additional context**
-Add any other context about the problem here.
+## Additional context
+
+Add relevant screenshots, console output, or other details.

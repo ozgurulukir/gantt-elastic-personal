@@ -67,7 +67,7 @@
   "author": "Rafal Pospiech <neuronet.io@gmail.com> (https://neuronet.io)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/neuronetio/gantt-elastic/issues"
+    "url": "https://github.com/ozgurulukir/gantt-elastic-personal/issues"
   },
   "postcss": {
     "plugins": {
