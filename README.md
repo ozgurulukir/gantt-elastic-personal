@@ -1,17 +1,6 @@
 <h1>Gantt-elastic - Javascript Gantt Chart (editable, responsive)</h1>
 <h2>Javascript Gantt Chart for vue, jquery, vanilla js and other frameworks</h2>
 
-<br>
-<h3>Project moved as next major version to <a href="https://github.com/neuronetio/gantt-schedule-timeline-calendar">gantt-schedule-timeline-calendar</a></h3><br>
-<br>
-
-<strong>This project is not suitable for use in a production environment as it runs very slowly even in standard medium projects. This project has been completely rewritten and built with super performance in mind and is available in the new repository as a <a href="https://github.com/neuronetio/gantt-schedule-timeline-calendar">gantt-schedule-timeline-calendar</a>.</strong>
-
-<h2><a href="https://neuronet.io/gantt-elastic/" target="_blank">Gantt-elastic demo here</a></h2>
-
-![preview img](https://github.com/neuronetio/gantt-elastic/raw/master/gantt-elastic.jpg)
-![preview gif](https://github.com/neuronetio/gantt-elastic/raw/master/grab-scroll.gif)
-
 ## Gantt-elastic
 
 is a vue component but it could be used in other frameworks or even with jQuery (vue is kind of elastic and lightweight framework).
