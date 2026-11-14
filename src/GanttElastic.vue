@@ -378,7 +378,10 @@ export function mergeDeep(target, ...sources) {
   }
   const source = sources.shift();
   if (isObject(target) && isObject(source)) {
-    for (const key in source) {
+    for (const key of Object.keys(source)) {
+      if (key === '__proto__' || key === 'constructor') {
+        continue;
+      }
       if (isObject(source[key])) {
         if (typeof target[key] === 'undefined') {
           target[key] = {};
@@ -426,7 +429,10 @@ export function mergeDeepReactive(component, target, ...sources) {
   }
   const source = sources.shift();
   if (isObject(target) && isObject(source)) {
-    for (const key in source) {
+    for (const key of Object.keys(source)) {
+      if (key === '__proto__' || key === 'constructor') {
+        continue;
+      }
       if (isObject(source[key])) {
         if (typeof target[key] === 'undefined') {
           component.$set(target, key, {});
@@ -475,8 +481,8 @@ export function notEqualDeep(left, right, cache = [], path = '') {
   } else if (isObject(right) && !isObject(left)) {
     return { left, right, what: path + '.isObject' };
   } else if (isObject(left) && isObject(right)) {
-    for (let key in left) {
-      if (!left.hasOwnProperty(key) || !left.propertyIsEnumerable(key)) {
+    for (let key of Object.keys(left)) {
+      if (!left.propertyIsEnumerable(key)) {
         continue;
       }
       if (!right.hasOwnProperty(key)) {
